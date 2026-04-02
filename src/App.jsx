@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AppLayout from './layout/AppLayout'
 import Placeholder from './components/Placeholder'
+import Home from './pages/Home'
 
 const routes = [
-  { path: '/', label: 'Home' },
+  { path: '/', label: 'Home', element: <Home /> },
   { path: '/about', label: 'About Us' },
   { path: '/our-work', label: 'Our Work' },
   { path: '/our-partners', label: 'Our Partners' },
@@ -27,7 +28,7 @@ function App() {
             <Route
               key={route.path}
               path={route.path}
-              element={<Placeholder title={route.label} />}
+              element={route.element || <Placeholder title={route.label} />}
             />
           ))}
         </Routes>
