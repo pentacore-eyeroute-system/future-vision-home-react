@@ -8,6 +8,7 @@ import OurPartners from './pages/OurPartners'
 import EyeRoute from './pages/EyeRoute'
 import Donate from './pages/Donate'
 import Contact from './pages/Contact'
+import Admin from './pages/Admin'
 import Newsletter1 from './pages/newsletters/Newsletter1'
 import Newsletter2 from './pages/newsletters/Newsletter2'
 import Newsletter3 from './pages/newsletters/Newsletter3'
@@ -27,7 +28,7 @@ const routes = [
   { path: '/newsletter/3', label: 'Quarterly Newsletter 3 2023', element: <Newsletter3 /> },
   { path: '/newsletter/4', label: 'Quarterly Newsletter 4 2023', element: <Newsletter4 /> },
   { path: '/year-end-report-2024', label: 'Year-End Report 2024', element: <YearEndReport2024 /> },
-  { path: '/admin', label: 'Admin' },
+  { path: '/admin', label: 'Admin', element: <Admin /> },
 ]
 
 function App() {

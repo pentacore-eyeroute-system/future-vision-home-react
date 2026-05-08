@@ -3,20 +3,35 @@ import { Link } from 'react-router-dom'
 function Home() {
   return (
     <>
-      <section id="home" className="hero">
-        <div className="hero-background">
+      <section
+        id="home"
+        className="hero"
+        style={{ color: '#fff' }}
+      >
+        <div
+          className="hero-background"
+          style={{ backgroundImage: "url('/images/home.png')" }}
+        >
           <div className="gradient-overlay"></div>
         </div>
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title">WELCOME TO FUTURE VISION HOME</h1>
+            <h1 className="hero-title" style={{ color: '#fff' }}>
+              WELCOME TO FUTURE VISION HOME
+            </h1>
             <div className="hero-quote-wrapper">
-              <p className="hero-quote">
+              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
                 "Who sinned, this man or his parents, that he was born blind?"
               </p>
-              <p className="hero-quote">It was not that this man sinned, or his parents,</p>
-              <p className="hero-quote">but that the works of God might be displayed in him.</p>
-              <p className="quote-reference">John 9:2-3</p>
+              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
+                It was not that this man sinned, or his parents,
+              </p>
+              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
+                but that the works of God might be displayed in him.
+              </p>
+              <p className="quote-reference" style={{ color: '#95ab2f', fontWeight: 700 }}>
+                John 9:2-3
+              </p>
             </div>
           </div>
         </div>
