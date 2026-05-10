@@ -224,17 +224,17 @@ function OurWork() {
               <div className="news-articles">
                 <div className="news-featured-row">
                   {filteredNews.slice(0, 2).map((article) => (
-                    <NewsCard key={article.path} article={article} />
+                    <NewsCard key={article.slug} article={article} />
                   ))}
                 </div>
                 <div className="news-featured-row">
                   {filteredNews.slice(2, 4).map((article) => (
-                    <NewsCard key={article.path} article={article} />
+                    <NewsCard key={article.slug} article={article} />
                   ))}
                 </div>
                 <div className="news-featured-row">
                   {filteredNews.slice(4, 5).map((article) => (
-                    <NewsCard key={article.path} article={article} />
+                    <NewsCard key={article.slug} article={article} />
                   ))}
                 </div>
                 {filteredNews.length === 0 && (
@@ -313,7 +313,7 @@ function NewsCard({ article }) {
       <div className="news-content">
         <h2 className="news-article-title">{article.title}</h2>
         <p className="news-article-excerpt">{article.excerpt}</p>
-        <Link to={article.path} className="news-read-more">
+        <Link to={`/news/${article.slug}`} className="news-read-more">
           Read More
         </Link>
       </div>

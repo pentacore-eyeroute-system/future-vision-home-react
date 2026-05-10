@@ -9,11 +9,7 @@ import EyeRoute from './pages/EyeRoute'
 import Donate from './pages/Donate'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
-import Newsletter1 from './pages/newsletters/Newsletter1'
-import Newsletter2 from './pages/newsletters/Newsletter2'
-import Newsletter3 from './pages/newsletters/Newsletter3'
-import Newsletter4 from './pages/newsletters/Newsletter4'
-import YearEndReport2024 from './pages/newsletters/YearEndReport2024'
+import Article from './pages/Article'
 
 const routes = [
   { path: '/', label: 'Home', element: <Home /> },
@@ -23,11 +19,7 @@ const routes = [
   { path: '/eye-route', label: 'EyeRoute', element: <EyeRoute /> },
   { path: '/donate', label: 'Donate', element: <Donate /> },
   { path: '/contact', label: 'Contact Us', element: <Contact /> },
-  { path: '/newsletter/1', label: 'Quarterly Newsletter 1 2025', element: <Newsletter1 /> },
-  { path: '/newsletter/2', label: 'Quarterly Newsletter 2 2023', element: <Newsletter2 /> },
-  { path: '/newsletter/3', label: 'Quarterly Newsletter 3 2023', element: <Newsletter3 /> },
-  { path: '/newsletter/4', label: 'Quarterly Newsletter 4 2023', element: <Newsletter4 /> },
-  { path: '/year-end-report-2024', label: 'Year-End Report 2024', element: <YearEndReport2024 /> },
+  { path: '/news/:slug', label: 'Article', element: <Article /> },
   { path: '/admin', label: 'Admin', element: <Admin /> },
 ]
 
