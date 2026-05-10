@@ -580,6 +580,9 @@ html[data-theme="dark"] .theme-switch-icon {
     border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .svm-card::before {
@@ -632,6 +635,8 @@ html[data-theme="dark"] .theme-switch-icon {
     font-size: 1rem;
     text-align: justify;
     text-justify: inter-word;
+    flex: 1;
+    margin-bottom: 0;
 }
 
 /* What We Do Section */

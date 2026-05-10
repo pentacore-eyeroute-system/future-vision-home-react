@@ -55,37 +55,40 @@ function Home() {
       <section id="about" className="story-vision-mission">
         <div className="container">
           <div className="svm-grid">
-            <div id="story" className="svm-card">
-              <img src="/images/story.png" alt="Story" className="svm-icon" />
-              <h2 className="svm-title">Our Story</h2>
+            <div className="svm-card">
+              <div className="svm-header">
+                <img src="/images/story.png" alt="Story" className="svm-icon" />
+                <h2 className="svm-title">Our Story</h2>
+              </div>
               <p className="svm-description">
-                Future Vision Home is the flagship project of Future Vision Sighted-Blind Inc.
-              </p>
-              <p className="svm-description">
-                FUTURE VISION SIGHTED-BLIND INC. is registered as a non-profit organization which is
-                composed of blind and visually impaired members as well as parents/guardians. Its
-                purpose is to give empowerment to the blind and/vision impaired of the country so as
-                to make them contributors and not burdens to the society.
-              </p>
-            </div>
-            <div id="vision" className="svm-card">
-              <img src="/images/vision.png" alt="Vision" className="svm-icon" />
-              <h2 className="svm-title">Our Vision</h2>
-              <p className="svm-description">
-                We envision a country in which blind and visually impaired as well as sighted youth
-                are encouraged to live a life guided by their own vision regardless of their gender,
-                beliefs, or disabilities.
+                Future Vision Home is the flagship project of Future Vision Sighted-Blind Inc., a
+                non-profit organization composed of blind members and parents. Our purpose is to
+                empower the visually impaired, enabling them to become independent and active
+                contributors to society.
               </p>
             </div>
-            <div id="mission" className="svm-card">
-              <img src="/images/mission.png" alt="Mission" className="svm-icon" />
-              <h2 className="svm-title">Our Mission</h2>
+            <div className="svm-card">
+              <div className="svm-header">
+                <img src="/images/vision.png" alt="Vision" className="svm-icon" />
+                <h2 className="svm-title">Our Vision</h2>
+              </div>
               <p className="svm-description">
-                It is our mission to improve access to education by establishing a home that allows
-                children and youth to attend the regular schools. A home that provides a supportive
-                environment where blind and sighted children live, learn, and develop independence
-                as well as social, communication and creative thinking skills. Obtaining these skills
-                will significantly impact not only their life but also the world.
+                We envision a country where the blind, visually impaired, and sighted youth are
+                encouraged to live lives guided by their own vision, regardless of their gender,
+                beliefs, or disabilities. We believe in a future where everyone has the opportunity
+                to thrive and succeed.
+              </p>
+            </div>
+            <div className="svm-card">
+              <div className="svm-header">
+                <img src="/images/mission.png" alt="Mission" className="svm-icon" />
+                <h2 className="svm-title">Our Mission</h2>
+              </div>
+              <p className="svm-description">
+                It is our mission to improve access to education by establishing a supportive home
+                environment where blind and sighted children live, learn, and develop independence.
+                We focus on social, communication, and creative skills that will significantly
+                impact their lives and the world.
               </p>
             </div>
           </div>
