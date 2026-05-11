@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import AppLayout from './layout/AppLayout'
+import AdminLayout from './layout/AdminLayout'
 import Placeholder from './components/Placeholder'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -10,33 +11,66 @@ import Donate from './pages/Donate'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
 import Article from './pages/Article'
+import AdminVisionistas from './pages/admin/AdminVisionistas'
+import AdminPartners from './pages/admin/AdminPartners'
+import AdminNewsGallery from './pages/admin/AdminNewsGallery'
+import AdminDeleted from './pages/admin/AdminDeleted'
 
-const routes = [
-  { path: '/', label: 'Home', element: <Home /> },
-  { path: '/about', label: 'About Us', element: <About /> },
-  { path: '/our-work', label: 'Our Work', element: <OurWork /> },
-  { path: '/our-partners', label: 'Our Partners', element: <OurPartners /> },
-  { path: '/eye-route', label: 'EyeRoute', element: <EyeRoute /> },
-  { path: '/donate', label: 'Donate', element: <Donate /> },
-  { path: '/contact', label: 'Contact Us', element: <Contact /> },
-  { path: '/news/:slug', label: 'Article', element: <Article /> },
-  { path: '/admin', label: 'Admin', element: <Admin /> },
+const publicRoutes = [
+  { path: '/', element: <Home /> },
+  { path: '/about', element: <About /> },
+  { path: '/our-work', element: <OurWork /> },
+  { path: '/our-partners', element: <OurPartners /> },
+  { path: '/eye-route', element: <EyeRoute /> },
+  { path: '/donate', element: <Donate /> },
+  { path: '/contact', element: <Contact /> },
+  { path: '/news/:slug', element: <Article /> },
 ]
+
+const adminRoutes = [
+  { path: '', element: <AdminVisionistas /> },
+  { path: 'news-gallery', element: <AdminNewsGallery /> },
+  { path: 'partners', element: <AdminPartners /> },
+  { path: 'deleted', element: <AdminDeleted /> },
+]
+
+// Simple Auth Guard
+const ProtectedRoute = ({ children }) => {
+  const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
+  return isAuthed ? children : <Navigate to="/admin/login" replace />
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <AppLayout>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={route.element || <Placeholder title={route.label} />}
-            />
+      <Routes>
+        {/* Public Routes */}
+        <Route element={<AppLayout />}>
+          {publicRoutes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
           ))}
-        </Routes>
-      </AppLayout>
+        </Route>
+
+        {/* Admin Login - No Layout */}
+        <Route path="/admin/login" element={<Admin />} />
+
+        {/* Protected Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          {adminRoutes.map((route) => (
+            <Route key={route.path} path={route.path} element={route.element} />
+          ))}
+        </Route>
+
+        {/* Catch-all */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const ADMIN_USER = 'admin'
 const ADMIN_PASS = '12345678'
@@ -7,22 +8,22 @@ const SESSION_TIME_KEY = 'adminLoginTime'
 const SESSION_MAX_AGE = 8 * 60 * 60 * 1000 // 8 hours
 
 function Admin() {
+  const navigate = useNavigate()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [authed, setAuthed] = useState(false)
 
   useEffect(() => {
     const isAuthed = sessionStorage.getItem(SESSION_KEY) === 'true'
     const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
     const expired = Date.now() - loginTime > SESSION_MAX_AGE
     if (isAuthed && !expired) {
-      setAuthed(true)
+      navigate('/admin')
     } else {
       sessionStorage.removeItem(SESSION_KEY)
       sessionStorage.removeItem(SESSION_TIME_KEY)
     }
-  }, [])
+  }, [navigate])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -36,9 +37,7 @@ function Admin() {
     if (username === ADMIN_USER && password === ADMIN_PASS) {
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      setAuthed(true)
-      setPassword('')
-      setUsername('')
+      navigate('/admin')
       return
     }
 
@@ -46,32 +45,8 @@ function Admin() {
     setPassword('')
   }
 
-  const handleLogout = () => {
-    sessionStorage.removeItem(SESSION_KEY)
-    sessionStorage.removeItem(SESSION_TIME_KEY)
-    setAuthed(false)
-  }
-
-  if (authed) {
-    return (
-      <section className="page-header admin-login-page admin-dashboard-page">
-        <div className="container admin-login-container">
-          <div className="admin-login-card">
-            <h1 className="page-title">Admin Dashboard (placeholder)</h1>
-            <p className="page-subtitle">
-              You are logged in as admin. Full dashboard features will be added next.
-            </p>
-            <button className="admin-login-btn admin-logout-btn" onClick={handleLogout}>
-              Logout
-            </button>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
   return (
-    <section className="page-header admin-login-page">
+    <section className="page-header admin-login-page !m-0 !min-h-screen">
       <div className="container admin-login-container">
         <div className="admin-login-card">
           <h1 className="page-title">Admin Login</h1>
