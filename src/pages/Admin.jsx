@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { loginAdmin } from '../services/authService.js';
 
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = '12345678'
 const SESSION_KEY = 'adminAuthenticated'
 const SESSION_TIME_KEY = 'adminLoginTime'
 const SESSION_MAX_AGE = 8 * 60 * 60 * 1000 // 8 hours
@@ -25,7 +24,7 @@ function Admin() {
     }
   }, [navigate])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -34,15 +33,17 @@ function Admin() {
       return
     }
 
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
+    try {
+      const { data } = await loginAdmin({ username, password })
+
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
+      localStorage.setItem('token', data.result);
       navigate('/admin')
-      return
+    } catch (err) {
+      setError('Invalid username or password. Please try again.')
+      setPassword('')
     }
-
-    setError('Invalid username or password. Please try again.')
-    setPassword('')
   }
 
   return (
