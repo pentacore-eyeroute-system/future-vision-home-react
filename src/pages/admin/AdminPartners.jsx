@@ -11,7 +11,6 @@ function AdminPartners() {
   const [formData, setFormData] = useState({
     par_fullname: '',
     par_type: 'organization',
-    par_contact: ''
   })
 
   useEffect(() => {
@@ -32,12 +31,11 @@ function AdminPartners() {
       label: 'Type',
       render: (val) => <span style={{ textTransform: 'capitalize' }}>{val}</span>
     },
-    { key: 'par_contact', label: 'Contact' },
   ]
 
   const handleOpenAdd = () => {
     setEditingItem(null)
-    setFormData({ par_fullname: '', par_type: 'organization', par_contact: '' })
+    setFormData({ par_fullname: '', par_type: 'organization' })
     setModalOpen(true)
   }
 
@@ -47,9 +45,9 @@ function AdminPartners() {
     setModalOpen(true)
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (item) => {
     if (window.confirm('Are you sure you want to delete this partner?')) {
-      await adminApi.deletePartner(id)
+      await adminApi.deletePartner(item.id)
       fetchData()
     }
   }
@@ -82,6 +80,7 @@ function AdminPartners() {
         data={partners} 
         onEdit={handleEdit} 
         onDelete={handleDelete} 
+        isLoading={loading}
       />
 
       <AdminModal 
@@ -108,14 +107,6 @@ function AdminPartners() {
               <option value="individual">Individual</option>
               <option value="organization">Organization</option>
             </select>
-          </div>
-          <div className="form-group">
-            <label>Contact</label>
-            <input 
-              type="text" 
-              value={formData.par_contact || ''}
-              onChange={(e) => setFormData({...formData, par_contact: e.target.value})}
-            />
           </div>
           <div className="form-actions">
             <button type="submit" className="btn btn-primary">Save</button>
