@@ -4,13 +4,13 @@ import AdminDataTable from '../../components/admin/AdminDataTable'
 
 const FILTERS = [
   { key: 'visionista', label: 'Visionistas' },
-  { key: 'news-gallery', label: 'News & Gallery' },
+  { key: 'news', label: 'News' },
+  { key: 'gallery', label: 'Gallery' },
   { key: 'partner', label: 'Partners' },
 ]
 
 const matchesFilter = (item, filter) => {
   if (filter === 'all') return true
-  if (filter === 'news-gallery') return item.type === 'news' || item.type === 'gallery'
   return item.type === filter
 }
 
