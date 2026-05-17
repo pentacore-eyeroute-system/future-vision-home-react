@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
+import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
+import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
 
 function AdminVisionistas() {
   const [visionistas, setVisionistas] = useState([])
@@ -12,7 +14,7 @@ function AdminVisionistas() {
     vis_fullname: '',
     vis_age: '',
     vis_story: '',
-    vis_pic_path: '',
+    vis_images: [],
     vis_is_archived: false
   })
 
@@ -30,6 +32,11 @@ function AdminVisionistas() {
   const columns = [
     { key: 'vis_fullname', label: 'Name' },
     { key: 'vis_age', label: 'Age' },
+    {
+      key: 'vis_images',
+      label: 'Photos',
+      render: (val) => `${normalizeImageList(val).length} uploaded`,
+    },
     { 
       key: 'vis_story', 
       label: 'Story',
@@ -39,21 +46,42 @@ function AdminVisionistas() {
 
   const handleOpenAdd = () => {
     setEditingItem(null)
-    setFormData({ vis_fullname: '', vis_age: '', vis_story: '', vis_pic_path: '', vis_is_archived: false })
+    setFormData({ vis_fullname: '', vis_age: '', vis_story: '', vis_images: [], vis_is_archived: false })
     setModalOpen(true)
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
-    setFormData({ ...item })
+    setFormData({
+      ...item,
+      vis_images: normalizeImageList(item.vis_images || item.vis_pic_path),
+    })
     setModalOpen(true)
   }
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (item) => {
     if (window.confirm('Are you sure you want to delete this visionista?')) {
-      await adminApi.deleteVisionista(id)
+      await adminApi.deleteVisionista(item.id)
       fetchData()
     }
+  }
+
+  const handleImageUpload = async (event) => {
+    const nextImages = await filesToImageEntries(event.target.files)
+
+    setFormData((current) => ({
+      ...current,
+      vis_images: [...current.vis_images, ...nextImages],
+    }))
+
+    event.target.value = ''
+  }
+
+  const handleRemoveImage = (imageId) => {
+    setFormData((current) => ({
+      ...current,
+      vis_images: current.vis_images.filter((image) => image.id !== imageId),
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -84,6 +112,7 @@ function AdminVisionistas() {
         data={visionistas} 
         onEdit={handleEdit} 
         onDelete={handleDelete} 
+        isLoading={loading}
       />
 
       <AdminModal 
@@ -118,15 +147,15 @@ function AdminVisionistas() {
               onChange={(e) => setFormData({...formData, vis_story: e.target.value})}
             ></textarea>
           </div>
-          <div className="form-group">
-            <label>Picture Path</label>
-            <input 
-              type="text" 
-              placeholder="/images/example.png"
-              value={formData.vis_pic_path}
-              onChange={(e) => setFormData({...formData, vis_pic_path: e.target.value})}
-            />
-          </div>
+          <AdminImageUploadField
+            inputId="visionistaImages"
+            label="Pictures"
+            images={formData.vis_images}
+            multiple
+            onFilesSelected={handleImageUpload}
+            onRemoveImage={handleRemoveImage}
+            helperText="Upload one or more photos for this visionista profile."
+          />
           <div className="form-group">
             <label>Status</label>
             <select 

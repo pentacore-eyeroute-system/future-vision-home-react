@@ -1,9 +1,30 @@
 import { useState, useEffect } from 'react'
+import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
+
+const FILTERS = [
+  { key: 'visionista', label: 'Visionistas' },
+  { key: 'news-gallery', label: 'News & Gallery' },
+  { key: 'partner', label: 'Partners' },
+]
+
+const matchesFilter = (item, filter) => {
+  if (filter === 'all') return true
+  if (filter === 'news-gallery') return item.type === 'news' || item.type === 'gallery'
+  return item.type === filter
+}
+
+const formatType = (type) => {
+  if (type === 'visionista') return 'Visionista'
+  if (type === 'news') return 'News'
+  if (type === 'gallery') return 'Gallery'
+  return 'Partner'
+}
 
 function AdminDeleted() {
   const [deletedItems, setDeletedItems] = useState([])
   const [loading, setLoading] = useState(true)
+  const [activeFilter, setActiveFilter] = useState('visionista')
 
   useEffect(() => {
     fetchData()
@@ -11,32 +32,34 @@ function AdminDeleted() {
 
   const fetchData = async () => {
     setLoading(true)
-    // Mock data for deleted items
-    setDeletedItems([
-      { id: 101, displayTitle: 'Old Partner', type: 'partner', deletedAt: '2025-05-01' },
-      { id: 102, displayTitle: 'Draft News', type: 'news', deletedAt: '2025-05-05' },
-    ])
+    const data = await adminApi.getDeletedItems()
+    setDeletedItems(data)
     setLoading(false)
   }
 
   const columns = [
     { key: 'displayTitle', label: 'Name/Title' },
-    { 
-      key: 'type', 
+    {
+      key: 'type',
       label: 'Type',
-      render: (val) => <span style={{ textTransform: 'capitalize' }}>{val}</span>
+      render: (val) => <span style={{ textTransform: 'capitalize' }}>{formatType(val)}</span>,
     },
     { key: 'deletedAt', label: 'Deleted Date' },
   ]
 
-  const handleRestore = (item) => {
-    alert(`Restoring ${item.displayTitle}...`)
-    // Logic to move back to active tables
+  const filteredItems = deletedItems.filter((item) => matchesFilter(item, activeFilter))
+
+  const getFilterCount = (filterKey) => deletedItems.filter((item) => matchesFilter(item, filterKey)).length
+
+  const handleRestore = async (item) => {
+    await adminApi.restoreDeletedItem(item.id)
+    fetchData()
   }
 
-  const handleDeletePermanent = (id) => {
+  const handleDeletePermanent = async (item) => {
     if (window.confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
-      setDeletedItems(deletedItems.filter(item => item.id !== id))
+      await adminApi.permanentlyDeleteItem(item.id)
+      fetchData()
     }
   }
 
@@ -47,11 +70,27 @@ function AdminDeleted() {
         <p>Restore accidentally deleted records or permanently delete them.</p>
       </div>
 
-      <AdminDataTable 
-        columns={columns} 
-        data={deletedItems} 
+      <div className="admin-subtabs" role="tablist" aria-label="Recently deleted filters">
+        {FILTERS.map((filter) => (
+          <button
+            key={filter.key}
+            type="button"
+            className={`admin-subtab ${activeFilter === filter.key ? 'active' : ''}`}
+            onClick={() => setActiveFilter(filter.key)}
+          >
+            {filter.label}
+            <span className="admin-subtab-count">{getFilterCount(filter.key)}</span>
+          </button>
+        ))}
+      </div>
+
+      <AdminDataTable
+        columns={columns}
+        data={filteredItems}
         onRestore={handleRestore}
-        onDelete={handleDeletePermanent} 
+        onDelete={handleDeletePermanent}
+        isLoading={loading}
+        emptyMessage="No deleted records in this section."
       />
     </div>
   )
