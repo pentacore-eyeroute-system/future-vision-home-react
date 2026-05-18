@@ -135,7 +135,7 @@ export function ReviewAuthProvider({ children }) {
 
   const signOut = async () => {
     try {
-      await reviewApi.signOut(session)
+      // await reviewApi.signOut(session)
     } catch {
       // Ignore sign-out endpoint failures so local logout still succeeds.
     } finally {
@@ -154,7 +154,7 @@ export function ReviewAuthProvider({ children }) {
     isAuthenticating,
     isRestoringSession,
     session,
-    signOut,
+    // signOut,
     user: session?.user ?? null,
   }
 

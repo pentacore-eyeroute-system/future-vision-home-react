@@ -1,4 +1,5 @@
 import { reviewAuthConfig } from '../config/reviewAuthConfig'
+import { buildApiUrl } from '../config/apiUrlConfig';
 
 const request = async (endpoint, { method = 'GET', body, token } = {}) => {
   const response = await fetch(reviewAuthConfig.buildApiUrl(endpoint), {
@@ -35,7 +36,7 @@ const normalizeSession = (payload) => {
   const userSource =
     payload?.user ??
     payload?.profile ??
-    (payload?.name || payload?.fullName || payload?.displayName || payload?.email ? payload : null)
+    (payload?.fullname || payload?.email ? payload : null)
 
   if (!userSource) {
     throw new Error('Your backend must return the signed-in user profile.')
@@ -44,7 +45,7 @@ const normalizeSession = (payload) => {
   const user = normalizeUser(userSource)
 
   return {
-    token: payload?.token ?? payload?.jwt ?? payload?.sessionToken ?? payload?.accessToken ?? null,
+    token: payload?.token ?? payload?.sessionToken ?? payload?.accessToken ?? null,
     user,
   }
 }
@@ -66,13 +67,15 @@ export const normalizeReview = (review = {}, fallbackUser = null) => {
 export const reviewApi = {
   canRestoreSession: () => Boolean(reviewAuthConfig.endpoints.authSession),
 
-  authenticateWithGoogle: async (idToken) => {
-    const payload = await request(reviewAuthConfig.endpoints.googleAuth, {
+  authenticateWithGoogle: async (googleIdToken) => {
+    const payload = await request('/reviewer-auth/login', {
       method: 'POST',
-      body: { idToken },
+      body: { googleIdToken },
     })
 
-    return normalizeSession(payload)
+    localStorage.setItem('token', payload.result.token);
+
+    return normalizeSession(payload.result.user)
   },
 
   getCurrentSession: async () => {
@@ -84,26 +87,26 @@ export const reviewApi = {
     return payload ? normalizeSession(payload) : null
   },
 
-  signOut: async (session) => {
-    if (!reviewAuthConfig.endpoints.signOut) {
-      return
-    }
+  // signOut: async (session) => {
+  //   if (!reviewAuthConfig.endpoints.signOut) {
+  //     return
+  //   }
 
-    await request(reviewAuthConfig.endpoints.signOut, {
-      method: 'POST',
-      token: session?.token,
-    })
-  },
+  //   await request(reviewAuthConfig.endpoints.signOut, {
+  //     method: 'POST',
+  //     token: session?.token,
+  //   })
+  // },
 
   getReviews: async () => {
-    const payload = await request(reviewAuthConfig.endpoints.reviews)
+    const payload = await request('')
     const reviews = Array.isArray(payload) ? payload : payload?.reviews ?? payload?.data ?? []
 
     return reviews.map((review) => normalizeReview(review))
   },
 
   submitReview: async (session, review) => {
-    const payload = await request(reviewAuthConfig.endpoints.reviews, {
+    const payload = await request('', {
       method: 'POST',
       token: session?.token,
       body: review,
