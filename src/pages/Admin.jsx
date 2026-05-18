@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { loginAdmin } from '../services/authService.js';
+import { authApi } from '../api/authApi.js';
 
 const SESSION_KEY = 'adminAuthenticated'
 const SESSION_TIME_KEY = 'adminLoginTime'
@@ -34,7 +34,7 @@ function Admin() {
     }
 
     try {
-      const { data } = await loginAdmin({ username, password })
+      const data = await authApi.loginAdmin({ username, password })
 
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
