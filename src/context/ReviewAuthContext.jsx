@@ -154,7 +154,7 @@ export function ReviewAuthProvider({ children }) {
     isAuthenticating,
     isRestoringSession,
     session,
-    // signOut,
+    signOut,
     user: session?.user ?? null,
   }
 
