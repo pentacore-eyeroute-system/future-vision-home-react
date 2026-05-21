@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
+import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
@@ -25,7 +26,7 @@ function AdminNewsGallery() {
   const fetchData = async () => {
     setLoading(true)
     const news = await adminApi.getNews()
-    const gallery = await adminApi.getGallery()
+    const gallery = await galleryApi.getGalleries()
 
     const combined = [
       ...news.map((item) => ({
@@ -35,12 +36,12 @@ function AdminNewsGallery() {
         displayDate: item.news_date,
         images: normalizeImageList(item.news_images || item.news_pic_path),
       })),
-      ...gallery.map((item) => ({
+      ...gallery.result.map((item) => ({
         ...item,
         type: 'gallery',
         displayTitle: item.gal_title,
-        displayDate: item.gal_date,
-        images: normalizeImageList(item.gal_images || item.gal_pic_path),
+        displayDate: normalizeDate(item.gal_date),
+        images: normalizeImageList(item.galleryPictures),
       })),
     ]
 
@@ -86,7 +87,9 @@ function AdminNewsGallery() {
       if (item.type === 'news') {
         await adminApi.deleteNews(item.id)
       } else {
-        await adminApi.deleteGallery(item.id)
+        let isTemporarilyDeleted = !item.is_temporarily_deleted;
+
+        await galleryApi.temporaryDeleteGallery(item.id, { isTemporarilyDeleted: isTemporarilyDeleted});
       }
       fetchData()
     }
@@ -137,17 +140,26 @@ function AdminNewsGallery() {
         news_images: formData.images,
       })
     } else {
-      await adminApi.createGallery({
-        gal_title: formData.title,
-        gal_description: formData.description,
-        gal_date: formData.date,
-        gal_images: formData.images,
-      })
+      const fd = new FormData();
+
+      fd.append('title', formData.title);
+      fd.append('description', formData.description);
+      fd.append('date', formData.date);
+
+      formData.images.forEach(image => {
+        fd.append('images', image.file);
+      });
+
+      await galleryApi.createGallery(fd);
     }
 
     setModalOpen(false)
     fetchData()
   }
+
+  const normalizeDate = (date) => {
+    return new Date(date).toLocaleDateString('en-CA');
+  };
 
   return (
     <div className="admin-section active">

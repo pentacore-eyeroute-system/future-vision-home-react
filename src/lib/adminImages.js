@@ -13,6 +13,7 @@ export const filesToImageEntries = async (fileList) => {
   return Promise.all(
     files.map(async (file, index) => ({
       id: `${Date.now()}-${index}-${file.name}`,
+      file,
       name: file.name,
       url: await readFileAsDataUrl(file),
     }))
@@ -37,7 +38,7 @@ export const normalizeImageList = (value) => {
         return {
           id: item.id || `image-${Date.now()}-${index}`,
           name: item.name || `Image ${index + 1}`,
-          url: item.url || item.previewUrl || '',
+          url: item.url || item.previewUrl || item.npi_pic_url || item.gpi_pic_url || '',
         }
       })
       .filter((item) => item.url)
@@ -48,7 +49,7 @@ export const normalizeImageList = (value) => {
       {
         id: 'legacy-0',
         name: 'Image 1',
-        url: value,
+        url: value || value.npi_pic_url || value.gpi_pic_url,
       },
     ]
   }
