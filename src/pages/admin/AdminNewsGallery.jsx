@@ -125,12 +125,20 @@ function AdminNewsGallery() {
           news_images: formData.images,
         })
       } else {
-        await adminApi.updateGallery(editingItem.id, {
-          gal_title: formData.title,
-          gal_description: formData.description,
-          gal_date: formData.date,
-          gal_images: formData.images,
-        })
+        const existingGalleryPicturesIds = formData.images.map(image => image.id);
+
+        const fd = new FormData();
+
+        fd.append('title', formData.title);
+        fd.append('description', formData.description);
+        fd.append('date', formData.date);
+        fd.append('existingGalleryPicturesIds', JSON.stringify(existingGalleryPicturesIds));
+
+        formData.images.forEach(image => {
+          fd.append('images', image.file);
+        });
+        
+        await galleryApi.updateGallery(editingItem.id, fd);
       }
     } else if (formData.type === 'news') {
       await adminApi.createNews({
