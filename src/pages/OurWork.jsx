@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { visionistaApi } from '../api/visionistaApi'
 import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
@@ -7,6 +8,7 @@ import { galleryCategories } from '../data/gallery'
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
 function OurWork() {
+  const [data, setData] = useState([]);
   const [activeTab, setActiveTab] = useState('what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -22,6 +24,16 @@ function OurWork() {
     )
   }, [query])
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const visionistas = await visionistaApi.getVisionistas();
+
+    setData(visionistas.result);
+  };
+  
   return (
     <>
       <section className="page-header">
@@ -145,9 +157,9 @@ function OurWork() {
                 INSPIRING STORIES OF THE BENEFICIARIES OF THE PROJECT
               </h3>
               <div className="visionistas-grid">
-                {visionistas.map((v) => (
+                {data.map((v) => (
                   <button
-                    key={v.name}
+                    key={v.vis_fullname}
                     className="visionista-card visionista-card-btn"
                     type="button"
                     onClick={() => setSelectedVisionista(v)}
@@ -156,8 +168,8 @@ function OurWork() {
                     <div className="visionista-icon">
                       <img src="/images/daily.png" alt="Visionista icon" />
                     </div>
-                    <h3 className="visionista-name">{v.name}</h3>
-                    <p className="visionista-story visionista-story-preview">{v.preview}</p>
+                    <h3 className="visionista-name">{v.vis_fullname}</h3>
+                    <p className="visionista-story visionista-story-preview">{v.vis_story}</p>
                     <span className="visionista-readmore" aria-hidden="true">
                       Read Story →
                     </span>
@@ -170,7 +182,7 @@ function OurWork() {
           {selectedVisionista && (
             <div className="visionista-dialog open" role="dialog" aria-modal="true">
               <div className="visionista-dialog-header">
-                <h3 className="visionista-dialog-title">{selectedVisionista.name}</h3>
+                <h3 className="visionista-dialog-title">{selectedVisionista.vis_fullname}</h3>
                 <button
                   type="button"
                   className="visionista-dialog-close"
@@ -181,16 +193,16 @@ function OurWork() {
                 </button>
               </div>
               <div className="visionista-dialog-body">
-                {selectedVisionista.image && (
+                {selectedVisionista.vis_pic_url && (
                   <img
                     className="visionista-modal-photo"
-                    src={selectedVisionista.image}
-                    alt={selectedVisionista.name}
+                    src={selectedVisionista.vis_pic_url}
+                    alt={selectedVisionista.vis_fullname}
                   />
                 )}
-                {selectedVisionista.story.map((p, idx) => (
-                  <p key={idx}>{p}</p>
-                ))}
+                <div className="whitespace-pre-line">
+                  {selectedVisionista.vis_story}
+                </div>
               </div>
             </div>
           )}
