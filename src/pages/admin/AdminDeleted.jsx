@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
+import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
 
 const FILTERS = [
   { key: 'visionista', label: 'Visionistas' },
@@ -32,7 +33,28 @@ function AdminDeleted() {
 
   const fetchData = async () => {
     setLoading(true)
-    const data = await adminApi.getDeletedItems()
+
+    const visionistas = await recentlyDeletedApi.getDeletedVisionistas();
+    const news = await recentlyDeletedApi.getDeletedNews();
+    const galleries = await recentlyDeletedApi.getDeletedGalleries();
+    const partners = await recentlyDeletedApi.getDeletedPartners();
+
+    const combinedDeletedItems = [
+      ...visionistas.result,
+      ...news.result,
+      ...galleries.result,
+      ...partners.result
+    ];
+
+    const data = combinedDeletedItems.map((item, index) => ({
+      id: index + 1,
+      sourceKey: item.type,
+      type: item.type,
+      displayTitle: item.vis_fullname || item.news_title || item.gal_title || item.par_fullname,
+      deletedAt: item.updatedAt,
+      item,
+    }));
+
     setDeletedItems(data)
     setLoading(false)
   }
