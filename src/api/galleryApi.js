@@ -80,5 +80,25 @@ export const galleryApi = {
         }
 
         return payload;
+    },
+
+    permanentDeleteGallery: async (id) => {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch(buildApiUrl(`/gallery/soft-delete-gallery/${id}`), {
+            method: 'PUT',
+            headers: { 'Authorization' : `Bearer ${token}` },
+        }); 
+
+        const contentType = response.headers.get('content-type') || ''
+        const payload = contentType.includes('application/json')
+            ? await response.json().catch(() => null)
+            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
+
+        if (!response.ok) {
+            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
+        }
+
+        return payload;
     }
 };

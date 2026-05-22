@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { galleryApi } from '../../api/galleryApi'
 import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
@@ -46,18 +47,22 @@ function AdminDeleted() {
       ...partners.result
     ];
 
-    const data = combinedDeletedItems.map((item, index) => ({
-      id: index + 1,
+    const data = combinedDeletedItems.map((item) => ({
+      id: item.id,
       sourceKey: item.type,
       type: item.type,
       displayTitle: item.vis_fullname || item.news_title || item.gal_title || item.par_fullname,
-      deletedAt: item.updatedAt,
+      deletedAt: normalizeDate(item.updatedAt),
       item,
     }));
 
     setDeletedItems(data)
     setLoading(false)
   }
+
+  const normalizeDate = (date) => {
+    return new Date(date).toLocaleDateString('en-CA');
+  };
 
   const columns = [
     { key: 'displayTitle', label: 'Name/Title' },
@@ -74,13 +79,15 @@ function AdminDeleted() {
   const getFilterCount = (filterKey) => deletedItems.filter((item) => matchesFilter(item, filterKey)).length
 
   const handleRestore = async (item) => {
-    await adminApi.restoreDeletedItem(item.id)
+    let isTemporarilyDeleted = !item.item.gal_is_temporarily_deleted;
+    
+    await galleryApi.temporaryDeleteGallery(item.id, { isTemporarilyDeleted: isTemporarilyDeleted});
     fetchData()
   }
 
   const handleDeletePermanent = async (item) => {
     if (window.confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
-      await adminApi.permanentlyDeleteItem(item.id)
+      await galleryApi.permanentDeleteGallery(item.id);
       fetchData()
     }
   }
