@@ -11,7 +11,10 @@ export const reviewAuthConfig = {
   googleClientId,
   hasGoogleClientId: Boolean(googleClientId),
   endpoints: {
+    googleAuth: trim(import.meta.env.VITE_GOOGLE_AUTH_ENDPOINT),
     authSession: trim(import.meta.env.VITE_AUTH_SESSION_ENDPOINT),
+    signOut: trim(import.meta.env.VITE_AUTH_SIGNOUT_ENDPOINT),
+    reviews: trim(import.meta.env.VITE_REVIEWS_ENDPOINT),
   },
   buildApiUrl,
 }

@@ -42,6 +42,29 @@ const formatReviewDate = (value) => {
   })
 }
 
+function FeedbackAvatar({ name, picture, className }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const initial = name?.trim()?.charAt(0)?.toUpperCase() || 'G'
+  const safePicture = typeof picture === 'string' ? picture.trim() : ''
+
+  useEffect(() => {
+    setImageFailed(false)
+  }, [safePicture])
+
+  if (safePicture && !imageFailed) {
+    return (
+      <img
+        src={safePicture}
+        alt={name || 'Google User'}
+        className={className}
+        onError={() => setImageFailed(true)}
+      />
+    )
+  }
+
+  return <div className={`${className} feedback-avatar-fallback`}>{initial}</div>
+}
+
 function EyeRoute() {
   const [feedbacks, setFeedbacks] = useState(() => demoFeedbacks.map((feedback) => normalizeReview(feedback)))
   const [formData, setFormData] = useState(emptyForm)
@@ -108,8 +131,6 @@ function EyeRoute() {
       setIsSubmitting(false)
     }
   }
-
-  const userInitial = user?.name?.charAt(0)?.toUpperCase() || 'G'
 
   return (
     <>
@@ -247,11 +268,7 @@ function EyeRoute() {
                 <>
                   <div className="feedback-user-card">
                     <div className="feedback-user-identity">
-                      {user?.picture ? (
-                        <img src={user.picture} alt={user.name} className="feedback-avatar" />
-                      ) : (
-                        <div className="feedback-avatar feedback-avatar-fallback">{userInitial}</div>
-                      )}
+                      <FeedbackAvatar name={user?.name} picture={user?.picture} className="feedback-avatar" />
 
                       <div>
                         <p className="feedback-user-name">{user?.name}</p>
@@ -328,13 +345,11 @@ function EyeRoute() {
                 <div key={feedback.id} className="feedback-card">
                   <div className="feedback-header">
                     <div className="feedback-reviewer">
-                      {feedback.picture ? (
-                        <img src={feedback.picture} alt={feedback.name} className="feedback-reviewer-avatar" />
-                      ) : (
-                        <div className="feedback-reviewer-avatar feedback-avatar-fallback">
-                          {feedback.name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <FeedbackAvatar
+                        name={feedback.name}
+                        picture={feedback.picture}
+                        className="feedback-reviewer-avatar"
+                      />
                       <span className="feedback-name">{feedback.name}</span>
                     </div>
                     <span className="feedback-date">{formatReviewDate(feedback.date)}</span>

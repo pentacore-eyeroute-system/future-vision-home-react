@@ -73,7 +73,7 @@ export const renderGoogleButton = (element, options = {}) => {
     return
   }
 
-  const width = Math.max(220, Math.min(element.clientWidth || 320, 400))
+  const width = 220
 
   element.innerHTML = ''
   window.google.accounts.id.renderButton(element, {
