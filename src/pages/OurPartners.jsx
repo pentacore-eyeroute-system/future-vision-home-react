@@ -1,4 +1,19 @@
+import { useState, useEffect } from 'react'
+import { partnerApi } from '../api/partnerApi'
+
 function OurPartners() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const partners = await partnerApi.getPartners();
+
+    setData(partners.result);
+  };
+ 
   return (
     <>
       <section className="page-header">
@@ -16,39 +31,12 @@ function OurPartners() {
           <div className="partners-content-wrapper">
             <PartnersCategory
               title="ORGANIZATIONS"
-              names={[
-                'Kanthari Foundation Switzerland',
-                'Stichting kanthari',
-                'Philippine Blind Union (PBU)',
-                'Eusebio C. Santos Elementary School (ECSES)',
-                'Department of Education (DepEd) Bureau of Education Assessment (BEA)',
-                'Butil ng Pag-asa',
-                'Persons with Different Abilities (PWDA) Bambang',
-              ]}
+              names={data.filter(partner => partner.par_type === "Organization").map(partner => partner.par_fullname)}
             />
 
             <PartnersCategory
               title="INDIVIDUALS"
-              names={[
-                'Cristy Villanueva',
-                'Imee Licas Chulipa',
-                'Sofia Villanueva',
-                'Junver Arcayna',
-                'Richt Arcayna (Ms. Jessa, Ms. Julie, Ms. Alyssa-Birthday Fund Raiser)',
-                'Gigi Tibi',
-                'Kristine Teves',
-                'Runnesa Soriao',
-                'Paola Jane Razon',
-                'John Mark Limel Papag',
-                'Seniorita Edna D. Lhuillier',
-                'Catherine B. Jones',
-                'Limuel H. Vilela',
-                'Wil Sabado',
-                'Jing/Grace Montoya',
-                'Andrea',
-                'Judith C. Abando',
-                'Nancy D. Medina',
-              ]}
+              names={data.filter(partner => partner.par_type === "Individual").map(partner => partner.par_fullname)}
             />
 
             <PartnersCategory
