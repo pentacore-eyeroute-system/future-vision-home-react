@@ -195,32 +195,32 @@ function EyeRoute() {
               <Feature
                 icon="/images/obj.png"
                 title="Object Detection"
-                description="Advanced AI technology identifies and alerts you to objects in your path, including people, vehicles, obstacles, and other potential hazards to ensure safe navigation."
+                description="Detects and classifies relevant objects in the live camera feed. Provides contextual awareness for visually impaired users and helps detect hazards."
               />
               <Feature
                 icon="/images/distance.png"
-                title="Distance Estimation"
-                description="Get accurate distance measurements to objects, obstacles, and destinations. Know exactly how far you are from important points to navigate with precision and confidence."
+                title="Audio Feedback Module"
+                description="Converts system-generated text alerts and guidance into spoken audio so the PVI can receive real-time instructions and warnings."
               />
               <Feature
                 icon="/images/voice.png"
                 title="Voice Guided Navigation"
-                description="Navigate with confidence using clear, detailed voice instructions. EyeRoute provides real-time audio guidance to help you reach your destination safely and independently."
+                description="Converts system-generated guidance and alerts into spoken audio so users can receive real-time instructions and warnings."
               />
               <Feature
                 icon="/images/path.png"
                 title="Safe Path"
-                description="Identifies walkable terrain vs. obstacles. EyeRoute analyzes your surroundings to distinguish between safe, navigable paths and potential hazards, guiding you along the safest route."
+                description="Identifies potentially walkable areas by analyzing the lower camera frame and detecting visible obstacles or interruptions along the user's path."
               />
               <Feature
                 icon="/images/video.png"
                 title="Real-Time Video Stream"
-                description="Access live video streaming of your surroundings, allowing your loved ones to see what you see in real-time. Stay connected and get visual assistance when needed for enhanced safety and support."
+                description="Provides a live video stream of the user's surroundings to the guardian mobile application for remote monitoring and assistance."
               />
               <Feature
                 icon="/images/loc.png"
-                title="Location Tracking"
-                description="Get instant, up-to-the-moment location updates with real-time GPS tracking. Stay connected and navigate with confidence knowing your exact position is always current, helping you and your loved ones track your journey in real-time."
+                title="Destination Navigation"
+                description="Guides the user toward a selected destination by providing walking directions based on the user's spoken destination and current location."
               />
             </div>
           </div>
