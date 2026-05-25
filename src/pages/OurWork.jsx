@@ -4,11 +4,13 @@ import { visionistaApi } from '../api/visionistaApi'
 import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
+import { galleryApi } from '../api/galleryApi'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
 function OurWork() {
-  const [data, setData] = useState([]);
+  const [visionistas, setVisionistas] = useState([]);
+  const [galleries, setGalleries] = useState([]);
   const [activeTab, setActiveTab] = useState('what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -29,9 +31,12 @@ function OurWork() {
   }, []);
 
   const fetchData = async () => {
-    const visionistas = await visionistaApi.getVisionistas();
+    const visionistaResponse = await visionistaApi.getVisionistas();
+    const galleryResponse = await galleryApi.getGalleries();
 
-    setData(visionistas.result);
+    setVisionistas(visionistaResponse.result);
+    setGalleries(galleryResponse.result);
+    console.log(galleryResponse.result)
   };
   
   return (
@@ -157,7 +162,7 @@ function OurWork() {
                 INSPIRING STORIES OF THE BENEFICIARIES OF THE PROJECT
               </h3>
               <div className="visionistas-grid">
-                {data.map((v) => (
+                {visionistas.map((v) => (
                   <button
                     key={v.vis_fullname}
                     className="visionista-card visionista-card-btn"
@@ -259,19 +264,19 @@ function OurWork() {
 
               <div className="gallery-section">
                 <h3 className="gallery-section-title">Photo Gallery</h3>
-                {galleryCategories.map((category) => (
-                  <div className="gallery-category" key={category.title}>
-                    <h4 className="gallery-category-title">{category.title}</h4>
-                    <p className="gallery-date">{category.date}</p>
+                {galleries.map((gallery) => (
+                  <div className="gallery-category" key={gallery.gal_title}>
+                    <h4 className="gallery-category-title">{gallery.gal_title}</h4>
+                    <p className="gallery-date">{new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {gallery.gal_description}</p>
                     <div className="gallery-grid">
-                      {category.images.map((img) => (
+                      {gallery.galleryPictures.map((img) => (
                         <button
                           key={img}
                           className="gallery-item"
                           type="button"
                           onClick={() => setLightboxImage(img)}
                         >
-                          <img src={decodeURI(img)} alt={category.title} />
+                          <img src={decodeURI(img.gpi_pic_url)} alt={gallery.title} />
                         </button>
                       ))}
                     </div>
