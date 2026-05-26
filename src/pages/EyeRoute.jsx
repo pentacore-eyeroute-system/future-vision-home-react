@@ -1,77 +1,82 @@
-import { useEffect, useState } from 'react'
-import { normalizeReview, reviewApi } from '../api/reviewApi'
-import GoogleSignInButton from '../components/GoogleSignInButton'
-import { useReviewAuth } from '../context/reviewAuth'
+import { useEffect, useState } from "react";
+import { normalizeReview, reviewApi } from "../api/reviewApi";
+import GoogleSignInButton from "../components/GoogleSignInButton";
+import { useReviewAuth } from "../context/reviewAuth";
 
 const demoFeedbacks = [
   {
     id: 1,
-    user: { name: 'John Doe' },
+    user: { name: "John Doe" },
     rating: 5,
-    comment: 'EyeRoute has completely changed how I navigate my neighborhood. Highly recommend!',
-    createdAt: '2024-03-15',
+    comment:
+      "EyeRoute has completely changed how I navigate my neighborhood. Highly recommend!",
+    createdAt: "2024-03-15",
   },
   {
     id: 2,
-    user: { name: 'Maria Santos' },
+    user: { name: "Maria Santos" },
     rating: 4,
-    comment: 'Very helpful app. The object detection is quite accurate.',
-    createdAt: '2024-03-10',
+    comment: "Very helpful app. The object detection is quite accurate.",
+    createdAt: "2024-03-10",
   },
-]
+];
 
 const emptyForm = {
   rating: 5,
-  comment: '',
-}
+  comment: "",
+};
 
 const formatReviewDate = (value) => {
   if (!value) {
-    return 'Just now'
+    return "Just now";
   }
 
-  const parsedDate = new Date(value)
+  const parsedDate = new Date(value);
   if (Number.isNaN(parsedDate.getTime())) {
-    return value
+    return value;
   }
 
-  return parsedDate.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
+  return parsedDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 function FeedbackAvatar({ name, picture, className }) {
-  const [imageFailed, setImageFailed] = useState(false)
-  const initial = name?.trim()?.charAt(0)?.toUpperCase() || 'G'
-  const safePicture = typeof picture === 'string' ? picture.trim() : ''
+  const [imageFailed, setImageFailed] = useState(false);
+  const initial = name?.trim()?.charAt(0)?.toUpperCase() || "G";
+  const safePicture = typeof picture === "string" ? picture.trim() : "";
 
   useEffect(() => {
-    setImageFailed(false)
-  }, [safePicture])
+    setImageFailed(false);
+  }, [safePicture]);
 
   if (safePicture && !imageFailed) {
     return (
       <img
         src={safePicture}
-        alt={name || 'Google User'}
+        alt={name || "Google User"}
         className={className}
         onError={() => setImageFailed(true)}
       />
-    )
+    );
   }
 
-  return <div className={`${className} feedback-avatar-fallback`}>{initial}</div>
+  return (
+    <div className={`${className} feedback-avatar-fallback`}>{initial}</div>
+  );
 }
 
 function EyeRoute() {
-  const [feedbacks, setFeedbacks] = useState(() => demoFeedbacks.map((feedback) => normalizeReview(feedback)))
-  const [formData, setFormData] = useState(emptyForm)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [loadNotice, setLoadNotice] = useState('')
-  const [submitMessage, setSubmitMessage] = useState('')
-  const [submitError, setSubmitError] = useState('')
+  const [feedbacks, setFeedbacks] = useState(() =>
+    demoFeedbacks.map((feedback) => normalizeReview(feedback)),
+  );
+  const [formData, setFormData] = useState(emptyForm);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadNotice, setLoadNotice] = useState("");
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const {
     error: authError,
@@ -82,55 +87,63 @@ function EyeRoute() {
     session,
     signOut,
     user,
-  } = useReviewAuth()
+  } = useReviewAuth();
 
   useEffect(() => {
-    let isActive = true
+    let isActive = true;
 
     reviewApi
       .getReviews()
       .then((reviews) => {
         if (!isActive) {
-          return
+          return;
         }
 
-        setFeedbacks(reviews)
-        setLoadNotice('')
+        setFeedbacks(reviews);
+        setLoadNotice("");
       })
       .catch(() => {
         if (isActive) {
-          setLoadNotice('Showing preview reviews until your AWS review endpoint is connected.')
+          setLoadNotice(
+            "Showing preview reviews until your AWS review endpoint is connected.",
+          );
         }
-      })
+      });
 
     return () => {
-      isActive = false
-    }
-  }, [])
+      isActive = false;
+    };
+  }, []);
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (!isAuthenticated || !session) {
-      setSubmitError('Sign in with Google before posting a review.')
-      return
+      setSubmitError("Sign in with Google before posting a review.");
+      return;
     }
 
-    setIsSubmitting(true)
-    setSubmitError('')
-    setSubmitMessage('')
+    setIsSubmitting(true);
+    setSubmitError("");
+    setSubmitMessage("");
 
     try {
-      const createdReview = await reviewApi.submitReview(session, formData)
-      setFeedbacks((currentFeedbacks) => [createdReview, ...currentFeedbacks])
-      setFormData(emptyForm)
-      setSubmitMessage('Thanks. Your review was submitted through your authenticated session.')
+      const createdReview = await reviewApi.submitReview(session, formData);
+      setFeedbacks((currentFeedbacks) => [createdReview, ...currentFeedbacks]);
+      setFormData(emptyForm);
+      setSubmitMessage(
+        "Thanks. Your review was submitted through your authenticated session.",
+      );
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to submit your review right now.')
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "Unable to submit your review right now.",
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <>
@@ -141,16 +154,37 @@ function EyeRoute() {
         <div className="container">
           <div className="app-landing-wrapper">
             <div className="app-landing-content">
-              <h2 className="app-landing-title">Intelligent Navigation for a Safer Tomorrow.</h2>
+              <h2 className="app-landing-title">
+                Intelligent Navigation for a Safer Tomorrow.
+              </h2>
               <p className="app-landing-description">
-                Stay connected. Guide your loved ones with visual impairment. Feel reassured wherever they go.
+                Stay connected. Guide your loved ones with visual impairment.
+                Feel reassured wherever they go.
               </p>
               <div className="app-download-buttons">
-                <a href="#" target="_blank" rel="noreferrer" aria-label="Get it on Google Play">
-                  <img src="/images/google-play.png" alt="Get it on Google Play" className="download-btn-image" />
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Get it on Google Play"
+                >
+                  <img
+                    src="/images/google-play.png"
+                    alt="Get it on Google Play"
+                    className="download-btn-image"
+                  />
                 </a>
-                <a href="#" target="_blank" rel="noreferrer" aria-label="Download on the App Store">
-                  <img src="/images/app-store.png" alt="Download on the App Store" className="download-btn-image" />
+                <a
+                  href="#"
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Download on the App Store"
+                >
+                  <img
+                    src="/images/app-store.png"
+                    alt="Download on the App Store"
+                    className="download-btn-image"
+                  />
                 </a>
               </div>
             </div>
@@ -187,7 +221,8 @@ function EyeRoute() {
             <div className="section-header">
               <h2 className="section-title">About EyeRoute</h2>
               <p className="section-subtitle">
-                Your personal navigation companion designed specifically for the visually impaired community
+                Your personal navigation companion designed specifically for the
+                visually impaired community
               </p>
             </div>
 
@@ -198,7 +233,7 @@ function EyeRoute() {
                 description="Detects and classifies relevant objects in the live camera feed. Provides contextual awareness for visually impaired users and helps detect hazards."
               />
               <Feature
-                icon="/images/distance.png"
+                icon="/images/audio_feedback.png"
                 title="Audio Feedback Module"
                 description="Converts system-generated text alerts and guidance into spoken audio so the PVI can receive real-time instructions and warnings."
               />
@@ -231,21 +266,24 @@ function EyeRoute() {
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">User Feedback</h2>
-            <p className="section-subtitle">What our community says about EyeRoute</p>
+            <p className="section-subtitle">
+              What our community says about EyeRoute
+            </p>
           </div>
 
           <div className="feedback-container">
             <div className="feedback-form-wrapper">
               <h3>Share Your Experience</h3>
               <p className="feedback-helper-text">
-                Reviews are tied to a Google-verified account before they are sent to your backend.
+                Reviews are tied to a Google-verified account before they are
+                sent to your backend.
               </p>
 
               {!hasGoogleClientId && (
                 <div className="feedback-auth-card">
                   <p className="feedback-auth-copy">
-                    Add `VITE_GOOGLE_CLIENT_ID` to your frontend env file first. The Google client secret should stay in
-                    your backend only.
+                    Add `VITE_GOOGLE_CLIENT_ID` to your frontend env file first.
+                    The Google client secret should stay in your backend only.
                   </p>
                 </div>
               )}
@@ -253,13 +291,21 @@ function EyeRoute() {
               {hasGoogleClientId && !isAuthenticated && (
                 <div className="feedback-auth-card">
                   <p className="feedback-auth-copy">
-                    Sign in with Google, let the frontend send the Google ID token to AWS, and wait for your backend to
-                    return your own app session before posting a review.
+                    Sign in with Google, let the frontend send the Google ID
+                    token to AWS, and wait for your backend to return your own
+                    app session before posting a review.
                   </p>
                   <GoogleSignInButton />
-                  {isRestoringSession && <p className="feedback-status">Checking for an existing session...</p>}
+                  {isRestoringSession && (
+                    <p className="feedback-status">
+                      Checking for an existing session...
+                    </p>
+                  )}
                   {isAuthenticating && (
-                    <p className="feedback-status">Finishing sign-in and exchanging your Google token with AWS...</p>
+                    <p className="feedback-status">
+                      Finishing sign-in and exchanging your Google token with
+                      AWS...
+                    </p>
                   )}
                 </div>
               )}
@@ -268,15 +314,25 @@ function EyeRoute() {
                 <>
                   <div className="feedback-user-card">
                     <div className="feedback-user-identity">
-                      <FeedbackAvatar name={user?.name} picture={user?.picture} className="feedback-avatar" />
+                      <FeedbackAvatar
+                        name={user?.name}
+                        picture={user?.picture}
+                        className="feedback-avatar"
+                      />
 
                       <div>
                         <p className="feedback-user-name">{user?.name}</p>
-                        {user?.email && <p className="feedback-user-email">{user.email}</p>}
+                        {user?.email && (
+                          <p className="feedback-user-email">{user.email}</p>
+                        )}
                       </div>
                     </div>
 
-                    <button type="button" className="feedback-signout-btn" onClick={() => void signOut()}>
+                    <button
+                      type="button"
+                      className="feedback-signout-btn"
+                      onClick={() => void signOut()}
+                    >
                       Sign Out
                     </button>
                   </div>
@@ -320,16 +376,32 @@ function EyeRoute() {
                       ></textarea>
                     </div>
 
-                    <button type="submit" className="submit-btn" disabled={isSubmitting}>
-                      {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                    <button
+                      type="submit"
+                      className="submit-btn"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Feedback"}
                     </button>
                   </form>
                 </>
               )}
 
-              {authError && <p className="feedback-status feedback-status-error">{authError}</p>}
-              {submitError && <p className="feedback-status feedback-status-error">{submitError}</p>}
-              {submitMessage && <p className="feedback-status feedback-status-success">{submitMessage}</p>}
+              {authError && (
+                <p className="feedback-status feedback-status-error">
+                  {authError}
+                </p>
+              )}
+              {submitError && (
+                <p className="feedback-status feedback-status-error">
+                  {submitError}
+                </p>
+              )}
+              {submitMessage && (
+                <p className="feedback-status feedback-status-success">
+                  {submitMessage}
+                </p>
+              )}
             </div>
 
             <div className="feedback-list">
@@ -337,7 +409,9 @@ function EyeRoute() {
 
               {feedbacks.length === 0 && (
                 <div className="feedback-card">
-                  <p className="feedback-empty">No reviews yet. Be the first verified user to leave one.</p>
+                  <p className="feedback-empty">
+                    No reviews yet. Be the first verified user to leave one.
+                  </p>
                 </div>
               )}
 
@@ -352,11 +426,13 @@ function EyeRoute() {
                       />
                       <span className="feedback-name">{feedback.name}</span>
                     </div>
-                    <span className="feedback-date">{formatReviewDate(feedback.date)}</span>
+                    <span className="feedback-date">
+                      {formatReviewDate(feedback.date)}
+                    </span>
                   </div>
                   <div className="feedback-rating">
-                    {'★'.repeat(feedback.rating)}
-                    {'☆'.repeat(5 - feedback.rating)}
+                    {"★".repeat(feedback.rating)}
+                    {"☆".repeat(5 - feedback.rating)}
                   </div>
                   <p className="feedback-comment">{feedback.comment}</p>
                 </div>
@@ -366,7 +442,7 @@ function EyeRoute() {
         </div>
       </section>
     </>
-  )
+  );
 }
 
 function Feature({ icon, title, description }) {
@@ -378,7 +454,7 @@ function Feature({ icon, title, description }) {
       <h3 className="feature-title">{title}</h3>
       <p className="feature-description">{description}</p>
     </div>
-  )
+  );
 }
 
-export default EyeRoute
+export default EyeRoute;
