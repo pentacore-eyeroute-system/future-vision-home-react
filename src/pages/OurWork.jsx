@@ -264,7 +264,7 @@ function OurWork() {
 
               <div className="gallery-section">
                 <h3 className="gallery-section-title">Photo Gallery</h3>
-                {galleries.map((gallery) => (
+                {galleries.sort((a, b) => new Date(b.gal_date) - new Date(a.gal_date)).map((gallery) => (
                   <div className="gallery-category" key={gallery.gal_title}>
                     <h4 className="gallery-category-title">{gallery.gal_title}</h4>
                     <p className="gallery-date">{new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {gallery.gal_description}</p>
