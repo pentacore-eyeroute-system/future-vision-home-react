@@ -5,11 +5,13 @@ import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
+import { newsApi } from '../api/newsApi'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
 function OurWork() {
   const [visionistas, setVisionistas] = useState([]);
+  const [news, setNews] = useState([]);
   const [galleries, setGalleries] = useState([]);
   const [activeTab, setActiveTab] = useState('what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
@@ -17,14 +19,14 @@ function OurWork() {
   const [query, setQuery] = useState('')
 
   const filteredNews = useMemo(() => {
-    if (!query.trim()) return newsArticles
+    if (!query.trim()) return news
     const q = query.toLowerCase()
-    return newsArticles.filter(
+    return news.filter(
       (item) =>
-        item.title.toLowerCase().includes(q) ||
-        item.excerpt.toLowerCase().includes(q)
+        item.news_title.toLowerCase().includes(q) ||
+        item.news_description.toLowerCase().includes(q)
     )
-  }, [query])
+  }, [query, news])
 
   useEffect(() => {
     fetchData();
@@ -32,11 +34,12 @@ function OurWork() {
 
   const fetchData = async () => {
     const visionistaResponse = await visionistaApi.getVisionistas();
+    const newsResponse = await newsApi.getNews();
     const galleryResponse = await galleryApi.getGalleries();
 
     setVisionistas(visionistaResponse.result);
+    setNews(newsResponse.result);
     setGalleries(galleryResponse.result);
-    console.log(galleryResponse.result)
   };
   
   return (
@@ -240,20 +243,20 @@ function OurWork() {
 
               <div className="news-articles">
                 <div className="news-featured-row">
-                  {filteredNews.slice(0, 2).map((article) => (
-                    <NewsCard key={article.slug} article={article} />
+                  {filteredNews.map((article) => (
+                    <NewsCard key={article.news_slug} article={article} />
                   ))}
                 </div>
-                <div className="news-featured-row">
+                {/* <div className="news-featured-row">
                   {filteredNews.slice(2, 4).map((article) => (
-                    <NewsCard key={article.slug} article={article} />
+                    <NewsCard key={article.news_slug} article={article} />
                   ))}
                 </div>
                 <div className="news-featured-row">
                   {filteredNews.slice(4, 5).map((article) => (
-                    <NewsCard key={article.slug} article={article} />
+                    <NewsCard key={article.news_slug} article={article} />
                   ))}
-                </div>
+                </div> */}
                 {filteredNews.length === 0 && (
                   <div className="no-results">
                     <h2>No Results Found</h2>
@@ -325,12 +328,12 @@ function NewsCard({ article }) {
   return (
     <article className="news-article">
       <div className="news-image">
-        <img src={article.image} alt={`${article.title} cover`} className="news-cover-image" />
+        <img src={article.newsPictures?.[0]?.npi_pic_url} alt={`${article.news_title} cover`} className="news-cover-image" />
       </div>
       <div className="news-content">
-        <h2 className="news-article-title">{article.title}</h2>
-        <p className="news-article-excerpt">{article.excerpt}</p>
-        <Link to={`/news/${article.slug}`} className="news-read-more">
+        <h2 className="news-article-title">{article.news_title}</h2>
+        <p className="news-article-excerpt">{article.news_description}</p>
+        <Link to={`/news/${article.news_slug}`} className="news-read-more">
           Read More
         </Link>
       </div>
