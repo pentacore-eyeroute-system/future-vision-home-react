@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { jwtDecode } from 'jwt-decode';
 import AppLayout from './layout/AppLayout'
 import AdminLayout from './layout/AdminLayout'
 import Placeholder from './components/Placeholder'
@@ -35,9 +36,26 @@ const adminRoutes = [
 ]
 
 // Simple Auth Guard
-const ProtectedRoute = ({ children }) => {
-  const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
-  return isAuthed ? children : <Navigate to="/admin/login" replace />
+const ProtectedRoute = ({ children, requiredRole }) => {
+  // const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
+  // return isAuthed ? children : <Navigate to="/admin/login" replace />
+
+  const token = sessionStorage.getItem('token');
+
+  if (!token) return <Navigate to="/admin/login" replace />;
+
+  try {
+    const decoded = jwtDecode(token);
+
+    if (decoded.role !== requiredRole) {
+      return <Navigate to='/' replace />;
+    }
+
+    return children;
+  } catch (err) {
+    sessionStorage.removeItem('token');
+    return <Navigate to='/admin/login' replace />;
+  }
 }
 
 function App() {
@@ -58,7 +76,7 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <AdminLayout />
             </ProtectedRoute>
           }

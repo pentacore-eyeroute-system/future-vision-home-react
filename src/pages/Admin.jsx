@@ -38,7 +38,7 @@ function Admin() {
 
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      localStorage.setItem('token', data.result);
+      sessionStorage.setItem('token', data.result.token);
       navigate('/admin')
     } catch (err) {
       if (err?.retryAfter) {

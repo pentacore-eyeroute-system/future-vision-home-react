@@ -73,7 +73,7 @@ export const reviewApi = {
       body: { googleIdToken },
     })
 
-    localStorage.setItem('token', payload.result.token);
+    localStorage.setItem('token', payload.result.user.token);
 
     return normalizeSession(payload.result.user)
   },
