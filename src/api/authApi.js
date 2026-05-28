@@ -14,7 +14,7 @@ export const authApi = {
             : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
 
         if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
+            throw payload;
         }
 
         return payload;

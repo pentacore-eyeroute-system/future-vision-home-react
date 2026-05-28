@@ -41,7 +41,12 @@ function Admin() {
       localStorage.setItem('token', data.result);
       navigate('/admin')
     } catch (err) {
-      setError('Invalid username or password. Please try again.')
+      if (err?.retryAfter) {
+        setError(err.retryAfter);
+      }
+      else {
+        setError('Invalid username or password. Please try again.')
+      }
       setPassword('')
     }
   }
