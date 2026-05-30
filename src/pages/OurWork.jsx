@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { visionistaApi } from '../api/visionistaApi'
 import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
@@ -9,7 +9,13 @@ import { newsApi } from '../api/newsApi'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
+const getPlainText = (value = '') => {
+  const parser = new DOMParser()
+  return parser.parseFromString(value, 'text/html').body.textContent || ''
+}
+
 function OurWork() {
+  const location = useLocation()
   const [visionistas, setVisionistas] = useState([]);
   const [news, setNews] = useState([]);
   const [galleries, setGalleries] = useState([]);
@@ -32,10 +38,18 @@ function OurWork() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const hashTab = location.hash.replace('#', '')
+
+    if (tabOrder.includes(hashTab)) {
+      setActiveTab(hashTab)
+    }
+  }, [location.hash])
+
   const fetchData = async () => {
-    const visionistaResponse = await visionistaApi.getVisionistas();
+    const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }));
     const newsResponse = await newsApi.getNews();
-    const galleryResponse = await galleryApi.getGalleries();
+    const galleryResponse = await galleryApi.getGalleries().catch(() => ({ result: [] }));
 
     setVisionistas(visionistaResponse.result);
     setNews(newsResponse.result);
@@ -332,7 +346,7 @@ function NewsCard({ article }) {
       </div>
       <div className="news-content">
         <h2 className="news-article-title">{article.news_title}</h2>
-        <p className="news-article-excerpt">{article.news_description}</p>
+        <p className="news-article-excerpt">{getPlainText(article.news_description)}</p>
         <Link to={`/news/${article.news_slug}`} className="news-read-more">
           Read More
         </Link>

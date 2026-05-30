@@ -4,6 +4,7 @@ import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
+import RichTextEditor from '../../components/admin/RichTextEditor'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
 
 function AdminNewsGallery() {
@@ -226,11 +227,18 @@ function AdminNewsGallery() {
           </div>
           <div className="form-group">
             <label>Description</label>
-            <textarea
-              required
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            ></textarea>
+            {formData.type === 'news' ? (
+              <RichTextEditor
+                value={formData.description}
+                onChange={(description) => setFormData({ ...formData, description })}
+              />
+            ) : (
+              <textarea
+                required
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              ></textarea>
+            )}
           </div>
           <AdminImageUploadField
             inputId="newsGalleryImages"
