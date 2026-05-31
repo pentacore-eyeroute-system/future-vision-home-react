@@ -106,7 +106,6 @@ function AdminPartners() {
             >
               <option value="individual">Individual</option>
               <option value="organization">Organization</option>
-              <option value="parent">Parent/Guardian</option>
             </select>
           </div>
           <div className="form-actions">
