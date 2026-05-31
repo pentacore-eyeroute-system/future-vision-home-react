@@ -4,6 +4,7 @@ import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import RichTextEditor from '../../components/admin/RichTextEditor'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
 
@@ -12,6 +13,7 @@ function AdminNewsGallery() {
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -27,7 +29,9 @@ function AdminNewsGallery() {
   const fetchData = async () => {
     setLoading(true)
     const news = await adminApi.getNews()
-    const gallery = await galleryApi.getGalleries()
+    const gallery = await galleryApi.getGalleries().catch(async () => ({
+      result: await adminApi.getGallery(),
+    }))
 
     const combined = [
       ...news.map((item) => ({
@@ -42,7 +46,7 @@ function AdminNewsGallery() {
         type: 'gallery',
         displayTitle: item.gal_title,
         displayDate: normalizeDate(item.gal_date),
-        images: normalizeImageList(item.galleryPictures),
+        images: normalizeImageList(item.galleryPictures || item.gal_images || item.gal_pic_path),
       })),
     ]
 
@@ -83,17 +87,22 @@ function AdminNewsGallery() {
     setModalOpen(true)
   }
 
-  const handleDelete = async (item) => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      if (item.type === 'news') {
-        await adminApi.deleteNews(item.id)
-      } else {
-        let isTemporarilyDeleted = !item.is_temporarily_deleted;
+  const handleDelete = (item) => {
+    setDeleteTarget(item)
+  }
 
-        await galleryApi.temporaryDeleteGallery(item.id, { isTemporarilyDeleted: isTemporarilyDeleted});
-      }
-      fetchData()
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    if (deleteTarget.type === 'news') {
+      await adminApi.deleteNews(deleteTarget.id)
+    } else {
+      let isTemporarilyDeleted = !deleteTarget.is_temporarily_deleted;
+
+      await galleryApi.temporaryDeleteGallery(deleteTarget.id, { isTemporarilyDeleted: isTemporarilyDeleted});
     }
+    setDeleteTarget(null)
+    fetchData()
   }
 
   const handleImageUpload = async (event) => {
@@ -188,6 +197,15 @@ function AdminNewsGallery() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         isLoading={loading}
+      />
+
+      <AdminConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete item?"
+        itemName={deleteTarget?.displayTitle}
+        confirmLabel="Delete"
       />
 
       <AdminModal

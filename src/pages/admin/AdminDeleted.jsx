@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
-import AdminModal from '../../components/admin/AdminModal'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
 
 const FILTERS = [
@@ -136,49 +136,32 @@ function AdminDeleted() {
         emptyMessage="No deleted records in this section."
       />
 
-      <AdminModal
+      <AdminConfirmModal
         isOpen={!!deleteTarget}
         onClose={() => setDeleteTarget(null)}
         title="Delete item permanently?"
+        itemName={deleteTarget?.displayTitle}
+        confirmLabel="Delete Permanently"
+        onConfirm={confirmPermanentDelete}
       >
-        <div className="delete-confirmation">
-          <div className="delete-confirmation-body">
-            <p>
-              This will permanently delete <strong>{deleteTarget?.displayTitle}</strong>. This action cannot be undone.
-            </p>
-          </div>
-          <div className="delete-confirmation-footer">
-            <button type="button" className="delete-cancel-btn" onClick={() => setDeleteTarget(null)}>
-              Cancel
-            </button>
-            <button type="button" className="delete-confirm-btn" onClick={confirmPermanentDelete}>
-              Delete Permanently
-            </button>
-          </div>
-        </div>
-      </AdminModal>
+        <p>
+          This will permanently delete <strong>{deleteTarget?.displayTitle}</strong>. This action cannot be undone.
+        </p>
+      </AdminConfirmModal>
 
-      <AdminModal
+      <AdminConfirmModal
         isOpen={!!restoreTarget}
         onClose={() => setRestoreTarget(null)}
         title="Restore item?"
+        itemName={restoreTarget?.displayTitle}
+        action="restore"
+        confirmLabel="Restore"
+        onConfirm={confirmRestore}
       >
-        <div className="delete-confirmation restore-confirmation">
-          <div className="delete-confirmation-body">
-            <p>
-              This will restore <strong>{restoreTarget?.displayTitle}</strong> and make it available again.
-            </p>
-          </div>
-          <div className="delete-confirmation-footer">
-            <button type="button" className="delete-cancel-btn" onClick={() => setRestoreTarget(null)}>
-              Cancel
-            </button>
-            <button type="button" className="restore-confirm-btn" onClick={confirmRestore}>
-              Restore
-            </button>
-          </div>
-        </div>
-      </AdminModal>
+        <p>
+          This will restore <strong>{restoreTarget?.displayTitle}</strong> and make it available again.
+        </p>
+      </AdminConfirmModal>
     </div>
   )
 }

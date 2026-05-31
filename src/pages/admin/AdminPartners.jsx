@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 
 function AdminPartners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [formData, setFormData] = useState({
     par_fullname: '',
     par_type: 'organization',
@@ -45,11 +47,16 @@ function AdminPartners() {
     setModalOpen(true)
   }
 
-  const handleDelete = async (item) => {
-    if (window.confirm('Are you sure you want to delete this partner?')) {
-      await adminApi.deletePartner(item.id)
-      fetchData()
-    }
+  const handleDelete = (item) => {
+    setDeleteTarget(item)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    await adminApi.deletePartner(deleteTarget.id)
+    setDeleteTarget(null)
+    fetchData()
   }
 
   const handleSubmit = async (e) => {
@@ -81,6 +88,15 @@ function AdminPartners() {
         onEdit={handleEdit} 
         onDelete={handleDelete} 
         isLoading={loading}
+      />
+
+      <AdminConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete item?"
+        itemName={deleteTarget?.par_fullname}
+        confirmLabel="Delete"
       />
 
       <AdminModal 

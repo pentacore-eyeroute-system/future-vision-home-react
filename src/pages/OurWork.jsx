@@ -284,7 +284,12 @@ function OurWork() {
                 {galleries.sort((a, b) => new Date(b.gal_date) - new Date(a.gal_date)).map((gallery) => (
                   <div className="gallery-category" key={gallery.gal_title}>
                     <h4 className="gallery-category-title">{gallery.gal_title}</h4>
-                    <p className="gallery-date">{new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {gallery.gal_description}</p>
+                    <p className="gallery-date">
+                      {new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                    {gallery.gal_description && (
+                      <p className="gallery-description">{gallery.gal_description}</p>
+                    )}
                     <div className="gallery-grid">
                       {gallery.galleryPictures.map((img) => (
                         <button

@@ -3,6 +3,7 @@ import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
 
 function AdminVisionistas() {
@@ -10,6 +11,7 @@ function AdminVisionistas() {
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [formData, setFormData] = useState({
     vis_fullname: '',
     vis_age: '',
@@ -59,11 +61,16 @@ function AdminVisionistas() {
     setModalOpen(true)
   }
 
-  const handleDelete = async (item) => {
-    if (window.confirm('Are you sure you want to delete this visionista?')) {
-      await adminApi.deleteVisionista(item.id)
-      fetchData()
-    }
+  const handleDelete = (item) => {
+    setDeleteTarget(item)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    await adminApi.deleteVisionista(deleteTarget.id)
+    setDeleteTarget(null)
+    fetchData()
   }
 
   const handleImageUpload = async (event) => {
@@ -113,6 +120,15 @@ function AdminVisionistas() {
         onEdit={handleEdit} 
         onDelete={handleDelete} 
         isLoading={loading}
+      />
+
+      <AdminConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete item?"
+        itemName={deleteTarget?.vis_fullname}
+        confirmLabel="Delete"
       />
 
       <AdminModal 
