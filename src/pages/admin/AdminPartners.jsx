@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { adminApi } from '../../api/adminApi'
+import { getAllPartners, addPartner, updatePartner, temporaryDeletePartner } from '../../api/partnerApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
@@ -21,9 +21,17 @@ function AdminPartners() {
 
   const fetchData = async () => {
     setLoading(true)
-    const data = await adminApi.getPartners()
-    setPartners(data)
-    setLoading(false)
+    try {
+      const response = await getAllPartners()
+      const data = response.data.result || []
+      // Filter out items where the temporary deletion flag is active
+      const activeItems = data.filter(item => !item.par_is_temporarily_deleted)
+      setPartners(activeItems)
+    } catch (error) {
+      console.error("Failed fetching partners:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const columns = [
@@ -54,20 +62,57 @@ function AdminPartners() {
   const confirmDelete = async () => {
     if (!deleteTarget) return
 
-    await adminApi.deletePartner(deleteTarget.id)
-    setDeleteTarget(null)
-    fetchData()
+    try {
+      await temporaryDeletePartner(deleteTarget.id)
+      setDeleteTarget(null)
+      fetchData() // Refresh view rows to omit the deleted item
+    } catch (error) {
+      console.error("Error setting temporary delete status:", error)
+    }
+  }
+
+  const handleAddPartner = async (formValues) => {
+    const payload = {
+      fullname: formValues.par_fullname || '',
+      par_fullname: formValues.par_fullname || '',
+      type: formValues.par_type || 'organization',
+      par_type: formValues.par_type || 'organization'
+    }
+
+    try {
+      await addPartner(payload)
+      fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error creating partner:", error)
+    }
+  }
+
+  const handleUpdatePartner = async (id, formValues) => {
+    const payload = {
+      fullname: formValues.par_fullname || '',
+      par_fullname: formValues.par_fullname || '',
+      type: formValues.par_type || 'organization',
+      par_type: formValues.par_type || 'organization'
+    }
+
+    try {
+      await updatePartner(id, payload)
+      fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error updating partner:", error)
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
     if (editingItem) {
-      await adminApi.updatePartner(editingItem.id, formData)
+      await handleUpdatePartner(editingItem.id, formData)
     } else {
-      await adminApi.createPartner(formData)
+      await handleAddPartner(formData)
     }
-    setModalOpen(false)
-    fetchData()
   }
 
   return (
@@ -136,3 +181,4 @@ function AdminPartners() {
 }
 
 export default AdminPartners
+

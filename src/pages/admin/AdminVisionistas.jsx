@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { adminApi } from '../../api/adminApi'
+import { getAllVisionistas, addVisionista, updateVisionista, temporaryDeleteVisionista } from '../../api/visionistaApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
@@ -26,9 +26,17 @@ function AdminVisionistas() {
 
   const fetchData = async () => {
     setLoading(true)
-    const data = await adminApi.getVisionistas()
-    setVisionistas(data)
-    setLoading(false)
+    try {
+      const response = await getAllVisionistas()
+      const data = response.data.result || []
+      // Filter out items where the backend's temporary deletion flag is active
+      const activeItems = data.filter(item => !item.vis_is_temporarily_deleted)
+      setVisionistas(activeItems)
+    } catch (error) {
+      console.error("Failed fetching visionistas:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const columns = [
@@ -37,7 +45,10 @@ function AdminVisionistas() {
     {
       key: 'vis_images',
       label: 'Photos',
-      render: (val) => `${normalizeImageList(val).length} uploaded`,
+      render: (val, item) => {
+        const list = normalizeImageList(val || item.vis_pic_url || item.vis_pic_path)
+        return `${list.length} uploaded`
+      },
     },
     { 
       key: 'vis_story', 
@@ -55,8 +66,11 @@ function AdminVisionistas() {
   const handleEdit = (item) => {
     setEditingItem(item)
     setFormData({
-      ...item,
-      vis_images: normalizeImageList(item.vis_images || item.vis_pic_path),
+      vis_fullname: item.vis_fullname || '',
+      vis_age: item.vis_age || '',
+      vis_story: item.vis_story || '',
+      vis_images: normalizeImageList(item.vis_pic_url || item.vis_pic_path),
+      vis_is_archived: false
     })
     setModalOpen(true)
   }
@@ -68,9 +82,13 @@ function AdminVisionistas() {
   const confirmDelete = async () => {
     if (!deleteTarget) return
 
-    await adminApi.deleteVisionista(deleteTarget.id)
-    setDeleteTarget(null)
-    fetchData()
+    try {
+      await temporaryDeleteVisionista(deleteTarget.id)
+      setDeleteTarget(null)
+      fetchData()
+    } catch (error) {
+      console.error("Error setting temporary delete status:", error)
+    }
   }
 
   const handleImageUpload = async (event) => {
@@ -78,7 +96,8 @@ function AdminVisionistas() {
 
     setFormData((current) => ({
       ...current,
-      vis_images: [...current.vis_images, ...nextImages],
+      // Replace current selection since it's a single image upload
+      vis_images: nextImages.slice(0, 1),
     }))
 
     event.target.value = ''
@@ -91,15 +110,66 @@ function AdminVisionistas() {
     }))
   }
 
+  const handleAddVisionista = async (formValues, imageFile) => {
+    const data = new FormData()
+    data.append('fullname', formValues.vis_fullname)
+    data.append('age', formValues.vis_age)
+    data.append('story', formValues.vis_story)
+    if (imageFile) {
+      data.append('image', imageFile)
+    }
+
+    try {
+      await addVisionista(data)
+      fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error creating visionista:", error)
+      if (error.response) {
+        console.error("Backend error details:", error.response.data)
+      }
+    }
+  }
+
+  const handleUpdateVisionista = async (id, formValues, imageFile) => {
+    const data = new FormData()
+    
+    // Non-prefixed keys
+    data.append('fullname', formValues.vis_fullname || '')
+    data.append('age', formValues.vis_age || '')
+    data.append('story', formValues.vis_story || '')
+
+    // Prefixed keys (to account for different backend expectations)
+    data.append('vis_fullname', formValues.vis_fullname || '')
+    data.append('vis_age', formValues.vis_age || '')
+    data.append('vis_story', formValues.vis_story || '')
+
+    // Handle image file - ONLY append if a new one is selected
+    if (imageFile) {
+      data.append('image', imageFile)
+    }
+
+    try {
+      await updateVisionista(id, data)
+      await fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error updating visionista:", error)
+      if (error.response) {
+        console.error("Backend error details:", error.response.data)
+      }
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const imageFile = formData.vis_images.find(img => img.file)?.file || null
+
     if (editingItem) {
-      await adminApi.updateVisionista(editingItem.id, formData)
+      await handleUpdateVisionista(editingItem.id, formData, imageFile)
     } else {
-      await adminApi.createVisionista(formData)
+      await handleAddVisionista(formData, imageFile)
     }
-    setModalOpen(false)
-    fetchData()
   }
 
   return (
@@ -167,21 +237,11 @@ function AdminVisionistas() {
             inputId="visionistaImages"
             label="Pictures"
             images={formData.vis_images}
-            multiple
+            multiple={false}
             onFilesSelected={handleImageUpload}
             onRemoveImage={handleRemoveImage}
-            helperText="Upload one or more photos for this visionista profile."
+            helperText="Upload a photo for this visionista profile."
           />
-          <div className="form-group">
-            <label>Status</label>
-            <select 
-              value={formData.vis_is_archived ? 'archived' : 'active'}
-              onChange={(e) => setFormData({...formData, vis_is_archived: e.target.value === 'archived'})}
-            >
-              <option value="active">Active</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
           <div className="form-actions">
             <button type="submit" className="btn btn-primary">Save</button>
             <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
@@ -193,3 +253,4 @@ function AdminVisionistas() {
 }
 
 export default AdminVisionistas
+

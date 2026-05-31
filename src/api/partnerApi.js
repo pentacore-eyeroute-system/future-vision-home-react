@@ -1,18 +1,28 @@
-import { buildApiUrl } from "../config/apiUrlConfig";
+import axios from 'axios';
+import { buildApiUrl } from '../config/apiUrlConfig';
 
+const API = axios.create({
+  baseURL: buildApiUrl('/partners'),
+});
+
+// Interceptor to attach the Admin JWT token
+API.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const getAllPartners = () => API.get('/get-all-partners');
+export const addPartner = (data) => API.post('/add-partner', data);
+export const updatePartner = (id, data) => API.patch(`/update-partner-info/${id}`, data);
+export const temporaryDeletePartner = (id) => API.patch(`/temporary-delete-partner/${id}`, { isTemporarilyDeleted: true });
+
+// Backward compatibility for public routes (e.g. OurPartners.jsx)
 export const partnerApi = {
-    getPartners: async () => {
-        const response = await fetch(buildApiUrl('/partners/get-all-partners'));
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    }
+  getPartners: async () => {
+    const response = await getAllPartners();
+    return response.data;
+  }
 };
