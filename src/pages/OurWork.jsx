@@ -1,13 +1,19 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { visionistaApi } from '../api/visionistaApi'
-import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
 import { newsApi } from '../api/newsApi'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
+
+const getStoryParagraphs = (story = '') => (
+  String(story)
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+)
 
 const getPlainText = (value = '') => {
   const parser = new DOMParser()
@@ -45,6 +51,22 @@ function OurWork() {
       setActiveTab(hashTab)
     }
   }, [location.hash])
+
+  useEffect(() => {
+    if (!selectedVisionista) return
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedVisionista(null)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedVisionista])
 
   const fetchData = async () => {
     const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }));
@@ -202,9 +224,20 @@ function OurWork() {
           </div>
 
           {selectedVisionista && (
-            <div className="visionista-dialog open" role="dialog" aria-modal="true">
+            <div
+              className="visionista-dialog-overlay"
+              role="presentation"
+              onClick={() => setSelectedVisionista(null)}
+            >
+            <div
+              className="visionista-dialog open"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="visionista-dialog-title"
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="visionista-dialog-header">
-                <h3 className="visionista-dialog-title">{selectedVisionista.vis_fullname}</h3>
+                <h3 className="visionista-dialog-title" id="visionista-dialog-title">{selectedVisionista.vis_fullname}</h3>
                 <button
                   type="button"
                   className="visionista-dialog-close"
@@ -222,10 +255,14 @@ function OurWork() {
                     alt={selectedVisionista.vis_fullname}
                   />
                 )}
-                <div className="whitespace-pre-line">
-                  {selectedVisionista.vis_story}
+                <div className="visionista-story-content">
+                  <span className="visionista-story-label">Visionista Story</span>
+                  {getStoryParagraphs(selectedVisionista.vis_story).map((paragraph, index) => (
+                    <p key={`${selectedVisionista.vis_fullname}-story-${index}`}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
+            </div>
             </div>
           )}
         </section>
