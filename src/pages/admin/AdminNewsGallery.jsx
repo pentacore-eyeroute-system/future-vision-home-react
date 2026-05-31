@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
-import { galleryApi } from '../../api/galleryApi'
+import { getAllGalleries, createGallery, updateGallery, temporaryDeleteGallery } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
@@ -30,30 +30,39 @@ function AdminNewsGallery() {
 
   const fetchData = async () => {
     setLoading(true)
-    const news = await adminApi.getNews()
-    const gallery = await galleryApi.getGalleries().catch(async () => ({
-      result: await adminApi.getGallery(),
-    }))
+    try {
+      const news = await adminApi.getNews()
+      
+      const galleryResponse = await getAllGalleries().catch(async () => ({
+        data: { result: await adminApi.getGallery() }
+      }))
+      
+      const galleryData = galleryResponse.data.result || []
+      const activeGalleryItems = galleryData.filter(item => !item.gal_is_temporarily_deleted)
 
-    const combined = [
-      ...news.map((item) => ({
-        ...item,
-        type: 'news',
-        displayTitle: item.news_title,
-        displayDate: item.news_date,
-        images: normalizeImageList(item.news_images || item.news_pic_path),
-      })),
-      ...gallery.result.map((item) => ({
-        ...item,
-        type: 'gallery',
-        displayTitle: item.gal_title,
-        displayDate: normalizeDate(item.gal_date),
-        images: normalizeImageList(item.galleryPictures || item.gal_images || item.gal_pic_path),
-      })),
-    ]
+      const combined = [
+        ...news.map((item) => ({
+          ...item,
+          type: 'news',
+          displayTitle: item.news_title,
+          displayDate: item.news_date,
+          images: normalizeImageList(item.news_images || item.news_pic_path),
+        })),
+        ...activeGalleryItems.map((item) => ({
+          ...item,
+          type: 'gallery',
+          displayTitle: item.gal_title,
+          displayDate: normalizeDate(item.gal_date),
+          images: normalizeImageList(item.galleryPictures || item.gal_images || item.gal_pic_path),
+        })),
+      ]
 
-    setData(combined)
-    setLoading(false)
+      setData(combined)
+    } catch (error) {
+      console.error("Failed fetching gallery/news items:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const columns = [
@@ -103,9 +112,11 @@ function AdminNewsGallery() {
     if (deleteTarget.type === 'news') {
       await adminApi.deleteNews(deleteTarget.id)
     } else {
-      let isTemporarilyDeleted = !deleteTarget.is_temporarily_deleted;
-
-      await galleryApi.temporaryDeleteGallery(deleteTarget.id, { isTemporarilyDeleted: isTemporarilyDeleted});
+      try {
+        await temporaryDeleteGallery(deleteTarget.id)
+      } catch (error) {
+        console.error("Error setting temporary delete status for gallery:", error)
+      }
     }
     setDeleteTarget(null)
     fetchData()
@@ -152,20 +163,38 @@ function AdminNewsGallery() {
           news_images: formData.images,
         })
       } else {
-        const existingGalleryPicturesIds = formData.images.map(image => image.id);
-
-        const fd = new FormData();
-
-        fd.append('title', formData.title);
-        fd.append('description', formData.description);
-        fd.append('date', formData.date);
-        fd.append('existingGalleryPicturesIds', JSON.stringify(existingGalleryPicturesIds));
-
-        formData.images.forEach(image => {
-          fd.append('images', image.file);
-        });
+        const fd = new FormData()
         
-        await galleryApi.updateGallery(editingItem.id, fd);
+        fd.append('title', formData.title || '')
+        fd.append('gal_title', formData.title || '')
+        
+        fd.append('description', formData.description || '')
+        fd.append('gal_description', formData.description || '')
+        
+        fd.append('date', formData.date || '')
+        fd.append('gal_date', formData.date || '')
+
+        const existingGalleryPicturesIds = formData.images
+          .filter(image => !image.file && typeof image.id === 'number')
+          .map(image => image.id)
+        fd.append('existingGalleryPicturesIds', JSON.stringify(existingGalleryPicturesIds))
+
+        const newFiles = formData.images.filter(image => image.file).map(image => image.file)
+
+        if (newFiles.length > 0) {
+          newFiles.forEach(file => {
+            fd.append('images', file)
+          })
+        } else if (formData.images.length > 0) {
+          const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
+          fd.append('existingImage', existingImgUrl)
+        }
+
+        try {
+          await updateGallery(editingItem.id, fd)
+        } catch (error) {
+          console.error("Error updating gallery entry:", error)
+        }
       }
     } else if (formData.type === 'news') {
       await adminApi.createNews({
@@ -175,17 +204,29 @@ function AdminNewsGallery() {
         news_images: formData.images,
       })
     } else {
-      const fd = new FormData();
+      const fd = new FormData()
 
-      fd.append('title', formData.title);
-      fd.append('description', formData.description);
-      fd.append('date', formData.date);
+      fd.append('title', formData.title || '')
+      fd.append('gal_title', formData.title || '')
+      
+      fd.append('description', formData.description || '')
+      fd.append('gal_description', formData.description || '')
+      
+      fd.append('date', formData.date || '')
+      fd.append('gal_date', formData.date || '')
 
-      formData.images.forEach(image => {
-        fd.append('images', image.file);
-      });
+      const newFiles = formData.images.filter(image => image.file).map(image => image.file)
+      if (newFiles.length > 0) {
+        newFiles.forEach(file => {
+          fd.append('images', file)
+        })
+      }
 
-      await galleryApi.createGallery(fd);
+      try {
+        await createGallery(fd)
+      } catch (error) {
+        console.error("Error creating gallery entry:", error)
+      }
     }
 
     setModalOpen(false)
