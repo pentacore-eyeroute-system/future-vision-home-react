@@ -116,7 +116,8 @@ function EyeRoute() {
           return;
         }
 
-        setFeedbacks(reviews);
+        const normalized = reviews.map(normalizeReview);
+        setFeedbacks(normalized);
         setLoadNotice("");
       })
       .catch(() => {
@@ -159,17 +160,27 @@ function EyeRoute() {
     setSubmitMessage("");
 
     try {
-      const createdReview = await reviewApi.submitReview(session, formData);
-      setFeedbacks((currentFeedbacks) => [createdReview, ...currentFeedbacks]);
+      // Constructs payload properties matching the backend schema expectation
+      const payload = {
+        rating: formData.rating,
+        feedback: formData.comment,
+      };
+
+      const rawReview = await reviewApi.submitReview(session, payload);
+      const normalized = {
+        ...normalizeReview(rawReview),
+        name: user?.name || 'Anonymous User',
+        picture: user?.picture || '',
+        email: user?.email || '',
+        userId: user?.id || null,
+      };
+
+      setFeedbacks((currentFeedbacks) => [normalized, ...currentFeedbacks]);
       setFormData(emptyForm);
-      setSubmitMessage(
-        "Thanks. Your review was submitted through your authenticated session.",
-      );
+      setSubmitMessage("Thanks! Your review was successfully published.");
     } catch (error) {
       setSubmitError(
-        error instanceof Error
-          ? error.message
-          : "Unable to submit your review right now.",
+        error instanceof Error ? error.message : "Unable to submit your review right now."
       );
     } finally {
       setIsSubmitting(false);
@@ -204,19 +215,31 @@ function EyeRoute() {
     setReviewActionError("");
 
     try {
-      const updatedReview = await reviewApi.updateReview(session, reviewId, editForm);
+      // Since /add-review is dual-purpose, pass the current rating/feedback context 
+      const payload = {
+        rating: editForm.rating,
+        feedback: editForm.comment,
+      };
+
+      const rawUpdated = await reviewApi.submitReview(session, payload);
+      const normalizedUpdated = {
+        ...normalizeReview(rawUpdated),
+        name: user?.name || 'Anonymous User',
+        picture: user?.picture || '',
+        email: user?.email || '',
+        userId: user?.id || null,
+      };
+
       setFeedbacks((currentFeedbacks) =>
         currentFeedbacks.map((feedback) =>
-          feedback.id === reviewId ? updatedReview : feedback,
-        ),
+          feedback.id === reviewId ? normalizedUpdated : feedback
+        )
       );
       handleCancelEdit();
-      setSubmitMessage("Your review was updated.");
+      setSubmitMessage("Your review was successfully updated.");
     } catch (error) {
       setReviewActionError(
-        error instanceof Error
-          ? error.message
-          : "Unable to update your review right now.",
+        error instanceof Error ? error.message : "Unable to update your review right now."
       );
     } finally {
       setUpdatingReviewId(null);
@@ -230,10 +253,7 @@ function EyeRoute() {
     }
 
     const shouldDelete = window.confirm("Delete this review? This action cannot be undone.");
-
-    if (!shouldDelete) {
-      return;
-    }
+    if (!shouldDelete) return;
 
     setOpenMenuReviewId(null);
     setDeletingReviewId(reviewId);
@@ -241,18 +261,19 @@ function EyeRoute() {
 
     try {
       await reviewApi.deleteReview(session, reviewId);
+      
+      // Filter out deleted feedback row items dynamically from UI state arrays
       setFeedbacks((currentFeedbacks) =>
-        currentFeedbacks.filter((feedback) => feedback.id !== reviewId),
+        currentFeedbacks.filter((feedback) => feedback.id !== reviewId)
       );
+      
       if (editingReviewId === reviewId) {
         handleCancelEdit();
       }
-      setSubmitMessage("Your review was deleted.");
+      setSubmitMessage("Your review has been successfully removed.");
     } catch (error) {
       setReviewActionError(
-        error instanceof Error
-          ? error.message
-          : "Unable to delete your review right now.",
+        error instanceof Error ? error.message : "Unable to delete your review right now."
       );
     } finally {
       setDeletingReviewId(null);

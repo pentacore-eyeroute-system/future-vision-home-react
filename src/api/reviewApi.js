@@ -1,142 +1,137 @@
-import { reviewAuthConfig } from '../config/reviewAuthConfig'
-import { buildApiUrl } from '../config/apiUrlConfig';
+import axios from 'axios';
+import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
+import { reviewAuthConfig } from '../config/reviewAuthConfig';
 
-const request = async (endpoint, { method = 'GET', body, token } = {}) => {
-  const response = await fetch(reviewAuthConfig.buildApiUrl(endpoint), {
-    method,
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  })
-
-  const contentType = response.headers.get('content-type') || ''
-  const payload = contentType.includes('application/json')
-    ? await response.json().catch(() => null)
-    : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-  if (!response.ok) {
-    throw new Error(payload?.message || `Request failed with status ${response.status}.`)
+const getReviewBaseUrl = () => {
+  const base = VITE_API_BASE_URL || 'http://localhost:3001/fvh/api';
+  if (base.endsWith('/fvh/api')) {
+    return base.replace('/fvh/api', '/api/reviews');
   }
+  if (base.endsWith('/fvh/api/')) {
+    return base.replace('/fvh/api/', '/api/reviews');
+  }
+  return `${base}/reviews`;
+};
 
-  return payload
-}
+const API = axios.create({
+  baseURL: getReviewBaseUrl(),
+});
 
 const normalizeUser = (source = {}) => ({
   id: source.id ?? source.userId ?? source.sub ?? source.googleId ?? source.email ?? 'google-user',
   name: source.name ?? source.fullName ?? source.displayName ?? source.email ?? 'Google User',
   email: source.email ?? '',
   picture: source.picture ?? source.avatarUrl ?? source.imageUrl ?? '',
-})
+});
 
 const normalizeSession = (payload) => {
   const userSource =
     payload?.user ??
     payload?.profile ??
-    (payload?.fullname || payload?.email ? payload : null)
+    (payload?.fullname || payload?.email ? payload : null);
 
   if (!userSource) {
-    throw new Error('Your backend must return the signed-in user profile.')
+    throw new Error('Your backend must return the signed-in user profile.');
   }
 
-  const user = normalizeUser(userSource)
+  const user = normalizeUser(userSource);
 
   return {
     token: payload?.token ?? payload?.sessionToken ?? payload?.accessToken ?? null,
     user,
-  }
-}
-
-export const normalizeReview = (review = {}, fallbackUser = null) => {
-  const author = review.user ?? review.author ?? fallbackUser ?? {}
-  const reviewer = normalizeUser(author)
-
-  return {
-    id: review.id ?? review.reviewId ?? review.review_id ?? `${reviewer.id}-${review.createdAt ?? review.date ?? Date.now()}`,
-    userId: reviewer.id,
-    email: reviewer.email,
-    name: reviewer.name,
-    picture: reviewer.picture,
-    rating: Number(review.rating ?? review.stars ?? 5),
-    comment: review.comment ?? review.review ?? review.message ?? '',
-    date: review.createdAt ?? review.created_at ?? review.date ?? new Date().toISOString(),
-  }
-}
+  };
+};
 
 export const reviewApi = {
   canRestoreSession: () => Boolean(reviewAuthConfig.endpoints.authSession),
 
   authenticateWithGoogle: async (googleIdToken) => {
-    const payload = await request('/reviewer-auth/login', {
-      method: 'POST',
-      body: { googleIdToken },
-    })
+    const response = await axios.post(`${VITE_API_BASE_URL}/reviewer-auth/login`, { googleIdToken });
+    const payload = response.data;
 
-    localStorage.setItem('token', payload.result.user.token);
+    // Save token if returned in response
+    const token = payload.result?.token || payload.result?.user?.token;
+    if (token) {
+      localStorage.setItem('token', token);
+    }
 
-    return normalizeSession(payload.result.user)
+    return normalizeSession(payload.result?.user || payload.result || {});
   },
 
   getCurrentSession: async () => {
     if (!reviewAuthConfig.endpoints.authSession) {
-      return null
+      return null;
     }
 
-    const payload = await request(reviewAuthConfig.endpoints.authSession)
-    return payload ? normalizeSession(payload) : null
+    const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession));
+    const payload = response.data;
+    return payload ? normalizeSession(payload) : null;
   },
-
-  // signOut: async (session) => {
-  //   if (!reviewAuthConfig.endpoints.signOut) {
-  //     return
-  //   }
-
-  //   await request(reviewAuthConfig.endpoints.signOut, {
-  //     method: 'POST',
-  //     token: session?.token,
-  //   })
-  // },
 
   getReviews: async () => {
-    const payload = await request('')
-    const reviews = Array.isArray(payload) ? payload : payload?.reviews ?? payload?.data ?? []
-
-    return reviews.map((review) => normalizeReview(review))
+    const response = await API.get('/get-reviews');
+    return response.data.result || response.data || [];
   },
 
-  submitReview: async (session, review) => {
-    const payload = await request('', {
-      method: 'POST',
-      token: session?.token,
-      body: review,
-    })
-
-    return normalizeReview(
-      payload ?? {
-        ...review,
-        createdAt: new Date().toISOString(),
-      },
-      session?.user,
-    )
+  submitReview: async (session, formData) => {
+    const token = typeof session === 'object' && session !== null ? session.token : session;
+    const response = await API.post('/add-review', formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.result || response.data;
   },
 
-  updateReview: async (session, reviewId, review) => {
-    const payload = await request(`/${reviewId}`, {
-      method: 'PATCH',
-      token: session?.token,
-      body: review,
-    })
-
-    return normalizeReview(payload ?? review, session?.user)
+  deleteReview: async (session, id) => {
+    const token = typeof session === 'object' && session !== null ? session.token : session;
+    const response = await API.put(`/soft-delete-review/${id}`, {}, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
   },
+};
 
-  deleteReview: async (session, reviewId) => {
-    await request(`/${reviewId}`, {
-      method: 'DELETE',
-      token: session?.token,
-    })
-  },
-}
+export const normalizeReview = (item) => {
+  if (!item) return null;
+
+  // Shape 1: { user, review }
+  if (item.review && typeof item.review === 'object') {
+    const userEmail = item.user?.usr_email || '';
+    const fallbackName = userEmail ? userEmail.split('@')[0] : 'Anonymous User';
+    return {
+      id: item.review.id,
+      name: item.user?.usr_fullname || item.user?.name || fallbackName,
+      picture: item.user?.usr_pic_url || item.user?.picture || '',
+      rating: Number(item.review.rev_rating || 5),
+      comment: item.review.rev_feedback || '',
+      date: item.review.rev_date || null,
+      userId: item.user?.id || null,
+      email: userEmail,
+    };
+  }
+
+  // Shape 2: { id, rev_linked_reviewer_id, rev_rating, rev_feedback, ... }
+  if (item.rev_linked_reviewer_id !== undefined || item.rev_rating !== undefined) {
+    return {
+      id: item.id,
+      name: item.name || 'Anonymous User',
+      picture: item.picture || '',
+      rating: Number(item.rev_rating || 5),
+      comment: item.rev_feedback || '',
+      date: item.createdAt || item.updatedAt || null,
+      userId: item.rev_linked_reviewer_id || null,
+      email: item.email || '',
+    };
+  }
+
+  // Shape 3: original normalized shape
+  return {
+    id: item.id,
+    name: item.name || 'Anonymous User',
+    picture: item.picture || '',
+    rating: Number(item.rating || 5),
+    comment: item.comment || '',
+    date: item.date || null,
+    userId: item.userId || null,
+    email: item.email || '',
+  };
+};
