@@ -388,6 +388,11 @@ function NewsCard({ article }) {
       </div>
       <div className="news-content">
         <h2 className="news-article-title">{article.news_title}</h2>
+        {article.news_date && (
+          <p className="news-date">
+            {new Date(article.news_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+        )}
         <p className="news-article-excerpt">{getPlainText(article.news_description)}</p>
         <Link to={`/news/${article.news_slug}`} className="news-read-more">
           Read More

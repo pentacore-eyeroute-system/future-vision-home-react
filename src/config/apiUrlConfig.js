@@ -1,7 +1,7 @@
 const trim = (value) => value?.trim() ?? ''
 const trimTrailingSlash = (value) => trim(value).replace(/\/+$/, '')
 
-export const VITE_API_BASE_URL = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL) || 'http://localhost:3001';
+export const VITE_API_BASE_URL = trimTrailingSlash(import.meta.env.VITE_API_BASE_URL) || 'http://localhost:3001/api';
 const apiBaseUrl = VITE_API_BASE_URL;
 
 export const buildApiUrl = (path) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { adminApi } from '../../api/adminApi'
 import { getAllGalleries, createGallery, updateGallery, temporaryDeleteGallery } from '../../api/galleryApi'
+import { getAllNews, createNews, updateNews, temporaryDeleteNews } from '../../api/newsApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
@@ -31,7 +32,9 @@ function AdminNewsGallery() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const news = await adminApi.getNews()
+      const newsResponse = await getAllNews()
+      const newsData = newsResponse.data.result || []
+      const activeNews = newsData.filter(item => !item.news_is_temporarily_deleted)
       
       const galleryResponse = await getAllGalleries().catch(async () => ({
         data: { result: await adminApi.getGallery() }
@@ -41,12 +44,12 @@ function AdminNewsGallery() {
       const activeGalleryItems = galleryData.filter(item => !item.gal_is_temporarily_deleted)
 
       const combined = [
-        ...news.map((item) => ({
+        ...activeNews.map((item) => ({
           ...item,
           type: 'news',
           displayTitle: item.news_title,
-          displayDate: item.news_date,
-          images: normalizeImageList(item.news_images || item.news_pic_path),
+          displayDate: normalizeDate(item.news_date),
+          images: normalizeImageList(item.newsPictures || item.news_images || item.news_pic_path),
         })),
         ...activeGalleryItems.map((item) => ({
           ...item,
@@ -110,7 +113,11 @@ function AdminNewsGallery() {
     if (!deleteTarget) return
 
     if (deleteTarget.type === 'news') {
-      await adminApi.deleteNews(deleteTarget.id)
+      try {
+        await temporaryDeleteNews(deleteTarget.id)
+      } catch (error) {
+        console.error("Error setting temporary delete status for news:", error)
+      }
     } else {
       try {
         await temporaryDeleteGallery(deleteTarget.id)
@@ -156,12 +163,37 @@ function AdminNewsGallery() {
 
     if (editingItem) {
       if (formData.type === 'news') {
-        await adminApi.updateNews(editingItem.id, {
-          news_title: formData.title,
-          news_description: formData.description,
-          news_date: formData.date,
-          news_images: formData.images,
-        })
+        const data = new FormData()
+        data.append('title', formData.title || '')
+        data.append('news_title', formData.title || '')
+        data.append('description', formData.description || '')
+        data.append('news_description', formData.description || '')
+        data.append('date', formData.date || '')
+        data.append('news_date', formData.date || '')
+
+        const existingNewsPicturesIds = formData.images
+          .filter(image => !image.file && image.id !== undefined && image.id !== null)
+          .map(image => image.id)
+        data.append('existingNewsPicturesIds', JSON.stringify(existingNewsPicturesIds))
+
+        const newFiles = formData.images.filter(img => img.file).map(img => img.file)
+        if (newFiles.length > 0) {
+          newFiles.forEach(file => {
+            data.append('images', file)
+          })
+        } else if (formData.images.length > 0) {
+          const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
+          data.append('existingImage', existingImgUrl)
+        }
+
+        try {
+          await updateNews(editingItem.id, data)
+        } catch (error) {
+          console.error("Error updating news article:", error)
+          if (error.response) {
+            console.error("Backend error details:", error.response.data)
+          }
+        }
       } else {
         const fd = new FormData()
         
@@ -197,12 +229,29 @@ function AdminNewsGallery() {
         }
       }
     } else if (formData.type === 'news') {
-      await adminApi.createNews({
-        news_title: formData.title,
-        news_description: formData.description,
-        news_date: formData.date,
-        news_images: formData.images,
-      })
+      const data = new FormData()
+      data.append('title', formData.title || '')
+      data.append('news_title', formData.title || '')
+      data.append('description', formData.description || '')
+      data.append('news_description', formData.description || '')
+      data.append('date', formData.date || '')
+      data.append('news_date', formData.date || '')
+
+      const newFiles = formData.images.filter(img => img.file).map(img => img.file)
+      if (newFiles.length > 0) {
+        newFiles.forEach(file => {
+          data.append('images', file)
+        })
+      }
+
+      try {
+        await createNews(data)
+      } catch (error) {
+        console.error("Error creating news article:", error)
+        if (error.response) {
+          console.error("Backend error details:", error.response.data)
+        }
+      }
     } else {
       const fd = new FormData()
 
@@ -234,7 +283,9 @@ function AdminNewsGallery() {
   }
 
   const normalizeDate = (date) => {
-    return new Date(date).toLocaleDateString('en-CA');
+    if (!date) return ''
+    const d = new Date(date)
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-CA')
   };
 
   return (

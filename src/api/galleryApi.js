@@ -15,8 +15,8 @@ API.interceptors.request.use((config) => {
 });
 
 export const getAllGalleries = () => API.get('/get-all-galleries');
-export const createGallery = (formData) => API.post('/create-gallery', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-export const updateGallery = (id, formData) => API.patch(`/update-gallery-info/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const createGallery = (formData) => API.post('/create-gallery', formData);
+export const updateGallery = (id, formData) => API.patch(`/update-gallery-info/${id}`, formData);
 export const temporaryDeleteGallery = (id) => API.patch(`/temporary-delete-gallery/${id}`, { isTemporarilyDeleted: true });
 export const permanentDeleteGallery = (id) => API.put(`/soft-delete-gallery/${id}`);
 
