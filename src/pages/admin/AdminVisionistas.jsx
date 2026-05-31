@@ -29,7 +29,6 @@ function AdminVisionistas() {
     try {
       const response = await getAllVisionistas()
       const data = response.data.result || []
-      // Filter out items where the backend's temporary deletion flag is active
       const activeItems = data.filter(item => !item.vis_is_temporarily_deleted)
       setVisionistas(activeItems)
     } catch (error) {
