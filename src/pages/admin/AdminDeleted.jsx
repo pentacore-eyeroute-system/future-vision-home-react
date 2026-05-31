@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { galleryApi } from '../../api/galleryApi'
-import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
+import AdminModal from '../../components/admin/AdminModal'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
 
 const FILTERS = [
@@ -27,6 +27,8 @@ function AdminDeleted() {
   const [deletedItems, setDeletedItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('visionista')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [restoreTarget, setRestoreTarget] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -79,17 +81,29 @@ function AdminDeleted() {
   const getFilterCount = (filterKey) => deletedItems.filter((item) => matchesFilter(item, filterKey)).length
 
   const handleRestore = async (item) => {
-    let isTemporarilyDeleted = !item.item.gal_is_temporarily_deleted;
+    setRestoreTarget(item)
+  }
+
+  const confirmRestore = async () => {
+    if (!restoreTarget) return
+
+    let isTemporarilyDeleted = !restoreTarget.item.gal_is_temporarily_deleted;
     
-    await galleryApi.temporaryDeleteGallery(item.id, { isTemporarilyDeleted: isTemporarilyDeleted});
+    await galleryApi.temporaryDeleteGallery(restoreTarget.id, { isTemporarilyDeleted: isTemporarilyDeleted});
+    setRestoreTarget(null)
     fetchData()
   }
 
   const handleDeletePermanent = async (item) => {
-    if (window.confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
-      await galleryApi.permanentDeleteGallery(item.id);
-      fetchData()
-    }
+    setDeleteTarget(item)
+  }
+
+  const confirmPermanentDelete = async () => {
+    if (!deleteTarget) return
+
+    await galleryApi.permanentDeleteGallery(deleteTarget.id);
+    setDeleteTarget(null)
+    fetchData()
   }
 
   return (
@@ -121,6 +135,50 @@ function AdminDeleted() {
         isLoading={loading}
         emptyMessage="No deleted records in this section."
       />
+
+      <AdminModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete item permanently?"
+      >
+        <div className="delete-confirmation">
+          <div className="delete-confirmation-body">
+            <p>
+              This will permanently delete <strong>{deleteTarget?.displayTitle}</strong>. This action cannot be undone.
+            </p>
+          </div>
+          <div className="delete-confirmation-footer">
+            <button type="button" className="delete-cancel-btn" onClick={() => setDeleteTarget(null)}>
+              Cancel
+            </button>
+            <button type="button" className="delete-confirm-btn" onClick={confirmPermanentDelete}>
+              Delete Permanently
+            </button>
+          </div>
+        </div>
+      </AdminModal>
+
+      <AdminModal
+        isOpen={!!restoreTarget}
+        onClose={() => setRestoreTarget(null)}
+        title="Restore item?"
+      >
+        <div className="delete-confirmation restore-confirmation">
+          <div className="delete-confirmation-body">
+            <p>
+              This will restore <strong>{restoreTarget?.displayTitle}</strong> and make it available again.
+            </p>
+          </div>
+          <div className="delete-confirmation-footer">
+            <button type="button" className="delete-cancel-btn" onClick={() => setRestoreTarget(null)}>
+              Cancel
+            </button>
+            <button type="button" className="restore-confirm-btn" onClick={confirmRestore}>
+              Restore
+            </button>
+          </div>
+        </div>
+      </AdminModal>
     </div>
   )
 }
