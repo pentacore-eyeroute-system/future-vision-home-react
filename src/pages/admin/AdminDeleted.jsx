@@ -62,6 +62,20 @@ function AdminDeleted() {
     setLoading(false)
   }
 
+  const restoreMap = {
+    visionista: recentlyDeletedApi.restoreDeletedVisionista,
+    news: recentlyDeletedApi.restoreDeletedNews,
+    gallery: recentlyDeletedApi.restoreDeletedGallery,
+    partner: recentlyDeletedApi.restoreDeletedPartner,
+  };
+
+  const deleteMap = {
+    visionista: recentlyDeletedApi.permanentDeleteVisionista,
+    news: recentlyDeletedApi.permanentDeleteNews,
+    gallery: recentlyDeletedApi.permanentDeleteGallery,
+    partner: recentlyDeletedApi.permanentDeletePartner,
+  }
+
   const normalizeDate = (date) => {
     return new Date(date).toLocaleDateString('en-CA');
   };
@@ -87,9 +101,14 @@ function AdminDeleted() {
   const confirmRestore = async () => {
     if (!restoreTarget) return
 
-    let isTemporarilyDeleted = !restoreTarget.item.gal_is_temporarily_deleted;
-    
-    await galleryApi.temporaryDeleteGallery(restoreTarget.id, { isTemporarilyDeleted: isTemporarilyDeleted});
+    const fn = restoreMap[restoreTarget.type]
+
+    if (!fn) return
+
+    await fn(restoreTarget.id, {
+      isTemporarilyDeleted: false
+    })
+
     setRestoreTarget(null)
     fetchData()
   }
@@ -101,7 +120,12 @@ function AdminDeleted() {
   const confirmPermanentDelete = async () => {
     if (!deleteTarget) return
 
-    await galleryApi.permanentDeleteGallery(deleteTarget.id);
+    const fn = deleteMap[deleteTarget.type]
+
+    if (!fn) return
+
+    await fn(deleteTarget.id)
+
     setDeleteTarget(null)
     fetchData()
   }
