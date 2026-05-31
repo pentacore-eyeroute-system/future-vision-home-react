@@ -26,6 +26,17 @@ const emptyForm = {
   comment: "",
 };
 
+const canManageReview = (feedback, user) => {
+  if (!feedback || !user) {
+    return false;
+  }
+
+  return (
+    (feedback.userId && feedback.userId === user.id) ||
+    (feedback.email && feedback.email === user.email)
+  );
+};
+
 const formatReviewDate = (value) => {
   if (!value) {
     return "Just now";
@@ -77,6 +88,12 @@ function EyeRoute() {
   const [loadNotice, setLoadNotice] = useState("");
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editForm, setEditForm] = useState(emptyForm);
+  const [reviewActionError, setReviewActionError] = useState("");
+  const [updatingReviewId, setUpdatingReviewId] = useState(null);
+  const [deletingReviewId, setDeletingReviewId] = useState(null);
+  const [openMenuReviewId, setOpenMenuReviewId] = useState(null);
 
   const {
     error: authError,
@@ -104,9 +121,7 @@ function EyeRoute() {
       })
       .catch(() => {
         if (isActive) {
-          setLoadNotice(
-            "Showing preview reviews until your AWS review endpoint is connected.",
-          );
+          setLoadNotice("");
         }
       });
 
@@ -114,6 +129,22 @@ function EyeRoute() {
       isActive = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!openMenuReviewId) {
+      return;
+    }
+
+    const handleOutsideClick = () => {
+      setOpenMenuReviewId(null);
+    };
+
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [openMenuReviewId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -142,6 +173,89 @@ function EyeRoute() {
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleStartEdit = (feedback) => {
+    setReviewActionError("");
+    setOpenMenuReviewId(null);
+    setEditingReviewId(feedback.id);
+    setEditForm({
+      rating: feedback.rating,
+      comment: feedback.comment,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setEditForm(emptyForm);
+    setReviewActionError("");
+  };
+
+  const handleUpdateReview = async (event, reviewId) => {
+    event.preventDefault();
+
+    if (!session) {
+      setReviewActionError("Sign in again before updating your review.");
+      return;
+    }
+
+    setUpdatingReviewId(reviewId);
+    setReviewActionError("");
+
+    try {
+      const updatedReview = await reviewApi.updateReview(session, reviewId, editForm);
+      setFeedbacks((currentFeedbacks) =>
+        currentFeedbacks.map((feedback) =>
+          feedback.id === reviewId ? updatedReview : feedback,
+        ),
+      );
+      handleCancelEdit();
+      setSubmitMessage("Your review was updated.");
+    } catch (error) {
+      setReviewActionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to update your review right now.",
+      );
+    } finally {
+      setUpdatingReviewId(null);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!session) {
+      setReviewActionError("Sign in again before deleting your review.");
+      return;
+    }
+
+    const shouldDelete = window.confirm("Delete this review? This action cannot be undone.");
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setOpenMenuReviewId(null);
+    setDeletingReviewId(reviewId);
+    setReviewActionError("");
+
+    try {
+      await reviewApi.deleteReview(session, reviewId);
+      setFeedbacks((currentFeedbacks) =>
+        currentFeedbacks.filter((feedback) => feedback.id !== reviewId),
+      );
+      if (editingReviewId === reviewId) {
+        handleCancelEdit();
+      }
+      setSubmitMessage("Your review was deleted.");
+    } catch (error) {
+      setReviewActionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete your review right now.",
+      );
+    } finally {
+      setDeletingReviewId(null);
     }
   };
 
@@ -272,29 +386,21 @@ function EyeRoute() {
           </div>
 
           <div className="feedback-container">
-            <div className="feedback-form-wrapper">
-              <h3>Share Your Experience</h3>
+            <div className={`feedback-form-wrapper${!isAuthenticated ? " feedback-form-wrapper-compact" : ""}`}>
               <p className="feedback-helper-text">
-                Reviews are tied to a Google-verified account before they are
-                sent to your backend.
+                Sign in with Google to leave a review.
               </p>
 
               {!hasGoogleClientId && (
                 <div className="feedback-auth-card">
                   <p className="feedback-auth-copy">
-                    Add `VITE_GOOGLE_CLIENT_ID` to your frontend env file first.
-                    The Google client secret should stay in your backend only.
+                    Google sign-in is not available right now. Please try again later.
                   </p>
                 </div>
               )}
 
               {hasGoogleClientId && !isAuthenticated && (
                 <div className="feedback-auth-card">
-                  <p className="feedback-auth-copy">
-                    Sign in with Google, let the frontend send the Google ID
-                    token to AWS, and wait for your backend to return your own
-                    app session before posting a review.
-                  </p>
                   <GoogleSignInButton />
                   {isRestoringSession && (
                     <p className="feedback-status">
@@ -303,8 +409,7 @@ function EyeRoute() {
                   )}
                   {isAuthenticating && (
                     <p className="feedback-status">
-                      Finishing sign-in and exchanging your Google token with
-                      AWS...
+                      Finishing sign-in...
                     </p>
                   )}
                 </div>
@@ -322,7 +427,7 @@ function EyeRoute() {
 
                       <div>
                         <p className="feedback-user-name">{user?.name}</p>
-                        {user?.email && (
+                        {user?.email && user.email !== user?.name && (
                           <p className="feedback-user-email">{user.email}</p>
                         )}
                       </div>
@@ -397,6 +502,11 @@ function EyeRoute() {
                   {submitError}
                 </p>
               )}
+              {reviewActionError && (
+                <p className="feedback-status feedback-status-error">
+                  {reviewActionError}
+                </p>
+              )}
               {submitMessage && (
                 <p className="feedback-status feedback-status-success">
                   {submitMessage}
@@ -426,15 +536,114 @@ function EyeRoute() {
                       />
                       <span className="feedback-name">{feedback.name}</span>
                     </div>
-                    <span className="feedback-date">
-                      {formatReviewDate(feedback.date)}
-                    </span>
+                    <div className="feedback-meta-actions">
+                      <span className="feedback-date">
+                        {formatReviewDate(feedback.date)}
+                      </span>
+                      {canManageReview(feedback, user) && editingReviewId !== feedback.id && (
+                        <div className="feedback-overflow" onClick={(event) => event.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="feedback-overflow-btn"
+                            aria-label="Review actions"
+                            aria-haspopup="menu"
+                            aria-expanded={openMenuReviewId === feedback.id}
+                            onClick={() =>
+                              setOpenMenuReviewId((currentId) =>
+                                currentId === feedback.id ? null : feedback.id,
+                              )
+                            }
+                          >
+                            <span aria-hidden="true">...</span>
+                          </button>
+                          {openMenuReviewId === feedback.id && (
+                            <div className="feedback-overflow-menu" role="menu">
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className="feedback-overflow-item"
+                                onClick={() => handleStartEdit(feedback)}
+                              >
+                                Edit Review
+                              </button>
+                              <button
+                                type="button"
+                                role="menuitem"
+                                className="feedback-overflow-item feedback-overflow-danger"
+                                disabled={deletingReviewId === feedback.id}
+                                onClick={() => handleDeleteReview(feedback.id)}
+                              >
+                                {deletingReviewId === feedback.id ? "Deleting..." : "Delete Review"}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="feedback-rating">
                     {"★".repeat(feedback.rating)}
                     {"☆".repeat(5 - feedback.rating)}
                   </div>
-                  <p className="feedback-comment">{feedback.comment}</p>
+                  <p className={`feedback-comment${editingReviewId === feedback.id ? " feedback-comment-editing" : ""}`}>
+                    {feedback.comment}
+                  </p>
+                  {editingReviewId === feedback.id && (
+                    <form
+                      className="feedback-edit-form"
+                      onSubmit={(event) => handleUpdateReview(event, feedback.id)}
+                    >
+                      <label htmlFor={`edit-rating-${feedback.id}`}>Rating</label>
+                      <select
+                        id={`edit-rating-${feedback.id}`}
+                        value={editForm.rating}
+                        onChange={(event) =>
+                          setEditForm((currentForm) => ({
+                            ...currentForm,
+                            rating: parseInt(event.target.value, 10),
+                          }))
+                        }
+                      >
+                        <option value="5">5 Stars - Excellent</option>
+                        <option value="4">4 Stars - Very Good</option>
+                        <option value="3">3 Stars - Good</option>
+                        <option value="2">2 Stars - Fair</option>
+                        <option value="1">1 Star - Poor</option>
+                      </select>
+
+                      <label htmlFor={`edit-comment-${feedback.id}`}>Review</label>
+                      <textarea
+                        id={`edit-comment-${feedback.id}`}
+                        required
+                        rows="4"
+                        maxLength="500"
+                        value={editForm.comment}
+                        onChange={(event) =>
+                          setEditForm((currentForm) => ({
+                            ...currentForm,
+                            comment: event.target.value,
+                          }))
+                        }
+                      ></textarea>
+
+                      <div className="feedback-edit-actions">
+                        <button
+                          type="submit"
+                          className="feedback-action-btn feedback-action-primary"
+                          disabled={updatingReviewId === feedback.id}
+                        >
+                          {updatingReviewId === feedback.id ? "Updating..." : "Update Review"}
+                        </button>
+                        <button
+                          type="button"
+                          className="feedback-action-btn"
+                          onClick={handleCancelEdit}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               ))}
             </div>

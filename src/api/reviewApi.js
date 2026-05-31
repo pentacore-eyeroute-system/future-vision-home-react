@@ -56,6 +56,8 @@ export const normalizeReview = (review = {}, fallbackUser = null) => {
 
   return {
     id: review.id ?? review.reviewId ?? review.review_id ?? `${reviewer.id}-${review.createdAt ?? review.date ?? Date.now()}`,
+    userId: reviewer.id,
+    email: reviewer.email,
     name: reviewer.name,
     picture: reviewer.picture,
     rating: Number(review.rating ?? review.stars ?? 5),
@@ -119,5 +121,22 @@ export const reviewApi = {
       },
       session?.user,
     )
+  },
+
+  updateReview: async (session, reviewId, review) => {
+    const payload = await request(`/${reviewId}`, {
+      method: 'PATCH',
+      token: session?.token,
+      body: review,
+    })
+
+    return normalizeReview(payload ?? review, session?.user)
+  },
+
+  deleteReview: async (session, reviewId) => {
+    await request(`/${reviewId}`, {
+      method: 'DELETE',
+      token: session?.token,
+    })
   },
 }
