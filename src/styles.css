@@ -4856,6 +4856,12 @@ html[data-theme="dark"] .theme-switch-icon {
     color: var(--text-secondary);
 }
 
+.admin-upload-error {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: #dc2626;
+}
+
 .admin-upload-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));

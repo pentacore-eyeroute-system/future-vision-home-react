@@ -5,15 +5,18 @@ function AdminImageUploadField({
   onFilesSelected,
   onRemoveImage,
   helperText,
+  errorText,
   multiple = true,
+  required = false,
 }) {
   return (
     <div className="form-group">
       <label htmlFor={inputId}>{label}</label>
-      <input id={inputId} type="file" accept="image/*" multiple={multiple} onChange={onFilesSelected} />
+      <input id={inputId} type="file" accept="image/*" multiple={multiple} required={required} onChange={onFilesSelected} />
       <p className="admin-upload-helper">
         {helperText || 'Upload one or more images instead of typing a file path.'}
       </p>
+      {errorText && <p className="admin-upload-error">{errorText}</p>}
 
       {images.length > 0 && (
         <div className="admin-upload-preview-grid">

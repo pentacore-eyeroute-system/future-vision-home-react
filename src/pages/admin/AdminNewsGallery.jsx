@@ -14,6 +14,8 @@ function AdminNewsGallery() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [imageError, setImageError] = useState('')
+  const [descriptionError, setDescriptionError] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -71,12 +73,16 @@ function AdminNewsGallery() {
 
   const handleOpenAdd = () => {
     setEditingItem(null)
+    setImageError('')
+    setDescriptionError('')
     setFormData({ title: '', description: '', date: '', type: 'news', images: [] })
     setModalOpen(true)
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
+    setImageError('')
+    setDescriptionError('')
     setFormData({
       title: item.displayTitle,
       description: item.news_description || item.gal_description || '',
@@ -112,6 +118,7 @@ function AdminNewsGallery() {
       ...current,
       images: [...current.images, ...nextImages],
     }))
+    setImageError('')
 
     event.target.value = ''
   }
@@ -125,6 +132,16 @@ function AdminNewsGallery() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    if (formData.type === 'news' && !formData.description.trim()) {
+      setDescriptionError('Please add a description for news posts.')
+      return
+    }
+
+    if (formData.type === 'gallery' && formData.images.length === 0) {
+      setImageError('Please upload at least one photo for gallery posts.')
+      return
+    }
 
     if (editingItem) {
       if (formData.type === 'news') {
@@ -228,7 +245,11 @@ function AdminNewsGallery() {
             <select
               value={formData.type}
               disabled={!!editingItem}
-              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, type: e.target.value })
+                setImageError('')
+                setDescriptionError('')
+              }}
             >
               <option value="news">News</option>
               <option value="gallery">Gallery</option>
@@ -246,10 +267,16 @@ function AdminNewsGallery() {
           <div className="form-group">
             <label>Description</label>
             {formData.type === 'news' ? (
-              <RichTextEditor
-                value={formData.description}
-                onChange={(description) => setFormData({ ...formData, description })}
-              />
+              <>
+                <RichTextEditor
+                  value={formData.description}
+                  onChange={(description) => {
+                    setFormData({ ...formData, description })
+                    setDescriptionError('')
+                  }}
+                />
+                {descriptionError && <p className="admin-upload-error">{descriptionError}</p>}
+              </>
             ) : (
               <textarea
                 required
@@ -263,9 +290,11 @@ function AdminNewsGallery() {
             label="Pictures"
             images={formData.images}
             multiple
+            required={formData.type === 'gallery' && formData.images.length === 0}
             onFilesSelected={handleImageUpload}
             onRemoveImage={handleRemoveImage}
-            helperText="Upload multiple images for news posts or gallery entries."
+            errorText={imageError}
+            helperText={formData.type === 'gallery' ? 'Upload at least one image for gallery entries.' : 'Upload multiple images for news posts or gallery entries.'}
           />
           <div className="form-actions">
             <button type="submit" className="btn btn-primary">Save</button>
