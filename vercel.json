@@ -2,15 +2,11 @@
   "rewrites": [
     {
       "source": "/fvh/:path*",
-      "destination": "http://54.151.166.0:3001/fvh/:path*"
+      "destination": "https://54.151.166.0:3001/fvh/:path*"
     },
-    {
-  "rewrites": [
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ] 
-}
   ]
 }
