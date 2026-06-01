@@ -4,8 +4,16 @@ import { reviewAuthConfig } from '../config/reviewAuthConfig';
 
 const API = axios.create({
   baseURL: getReviewBaseUrl(),
+  withCredentials: true,
 });
 
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 const normalizeUser = (source = {}) => ({
   id: source.id ?? source.userId ?? source.sub ?? source.googleId ?? source.email ?? 'google-user',
