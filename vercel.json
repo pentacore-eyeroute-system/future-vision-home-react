@@ -5,8 +5,12 @@
       "destination": "http://54.151.166.0:3001/fvh/:path*"
     },
     {
-      "source": "/((?!fvh/).*)",
+  "rewrites": [
+    {
+      "source": "/(.*)",
       "destination": "/index.html"
     }
+  ] 
+}
   ]
 }
