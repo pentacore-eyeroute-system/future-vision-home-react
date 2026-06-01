@@ -3,7 +3,7 @@ import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
 import { reviewAuthConfig } from '../config/reviewAuthConfig';
 
 const API = axios.create({
-  baseURL: getReviewBaseUrl(),
+  baseURL: `${VITE_API_BASE_URL}/reviews`,
   withCredentials: true,
 });
 
