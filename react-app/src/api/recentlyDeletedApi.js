@@ -3,6 +3,7 @@ import { buildApiUrl } from "../config/apiUrlConfig";
 export const recentlyDeletedApi = {
     getDeletedVisionistas: async () => {
         const token = sessionStorage.getItem('token');
+        console.log("Token from sessionStorage:", token);
 
         const response = await fetch(buildApiUrl('/visionistas/temporary-deleted-visionistas'), {
             method: 'GET',
