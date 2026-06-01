@@ -17,10 +17,12 @@ function Admin() {
     const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
     const expired = Date.now() - loginTime > SESSION_MAX_AGE
     if (isAuthed && !expired) {
-      navigate('/admin')
+      navigate('/admin', { replace: true })
     } else {
+      sessionStorage.removeItem('token')
       sessionStorage.removeItem(SESSION_KEY)
       sessionStorage.removeItem(SESSION_TIME_KEY)
+      localStorage.removeItem('token')
     }
   }, [navigate])
 
@@ -39,7 +41,7 @@ function Admin() {
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
       sessionStorage.setItem('token', data.result.token);
-      navigate('/admin')
+      navigate('/admin', { replace: true })
     } catch (err) {
       if (err?.retryAfter) {
         setError(err.retryAfter);

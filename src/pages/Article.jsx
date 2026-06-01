@@ -119,10 +119,12 @@ const Article = () => {
           </section>
         )}
 
-        <div 
-          className="article-content"
-          dangerouslySetInnerHTML={{ __html: article.news_description }}
-        />
+        <div className="article-content">
+          <div
+            className="article-body tiptap-content"
+            dangerouslySetInnerHTML={{ __html: article.news_description }}
+          />
+        </div>
       </div>
     </div>
   )

@@ -3104,14 +3104,16 @@ html[data-theme="dark"] .theme-switch-icon {
     text-justify: inter-word;
 }
 
+.article-body p:last-child {
+    margin-bottom: 0;
+}
+
 .article-body h2 {
     font-size: 1.75rem;
     font-weight: 800;
     color: var(--primary-color);
     margin: 2.5rem 0 1.25rem;
     font-family: 'Poppins-SemiBold', sans-serif;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 0.5rem;
 }
 
 .article-body h3 {
@@ -3119,6 +3121,44 @@ html[data-theme="dark"] .theme-switch-icon {
     font-weight: 600;
     color: var(--text-primary);
     margin: 1.5rem 0 0.75rem;
+}
+
+.article-body ul,
+.article-body ol,
+.tiptap-content ul,
+.tiptap-content ol {
+    margin: 1rem 0 1.5rem;
+    padding-left: 2rem;
+}
+
+.article-body ul,
+.tiptap-content ul {
+    list-style: disc;
+}
+
+.article-body ol,
+.tiptap-content ol {
+    list-style: decimal;
+}
+
+.article-body li,
+.tiptap-content li {
+    margin-bottom: 0.65rem;
+    line-height: 1.7;
+    font-size: 1.2rem;
+    font-weight: 520;
+}
+
+.article-body li p,
+.tiptap-content li p {
+    margin-bottom: 0.35rem;
+}
+
+.article-body hr,
+.tiptap-content hr {
+    border: 0;
+    border-top: 2px solid var(--border-color);
+    margin: 2rem 0;
 }
 
 .article-list {
