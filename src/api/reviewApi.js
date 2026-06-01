@@ -15,7 +15,15 @@ const getReviewBaseUrl = () => {
 
 const API = axios.create({
   baseURL: getReviewBaseUrl(),
+  withCredentials: true,
+});
 
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 const normalizeUser = (source = {}) => ({
@@ -64,7 +72,10 @@ export const reviewApi = {
       return null;
     }
 
-    const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession));
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession), {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     const payload = response.data;
     return payload ? normalizeSession(payload) : null;
   },
