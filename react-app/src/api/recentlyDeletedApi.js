@@ -2,7 +2,7 @@ import { buildApiUrl } from "../config/apiUrlConfig";
 
 export const recentlyDeletedApi = {
     getDeletedVisionistas: async () => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/visionistas/temporary-deleted-visionistas'), {
             method: 'GET',
@@ -22,7 +22,7 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedNews: async () => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/news/temporary-deleted-news'), {
             method: 'GET',
@@ -42,7 +42,7 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedGalleries : async () => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/gallery/temporary-deleted-galleries'), {
             method: 'GET',
@@ -62,7 +62,7 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedPartners: async () => {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/partners/temporary-deleted-partners'), {
             method: 'GET',
