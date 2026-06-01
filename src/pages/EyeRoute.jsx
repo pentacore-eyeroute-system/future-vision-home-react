@@ -4,6 +4,8 @@ import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
 import { VITE_API_BASE_URL } from "../config/apiUrlConfig";
 
+console.log('TEST')
+
 console.log("VITE_API_BASE_URL =", VITE_API_BASE_URL);
 
 const demoFeedbacks = [
