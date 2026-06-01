@@ -15,7 +15,7 @@ const getReviewBaseUrl = () => {
 
 const API = axios.create({
   baseURL: getReviewBaseUrl(),
-  withCredentials: true,
+
 });
 
 const normalizeUser = (source = {}) => ({
