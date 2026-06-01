@@ -5,11 +5,7 @@
       "destination": "https://54.151.166.0:3001/fvh/:path*"
     },
     {
-      "source": "/admin/:path*",
-      "destination": "/index.html"
-    },
-    {
-      "source": "/((?!fvh/.*).*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
