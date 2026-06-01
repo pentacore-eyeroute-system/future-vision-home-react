@@ -7,7 +7,7 @@ const API = axios.create({
   withCredentials: true,
 });
 
-console.log("API: ", API);
+console.log("API: ", `${VITE_API_BASE_URL}/reviews`);
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
