@@ -4,12 +4,12 @@ import { reviewAuthConfig } from '../config/reviewAuthConfig';
 
 const getReviewBaseUrl = () => {
   const base = VITE_API_BASE_URL || 'http://localhost:3001/fvh/api';
-  if (base.endsWith('/fvh/api')) {
-    return base.replace('/fvh/api', '/api/reviews');
-  }
-  if (base.endsWith('/fvh/api/')) {
-    return base.replace('/fvh/api/', '/api/reviews');
-  }
+  // if (base.endsWith('/fvh/api')) {
+  //   return base.replace('/fvh/api', '/api/reviews');
+  // }
+  // if (base.endsWith('/fvh/api/')) {
+  //   return base.replace('/fvh/api/', '/api/reviews');
+  // }
   return `${base}/reviews`;
 };
 
