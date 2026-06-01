@@ -13,8 +13,8 @@ function Admin() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const isAuthed = sessionStorage.getItem(SESSION_KEY) === 'true'
-    const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
+    const isAuthed = (localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY)) === 'true'
+    const loginTime = parseInt(localStorage.getItem(SESSION_TIME_KEY) || sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
     const expired = Date.now() - loginTime > SESSION_MAX_AGE
     if (isAuthed && !expired) {
       navigate('/admin', { replace: true })
@@ -23,6 +23,8 @@ function Admin() {
       sessionStorage.removeItem(SESSION_KEY)
       sessionStorage.removeItem(SESSION_TIME_KEY)
       localStorage.removeItem('token')
+      localStorage.removeItem(SESSION_KEY)
+      localStorage.removeItem(SESSION_TIME_KEY)
     }
   }, [navigate])
 
@@ -38,6 +40,9 @@ function Admin() {
     try {
       const data = await authApi.loginAdmin({ username, password })
 
+      localStorage.setItem(SESSION_KEY, 'true')
+      localStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
+      localStorage.setItem('token', data.result.token);
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
       sessionStorage.setItem('token', data.result.token);

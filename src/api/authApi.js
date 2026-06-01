@@ -5,7 +5,8 @@ export const authApi = {
         const response = await fetch(buildApiUrl('/auth/login'), {
             method: 'POST',
             headers: { 'Content-Type' : 'application/json' },
-            body: JSON.stringify(credentials)
+            body: JSON.stringify(credentials),
+            credentials: 'include',
         });
 
         const contentType = response.headers.get('content-type') || ''

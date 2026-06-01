@@ -2,12 +2,13 @@ import { buildApiUrl } from "../config/apiUrlConfig";
 
 export const recentlyDeletedApi = {
     getDeletedVisionistas: async () => {
-        const token = sessionStorage.getItem('token');
-        console.log("Token from sessionStorage:", token);
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        console.log("Token from storage:", token);
 
         const response = await fetch(buildApiUrl('/visionistas/temporary-deleted-visionistas'), {
             method: 'GET',
             headers: {'Authorization' : `Bearer ${token}` },
+            credentials: 'include',
         });
 
         const contentType = response.headers.get('content-type') || ''
@@ -23,11 +24,12 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedNews: async () => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/news/temporary-deleted-news'), {
             method: 'GET',
             headers: {'Authorization' : `Bearer ${token}` },
+            credentials: 'include',
         });
 
         const contentType = response.headers.get('content-type') || ''
@@ -43,11 +45,12 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedGalleries : async () => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/gallery/temporary-deleted-galleries'), {
             method: 'GET',
             headers: {'Authorization' : `Bearer ${token}` },
+            credentials: 'include',
         });
 
         const contentType = response.headers.get('content-type') || ''
@@ -63,11 +66,12 @@ export const recentlyDeletedApi = {
     },
 
     getDeletedPartners: async () => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl('/partners/temporary-deleted-partners'), {
             method: 'GET',
             headers: {'Authorization' : `Bearer ${token}` },
+            credentials: 'include',
         });
 
         const contentType = response.headers.get('content-type') || ''
@@ -83,7 +87,7 @@ export const recentlyDeletedApi = {
     },
 
     restoreDeletedVisionista: async (id, data) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/visionistas/temporary-delete-visionista/${id}`), {
             method: 'PATCH',
@@ -91,7 +95,8 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -107,7 +112,7 @@ export const recentlyDeletedApi = {
     },
 
     restoreDeletedNews: async (id, data) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/news/temporary-delete-news/${id}`), {
             method: 'PATCH',
@@ -115,7 +120,8 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -131,7 +137,7 @@ export const recentlyDeletedApi = {
     },
 
     restoreDeletedGallery: async (id, data) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/gallery/temporary-delete-gallery/${id}`), {
             method: 'PATCH',
@@ -139,7 +145,8 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -155,7 +162,7 @@ export const recentlyDeletedApi = {
     },
 
     restoreDeletedPartner: async (id, data) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/partners/temporary-delete-partner/${id}`), {
             method: 'PATCH',
@@ -163,7 +170,8 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -179,7 +187,7 @@ export const recentlyDeletedApi = {
     },
 
     permanentDeleteVisionista: async (id) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/visionistas/soft-delete-visionista/${id}`), {
             method: 'PUT',
@@ -187,6 +195,7 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -202,7 +211,7 @@ export const recentlyDeletedApi = {
     },
 
     permanentDeleteNews: async (id) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/news/soft-delete-news/${id}`), {
             method: 'PUT',
@@ -210,6 +219,7 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -225,7 +235,7 @@ export const recentlyDeletedApi = {
     },
 
     permanentDeleteGallery: async (id) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/gallery/soft-delete-gallery/${id}`), {
             method: 'PUT',
@@ -233,6 +243,7 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''
@@ -248,7 +259,7 @@ export const recentlyDeletedApi = {
     },
 
     permanentDeletePartner: async (id) => {
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
         const response = await fetch(buildApiUrl(`/partners/soft-delete-partner/${id}`), {
             method: 'PUT',
@@ -256,6 +267,7 @@ export const recentlyDeletedApi = {
                 'Authorization' : `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            credentials: 'include'
         }); 
 
         const contentType = response.headers.get('content-type') || ''

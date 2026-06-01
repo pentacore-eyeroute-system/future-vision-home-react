@@ -17,6 +17,8 @@ function AdminLayout() {
     sessionStorage.removeItem('adminAuthenticated')
     sessionStorage.removeItem('adminLoginTime')
     localStorage.removeItem('token')
+    localStorage.removeItem('adminAuthenticated')
+    localStorage.removeItem('adminLoginTime')
     navigate('/admin/login', { replace: true })
   }
 

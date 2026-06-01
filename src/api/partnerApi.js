@@ -3,11 +3,12 @@ import { buildApiUrl } from '../config/apiUrlConfig';
 
 const API = axios.create({
   baseURL: buildApiUrl('/partners'),
+  withCredentials: true,
 });
 
 // Interceptor to attach the Admin JWT token
 API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -3,11 +3,12 @@ import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
 
 const API = axios.create({
   baseURL: `${VITE_API_BASE_URL}/news`,
+  withCredentials: true,
 });
 
 // Interceptor to attach the Admin JWT token securely
 API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

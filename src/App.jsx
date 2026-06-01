@@ -40,7 +40,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   // const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
   // return isAuthed ? children : <Navigate to="/admin/login" replace />
 
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
   if (!token) return <Navigate to="/admin/login" replace />;
 
@@ -53,6 +53,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
 
     return children;
   } catch (err) {
+    localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     return <Navigate to='/admin/login' replace />;
   }
