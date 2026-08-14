@@ -384,9 +384,9 @@ html[data-theme="dark"] .theme-switch-icon {
     right: 0;
     bottom: 0;
     z-index: 1;
-    background-image: url('/images/home.png');
+    background-image: url('/images/hero_pic.webp');
     background-size: cover;
-    background-position: center;
+    background-position: center 20%;
     background-repeat: no-repeat;
 }
 
@@ -396,7 +396,12 @@ html[data-theme="dark"] .theme-switch-icon {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.45) 0%,
+        rgba(15, 23, 42, 0.6) 60%,
+        rgba(15, 23, 42, 0.8) 100%
+    );
     z-index: 1;
 }
 
@@ -410,8 +415,8 @@ html[data-theme="dark"] .theme-switch-icon {
     z-index: 2;
     text-align: center;
     color: white;
-    max-width: 900px;
-    padding: 2rem;
+    max-width: 800px;
+    padding: 1rem;
     animation: fadeInUp 1s ease;
 }
 
@@ -427,42 +432,43 @@ html[data-theme="dark"] .theme-switch-icon {
 }
 
 .hero-title {
-    font-size: clamp(2rem, 4vw, 3rem);
-    font-weight: 900;
-    margin-bottom: 2rem;
+    font-size: clamp(1.85rem, 3.8vw, 2.85rem);
+    font-weight: 800;
+    margin-bottom: 1.25rem;
     line-height: 1.2;
-    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7), 0 4px 24px rgba(0, 0, 0, 0.85);
 }
 
-.hero-quote-wrapper {
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    padding: 2rem 2.5rem;
-    border-radius: 20px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-2xl);
+.hero-quote-integrated {
+    max-width: 680px;
+    margin: 0 auto;
 }
 
 .hero-quote {
-    font-size: clamp(1rem, 1.8vw, 1.25rem);
-    line-height: 1.7;
-    color: var(--text-primary);
+    font-size: clamp(0.92rem, 1.4vw, 1.08rem);
+    line-height: 1.55;
+    color: #ffffff;
     font-style: italic;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 4px 16px rgba(0, 0, 0, 0.75);
 }
 
 .hero-quote:last-of-type {
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .quote-reference {
-    display: block;
-    margin-top: 1rem;
+    display: inline-block;
+    margin-top: 0.4rem;
     font-weight: 700;
-    color: var(--primary-color);
+    color: #bbf246;
     font-style: normal;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9), 0 4px 16px rgba(0, 0, 0, 0.75);
 }
 
 .scroll-indicator {
@@ -559,7 +565,7 @@ html[data-theme="dark"] .theme-switch-icon {
 
 /* Story, Vision, Mission Section */
 .story-vision-mission {
-    padding: 4rem 0;
+    padding: 2.5rem 0;
     background: var(--bg-tertiary);
     position: relative;
     z-index: 2;
@@ -568,13 +574,13 @@ html[data-theme="dark"] .theme-switch-icon {
 .svm-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 2rem;
+    gap: 1.25rem;
 }
 
 .svm-card {
     background: var(--bg-primary);
-    padding: 2rem 1.75rem;
-    border-radius: 16px;
+    padding: 1.35rem 1.35rem;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     position: relative;
     overflow: hidden;
@@ -589,27 +595,27 @@ html[data-theme="dark"] .theme-switch-icon {
     top: 0;
     left: 0;
     right: 0;
-    height: 4px;
+    height: 3px;
     background: var(--gradient-1);
 }
 
 .svm-header {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
+    gap: 0.75rem;
+    margin-bottom: 0.65rem;
 }
 
 .svm-icon {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     object-fit: contain;
     flex-shrink: 0;
     display: block;
 }
 
 .svm-title {
-    font-size: 2.2rem;
+    font-size: 1.4rem;
     font-weight: 800;
     color: #95ab2f;
     margin: 0;
@@ -618,8 +624,8 @@ html[data-theme="dark"] .theme-switch-icon {
 
 .svm-description {
     color: var(--text-secondary);
-    line-height: 1.7;
-    font-size: 1rem;
+    line-height: 1.55;
+    font-size: 0.92rem;
     text-align: justify;
     text-justify: inter-word;
     flex: 1;
@@ -2822,53 +2828,53 @@ html[data-theme="dark"] .theme-switch-icon {
 
 /* Our Work Preview Section (Homepage) */
 .our-work-preview {
-    padding: 4rem 0;
+    padding: 2.5rem 0;
     background: var(--bg-primary);
 }
 
 .work-preview-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    gap: 1.25rem;
     margin-bottom: 0;
 }
 
 .work-preview-card {
     background: var(--bg-secondary);
-    padding: 2rem 1.75rem;
-    border-radius: 14px;
+    padding: 1.35rem 1.25rem;
+    border-radius: 12px;
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     text-align: center;
 }
 
 .work-preview-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-xl);
     border-color: var(--primary-color);
 }
 
 .work-preview-icon {
-    width: 64px;
-    height: 64px;
+    width: 44px;
+    height: 44px;
     object-fit: contain;
     display: block;
-    margin: 0 auto 1rem auto;
+    margin: 0 auto 0.5rem auto;
 }
 
 .work-preview-title {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary-color);
     font-family: 'Poppins-SemiBold', sans-serif;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.4rem;
 }
 
 .work-preview-description {
     color: var(--text-secondary);
-    line-height: 1.6;
-    margin-bottom: 1.25rem;
-    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 0.75rem;
+    font-size: 0.88rem;
 }
 
 .work-preview-link {
@@ -2877,6 +2883,7 @@ html[data-theme="dark"] .theme-switch-icon {
     font-weight: 600;
     transition: all 0.3s ease;
     display: inline-block;
+    font-size: 0.9rem;
 }
 
 .work-preview-link:hover {
