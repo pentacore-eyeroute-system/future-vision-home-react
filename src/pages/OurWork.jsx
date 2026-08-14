@@ -1,16 +1,33 @@
-import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useMemo, useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
+const mapHashToTab = (hash) => {
+  if (!hash) return null
+  const clean = hash.replace(/^#/, '').toLowerCase()
+  if (clean === 'visionistas') return 'visionistas'
+  if (clean === 'gallery' || clean === 'news' || clean === 'news-gallery') return 'gallery'
+  if (clean === 'what-we-do' || clean === 'programs') return 'what-we-do'
+  return null
+}
+
 function OurWork() {
-  const [activeTab, setActiveTab] = useState('what-we-do')
+  const location = useLocation()
+  const [activeTab, setActiveTab] = useState(() => mapHashToTab(location.hash) || 'what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
   const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    const tabFromHash = mapHashToTab(location.hash)
+    if (tabFromHash && tabFromHash !== activeTab) {
+      setActiveTab(tabFromHash)
+    }
+  }, [location.hash])
 
   const filteredNews = useMemo(() => {
     if (!query.trim()) return newsArticles
@@ -21,6 +38,11 @@ function OurWork() {
         item.excerpt.toLowerCase().includes(q)
     )
   }, [query])
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    window.history.replaceState(null, '', `#${tab}`)
+  }
 
   return (
     <>
@@ -41,7 +63,7 @@ function OurWork() {
               <button
                 key={tab}
                 className={`tab-btn${activeTab === tab ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
               >
                 {tab === 'what-we-do' && 'What We Do'}
                 {tab === 'visionistas' && 'Visionistas'}
