@@ -4610,6 +4610,24 @@ html[data-theme="dark"] .theme-switch-icon {
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-xl);
+    position: relative;
+}
+
+.admin-login-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
+}
+
+.admin-login-back:hover {
+    color: var(--primary-color);
+    transform: translateX(-3px);
 }
 
 .admin-login-page .page-title {
@@ -4628,27 +4646,65 @@ html[data-theme="dark"] .theme-switch-icon {
     flex-direction: column;
 }
 
+.admin-password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.admin-password-wrapper input {
+    padding-right: 2.75rem !important;
+}
+
+.admin-password-toggle {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.2s ease;
+}
+
+.admin-password-toggle:hover {
+    color: var(--primary-color);
+}
+
 .admin-form-group input {
     padding: 0.875rem 1rem;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 1rem;
     font-family: 'Poppins-Light', sans-serif;
     transition: all 0.3s ease;
-    background: white;
-    color: #1f2937;
-    caret-color: #1f2937;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    caret-color: var(--primary-color);
     width: 100%;
 }
 
 .admin-form-group input::placeholder {
-    color: #999;
+    color: var(--text-secondary);
+    opacity: 0.7;
 }
 
 .admin-form-group input:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(149, 171, 47, 0.1);
+    box-shadow: 0 0 0 3px rgba(149, 171, 47, 0.15);
+}
+
+.admin-form-group input:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 .admin-login-btn {
@@ -4667,12 +4723,43 @@ html[data-theme="dark"] .theme-switch-icon {
     transition: all 0.3s ease;
     margin-top: 0.5rem;
     box-shadow: var(--shadow-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.admin-login-btn:hover {
+.admin-login-btn:hover:not(:disabled) {
     background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
+}
+
+.admin-login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.admin-login-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.admin-login-spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Legacy Admin Dashboard Styles */
