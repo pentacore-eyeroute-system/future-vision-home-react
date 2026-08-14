@@ -36,34 +36,27 @@ const adminRoutes = [
 ]
 
 // Simple Auth Guard
-const ProtectedRoute = ({ children, requiredRole = 'admin' }) => {
-  const isSessionAuthed =
-    localStorage.getItem('adminAuthenticated') === 'true' ||
-    sessionStorage.getItem('adminAuthenticated') === 'true'
+const ProtectedRoute = ({ children, requiredRole }) => {
+  // const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
+  // return isAuthed ? children : <Navigate to="/admin/login" replace />
 
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-  if (!isSessionAuthed && !token) {
-    return <Navigate to="/admin/login" replace />
-  }
+  if (!token) return <Navigate to="/admin/login" replace />;
 
-  if (token) {
-    try {
-      const decoded = jwtDecode(token)
-      if (decoded?.role && decoded.role !== requiredRole) {
-        return <Navigate to="/" replace />
-      }
-    } catch {
-      // Non-JWT token or local dev session
-      if (!isSessionAuthed) {
-        localStorage.removeItem('token')
-        sessionStorage.removeItem('token')
-        return <Navigate to="/admin/login" replace />
-      }
+  try {
+    const decoded = jwtDecode(token);
+
+    if (decoded.role !== requiredRole) {
+      return <Navigate to='/' replace />;
     }
-  }
 
-  return children
+    return children;
+  } catch (err) {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    return <Navigate to='/admin/login' replace />;
+  }
 }
 
 function App() {
