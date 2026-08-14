@@ -20,35 +20,33 @@ const getPlainText = (value = '') => {
   return parser.parseFromString(value, 'text/html').body.textContent || ''
 }
 
+const mapHashToTab = (hash) => {
+  if (!hash) return null
+  const clean = hash.replace(/^#/, '').toLowerCase()
+  if (clean === 'visionistas') return 'visionistas'
+  if (clean === 'gallery' || clean === 'news' || clean === 'news-gallery') return 'gallery'
+  if (clean === 'what-we-do' || clean === 'programs') return 'what-we-do'
+  return null
+}
+
 function OurWork() {
   const location = useLocation()
-  const [visionistas, setVisionistas] = useState([]);
-  const [news, setNews] = useState([]);
-  const [galleries, setGalleries] = useState([]);
-  const [activeTab, setActiveTab] = useState('what-we-do')
+  const [visionistas, setVisionistas] = useState([])
+  const [news, setNews] = useState([])
+  const [galleries, setGalleries] = useState([])
+  const [activeTab, setActiveTab] = useState(() => mapHashToTab(location.hash) || 'what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
   const [query, setQuery] = useState('')
 
-  const filteredNews = useMemo(() => {
-    if (!query.trim()) return news
-    const q = query.toLowerCase()
-    return news.filter(
-      (item) =>
-        item.news_title.toLowerCase().includes(q) ||
-        item.news_description.toLowerCase().includes(q)
-    )
-  }, [query, news])
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const hashTab = location.hash.replace('#', '')
-
-    if (tabOrder.includes(hashTab)) {
-      setActiveTab(hashTab)
+    const tabFromHash = mapHashToTab(location.hash)
+    if (tabFromHash && tabFromHash !== activeTab) {
+      setActiveTab(tabFromHash)
     }
   }, [location.hash])
 
@@ -69,15 +67,29 @@ function OurWork() {
   }, [selectedVisionista])
 
   const fetchData = async () => {
-    const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }));
-    const newsResponse = await newsApi.getNews();
-    const galleryResponse = await galleryApi.getGalleries().catch(() => ({ result: [] }));
+    const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }))
+    const newsResponse = await newsApi.getNews().catch(() => ({ result: [] }))
+    const galleryResponse = await galleryApi.getGalleries().catch(() => ({ result: [] }))
 
-    setVisionistas(visionistaResponse.result);
-    setNews(newsResponse.result);
-    setGalleries(galleryResponse.result);
-  };
-  
+    setVisionistas(visionistaResponse?.result || [])
+    setNews(newsResponse?.result || [])
+    setGalleries(galleryResponse?.result || [])
+  }
+
+  const filteredNews = useMemo(() => {
+    if (!query.trim()) return news
+    const q = query.toLowerCase()
+    return news.filter(
+      (item) =>
+        item.news_title?.toLowerCase().includes(q) ||
+        item.news_description?.toLowerCase().includes(q)
+    )
+  }, [query, news])
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    window.history.replaceState(null, '', `#${tab}`)
+  }
   return (
     <>
       <section className="page-header">
@@ -97,7 +109,7 @@ function OurWork() {
               <button
                 key={tab}
                 className={`tab-btn${activeTab === tab ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
               >
                 {tab === 'what-we-do' && 'What We Do'}
                 {tab === 'visionistas' && 'Visionistas'}

@@ -6,32 +6,29 @@ function Home() {
       <section
         id="home"
         className="hero"
-        style={{ color: '#fff' }}
       >
         <div
           className="hero-background"
-          style={{ backgroundImage: "url('/images/home.png')" }}
+          style={{ backgroundImage: "url('/images/hero_pic.webp')" }}
         >
           <div className="gradient-overlay"></div>
         </div>
         <div className="container">
           <div className="hero-content">
-            <h1 className="hero-title" style={{ color: '#fff' }}>
+            <h1 className="hero-title">
               WELCOME TO FUTURE VISION HOME
             </h1>
-            <div className="hero-quote-wrapper">
-              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
-                "Who sinned, this man or his parents, that he was born blind?"
+            <div className="hero-quote-integrated">
+              <p className="hero-quote">
+                &ldquo;Who sinned, this man or his parents, that he was born blind?&rdquo;
               </p>
-              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
+              <p className="hero-quote">
                 It was not that this man sinned, or his parents,
               </p>
-              <p className="hero-quote" style={{ color: '#f4f4f4' }}>
+              <p className="hero-quote">
                 but that the works of God might be displayed in him.
               </p>
-              <p className="quote-reference" style={{ color: '#95ab2f', fontWeight: 700 }}>
-                John 9:2-3
-              </p>
+              <span className="quote-reference">John 9:2&ndash;3</span>
             </div>
           </div>
         </div>

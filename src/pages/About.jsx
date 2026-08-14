@@ -1,7 +1,29 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+const mapHashToAboutTab = (hash) => {
+  if (!hash) return null
+  const clean = hash.replace(/^#/, '').toLowerCase()
+  if (clean === 'founder' || clean === 'founder-background') return 'founder'
+  if (clean === 'story' || clean === 'our-story') return 'story'
+  return null
+}
 
 function About() {
-  const [tab, setTab] = useState('story')
+  const location = useLocation()
+  const [tab, setTab] = useState(() => mapHashToAboutTab(location.hash) || 'story')
+
+  useEffect(() => {
+    const tabFromHash = mapHashToAboutTab(location.hash)
+    if (tabFromHash && tabFromHash !== tab) {
+      setTab(tabFromHash)
+    }
+  }, [location.hash])
+
+  const handleTabChange = (selectedTab) => {
+    setTab(selectedTab)
+    window.history.replaceState(null, '', `#${selectedTab}`)
+  }
 
   return (
     <>
@@ -19,13 +41,13 @@ function About() {
           <div className="tabs-nav">
             <button
               className={`tab-btn${tab === 'story' ? ' active' : ''}`}
-              onClick={() => setTab('story')}
+              onClick={() => handleTabChange('story')}
             >
               Our Story
             </button>
             <button
               className={`tab-btn${tab === 'founder' ? ' active' : ''}`}
-              onClick={() => setTab('founder')}
+              onClick={() => handleTabChange('founder')}
             >
               Founder&apos;s Background
             </button>
