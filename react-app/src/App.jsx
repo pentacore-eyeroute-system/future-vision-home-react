@@ -10,6 +10,7 @@ import EyeRoute from './pages/EyeRoute'
 import Donate from './pages/Donate'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
+import RequestAccess from './pages/RequestAccess'
 import Article from './pages/Article'
 import AdminVisionistas from './pages/admin/AdminVisionistas'
 import AdminPartners from './pages/admin/AdminPartners'
@@ -53,6 +54,10 @@ function App() {
 
         {/* Admin Login - No Layout */}
         <Route path="/admin/login" element={<Admin />} />
+        <Route path="/login" element={<Admin />} />
+
+        {/* Request Access Page - No Layout */}
+        <Route path="/internal/request-access" element={<RequestAccess />} />
 
         {/* Protected Admin Routes */}
         <Route

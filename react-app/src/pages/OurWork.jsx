@@ -222,7 +222,21 @@ function OurWork() {
                     aria-haspopup="dialog"
                   >
                     <div className="visionista-icon">
-                      <img src="/images/daily.png" alt="Visionista icon" />
+                      {v.vis_pic_url ? (
+                        <img
+                          src={v.vis_pic_url}
+                          alt={v.vis_fullname}
+                          className="visionista-card-photo"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null
+                            e.currentTarget.src = '/images/daily.png'
+                          }}
+                        />
+                      ) : (
+                        <div className="visionista-avatar-fallback" aria-label={v.vis_fullname}>
+                          {v.vis_fullname?.charAt(0) || 'V'}
+                        </div>
+                      )}
                     </div>
                     <h3 className="visionista-name">{v.vis_fullname}</h3>
                     <p className="visionista-story visionista-story-preview">{v.vis_story}</p>

@@ -189,6 +189,15 @@ function Admin() {
               )}
             </button>
           </form>
+
+          <div className="admin-auth-footer">
+            <p>
+              Need an account?{' '}
+              <Link to="/internal/request-access" className="admin-auth-link">
+                Request Access
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </section>

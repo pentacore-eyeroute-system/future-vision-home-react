@@ -321,45 +321,149 @@ function AdminNewsGallery() {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={editingItem ? 'Edit Post' : 'Create Post'}
+        subtitle={
+          editingItem
+            ? `Update details for this ${formData.type} entry.`
+            : `Fill in the information below to publish a new ${formData.type} entry.`
+        }
+        maxWidth="max-w-4xl"
       >
         <form onSubmit={handleSubmit} className="admin-form">
-          <div className="form-group">
-            <label>Title</label>
-            <input
-              type="text"
-              required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-          </div>
-          <div className="form-group">
-            <label>Type</label>
-            <select
-              value={formData.type}
-              disabled={!!editingItem}
-              onChange={(e) => {
-                setFormData({ ...formData, type: e.target.value })
-                setImageError('')
-                setDescriptionError('')
-              }}
-            >
-              <option value="news">News</option>
-              <option value="gallery">Gallery</option>
-            </select>
-          </div>
-          <div className="form-group">
-            <label>Date</label>
-            <input
-              type="date"
-              required
-              value={formData.date}
-              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-            />
-          </div>
-          <div className="form-group">
-            <label>Description</label>
-            {formData.type === 'news' ? (
-              <>
+          {formData.type === 'gallery' ? (
+            <div className="news-gallery-modal-grid">
+              {/* Left Column: Image Uploader */}
+              <div className="news-gallery-photo-col">
+                <AdminImageUploadField
+                  inputId="newsGalleryImages"
+                  label="Gallery Photos"
+                  images={formData.images}
+                  multiple
+                  required={formData.type === 'gallery' && formData.images.length === 0}
+                  onFilesSelected={handleImageUpload}
+                  onRemoveImage={handleRemoveImage}
+                  errorText={imageError}
+                  helperText="Upload at least one photo for this gallery."
+                />
+              </div>
+
+              {/* Right Column: Metadata Fields */}
+              <div className="news-gallery-fields-col flex flex-col gap-3.5">
+                <div className="form-group mb-0">
+                  <label>Title <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Enter gallery title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group mb-0">
+                    <label>Type</label>
+                    <select
+                      value={formData.type}
+                      disabled={!!editingItem}
+                      onChange={(e) => {
+                        setFormData({ ...formData, type: e.target.value })
+                        setImageError('')
+                        setDescriptionError('')
+                      }}
+                    >
+                      <option value="news">News</option>
+                      <option value="gallery">Gallery</option>
+                    </select>
+                  </div>
+
+                  <div className="form-group mb-0">
+                    <label>Date <span className="text-red-500">*</span></label>
+                    <input
+                      type="date"
+                      required
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group mb-0 flex-1 flex flex-col">
+                  <label>Description <span className="text-red-500">*</span></label>
+                  <textarea
+                    required
+                    rows={4}
+                    placeholder="Enter a brief description for this gallery..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="flex-1 min-h-[110px]"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="news-modal-wrapper">
+              <div className="news-meta-grid">
+                {/* Left Column: Featured Cover Image */}
+                <div className="news-featured-col">
+                  <AdminImageUploadField
+                    inputId="newsFeaturedImage"
+                    label="Cover Photo / Images"
+                    images={formData.images}
+                    multiple
+                    required={false}
+                    onFilesSelected={handleImageUpload}
+                    onRemoveImage={handleRemoveImage}
+                    errorText={imageError}
+                    helperText="Upload a featured cover image."
+                  />
+                </div>
+
+                {/* Right Column: Title, Type, Date */}
+                <div className="news-meta-fields">
+                  <div className="form-group mb-0">
+                    <label>Article Title <span className="text-red-500">*</span></label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter news article title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="form-group mb-0">
+                      <label>Type</label>
+                      <select
+                        value={formData.type}
+                        disabled={!!editingItem}
+                        onChange={(e) => {
+                          setFormData({ ...formData, type: e.target.value })
+                          setImageError('')
+                          setDescriptionError('')
+                        }}
+                      >
+                        <option value="news">News</option>
+                        <option value="gallery">Gallery</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group mb-0">
+                      <label>Publish Date <span className="text-red-500">*</span></label>
+                      <input
+                        type="date"
+                        required
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Row: Full Width Rich Text Content */}
+              <div className="form-group mt-3.5 mb-0">
+                <label>Article Content <span className="text-red-500">*</span></label>
                 <RichTextEditor
                   value={formData.description}
                   onChange={(description) => {
@@ -368,29 +472,13 @@ function AdminNewsGallery() {
                   }}
                 />
                 {descriptionError && <p className="admin-upload-error">{descriptionError}</p>}
-              </>
-            ) : (
-              <textarea
-                required
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              ></textarea>
-            )}
-          </div>
-          <AdminImageUploadField
-            inputId="newsGalleryImages"
-            label="Pictures"
-            images={formData.images}
-            multiple
-            required={formData.type === 'gallery' && formData.images.length === 0}
-            onFilesSelected={handleImageUpload}
-            onRemoveImage={handleRemoveImage}
-            errorText={imageError}
-            helperText={formData.type === 'gallery' ? 'Upload at least one image for gallery entries.' : 'Upload multiple images for news posts or gallery entries.'}
-          />
+              </div>
+            </div>
+          )}
+
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">Save</button>
             <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn btn-primary">{editingItem ? 'Update Post' : 'Publish Post'}</button>
           </div>
         </form>
       </AdminModal>
