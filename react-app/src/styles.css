@@ -5740,8 +5740,71 @@ html[data-theme="dark"] .theme-switch-icon {
     transform: translateY(-2px);
 }
 
+.admin-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--text-primary);
+}
+
+.admin-account-btn:hover {
+    border-color: var(--primary-color, #85A922);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-avatar-pill {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color, #85A922);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.admin-avatar-initials {
+    line-height: 1;
+}
+
+.admin-account-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.admin-role-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.admin-role-badge.role-admin {
+    background: rgba(133, 169, 34, 0.15);
+    color: var(--primary-color, #85A922);
+}
+
+.admin-role-badge.role-editor {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+}
+
 .admin-tabs {
     display: flex;
+    align-items: center;
     gap: 1.5rem;
     margin-bottom: 1rem;
     border-bottom: 2px solid var(--border-color);
@@ -5749,7 +5812,10 @@ html[data-theme="dark"] .theme-switch-icon {
 }
 
 .admin-tab {
-    padding: 1rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.75rem;
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
@@ -5759,15 +5825,147 @@ html[data-theme="dark"] .theme-switch-icon {
     color: var(--text-secondary);
     transition: all 0.3s ease;
     font-family: 'Poppins-SemiBold', sans-serif;
+    text-decoration: none;
+    position: relative;
 }
 
 .admin-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
+    color: var(--primary-color, #85A922);
+    border-bottom-color: var(--primary-color, #85A922);
 }
 
 .admin-tab:hover {
-    color: var(--primary-color);
+    color: var(--primary-color, #85A922);
+}
+
+.admin-tab-divider {
+    width: 1.5px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 0.25rem;
+    opacity: 0.7;
+    align-self: center;
+}
+
+.admin-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 9999px;
+    background: var(--primary-color, #85A922);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-tab.active .admin-tab-badge {
+    background: var(--primary-color, #85A922);
+    transform: scale(1.08);
+}
+
+/* Account Modal Styling */
+.account-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
+}
+
+.account-modal-profile {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.account-avatar-large {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-color, #85A922);
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.account-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.account-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.account-email {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.account-role-tag {
+    margin-top: 0.25rem;
+}
+
+.account-section-divider {
+    height: 1px;
+    background: var(--border-color);
+    width: 100%;
+}
+
+.account-role-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.role-toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.role-toggle-btn {
+    padding: 0.65rem 1rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.role-toggle-btn:hover {
+    border-color: var(--primary-color, #85A922);
+}
+
+.role-toggle-btn.active {
+    border-color: var(--primary-color, #85A922);
+    background: rgba(133, 169, 34, 0.12);
+    color: var(--primary-color, #85A922);
+    font-weight: 700;
+}
+
+.role-switcher-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0 0 0;
 }
 
 .admin-content {

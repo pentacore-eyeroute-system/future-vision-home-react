@@ -16,6 +16,8 @@ import AdminVisionistas from './pages/admin/AdminVisionistas'
 import AdminPartners from './pages/admin/AdminPartners'
 import AdminNewsGallery from './pages/admin/AdminNewsGallery'
 import AdminDeleted from './pages/admin/AdminDeleted'
+import AdminUsers from './pages/admin/AdminUsers'
+import AdminAuditLogs from './pages/admin/AdminAuditLogs'
 
 const publicRoutes = [
   { path: '/', element: <Home /> },
@@ -33,6 +35,8 @@ const adminRoutes = [
   { path: 'news-gallery', element: <AdminNewsGallery /> },
   { path: 'partners', element: <AdminPartners /> },
   { path: 'deleted', element: <AdminDeleted /> },
+  { path: 'users', element: <AdminUsers /> },
+  { path: 'audit-logs', element: <AdminAuditLogs /> },
 ]
 
 // Simple Auth Guard
