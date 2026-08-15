@@ -5133,21 +5133,31 @@ html[data-theme="dark"] .theme-switch-icon {
     position: relative;
 }
 
-.admin-login-back {
-    display: inline-flex;
+.admin-login-back-btn {
+    position: absolute;
+    top: 1.75rem;
+    left: 1.75rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    display: flex;
     align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-    transition: all 0.2s ease;
+    z-index: 20;
 }
 
-.admin-login-back:hover {
-    color: var(--primary-color);
+.admin-login-back-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #ffffff;
     transform: translateX(-3px);
+    box-shadow: var(--shadow-md);
 }
 
 .admin-login-page .page-title {
@@ -5164,6 +5174,52 @@ html[data-theme="dark"] .theme-switch-icon {
 .admin-form-group {
     display: flex;
     flex-direction: column;
+    gap: 0.45rem;
+}
+
+.admin-field-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: 'Poppins-SemiBold', sans-serif;
+    user-select: none;
+}
+
+.admin-required-star {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.admin-login-alert {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.75rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .admin-login-alert {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #fca5a5;
+}
+
+.admin-login-alert-icon {
+    flex-shrink: 0;
+    color: #ef4444;
+}
+
+[data-theme="dark"] .admin-login-alert-icon {
+    color: #f87171;
 }
 
 .admin-password-wrapper {
@@ -5280,6 +5336,68 @@ html[data-theme="dark"] .theme-switch-icon {
     to {
         transform: rotate(360deg);
     }
+}
+
+/* Dark Mode Overrides for Admin Login - WCAG AAA Compliant */
+[data-theme="dark"] .admin-login-page {
+    background: #020617 !important;
+}
+
+[data-theme="dark"] .admin-login-card {
+    background: #0F172A;
+    border-color: #1e293b;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .admin-login-back-btn {
+    background: rgba(149, 172, 41, 0.08);
+    border: 1.5px solid #95AC29;
+    color: #A6C430;
+}
+
+[data-theme="dark"] .admin-login-back-btn:hover {
+    background: #95AC29;
+    border-color: #95AC29;
+    color: #0B0F17;
+    box-shadow: 0 4px 12px rgba(149, 172, 41, 0.35);
+}
+
+[data-theme="dark"] .admin-form-group input {
+    background: #020617;
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-form-group input:focus {
+    border-color: #95AC29;
+    box-shadow: 0 0 0 3px rgba(149, 172, 41, 0.2);
+}
+
+[data-theme="dark"] .admin-password-toggle {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .admin-password-toggle:hover {
+    color: #A6C430;
+}
+
+[data-theme="dark"] .admin-login-btn {
+    background: #95AC29;
+    color: #0B0F17;
+    font-weight: 700;
+    font-family: 'Poppins-Bold', 'Poppins-SemiBold', sans-serif;
+    box-shadow: 0 4px 14px rgba(149, 172, 41, 0.28);
+}
+
+[data-theme="dark"] .admin-login-btn:hover:not(:disabled) {
+    background: #a6c430;
+    color: #0B0F17;
+    box-shadow: 0 6px 20px rgba(149, 172, 41, 0.4);
+}
+
+[data-theme="dark"] .admin-login-spinner {
+    border-color: rgba(11, 15, 23, 0.3);
+    border-top-color: #0B0F17;
 }
 
 /* Legacy Admin Dashboard Styles */
