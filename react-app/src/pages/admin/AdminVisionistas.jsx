@@ -359,15 +359,11 @@ function AdminVisionistas() {
                     <p className="dropzone-primary-text">
                       <span className="font-semibold text-[#95ab2f] underline underline-offset-2">Click to upload</span> or drag and drop
                     </p>
-                    <p className="dropzone-subtext">JPG, PNG or WEBP (Max 5MB)</p>
+                    <p className="dropzone-subtext">JPG, PNG or WEBP (up to 5MB)</p>
                     <span className="dropzone-badge">Recommended ratio 3:4</span>
                   </div>
                 )}
               </div>
-
-              <p className="visionista-helper-text">
-                Max size 5MB (JPG/PNG). Recommended ratio 3:4.
-              </p>
             </div>
 
             {/* Right Column: Form Fields */}
