@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import { adminApi } from '../../api/adminApi'
+import { getAllPartners, addPartner, updatePartner, temporaryDeletePartner } from '../../api/partnerApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 
 function AdminPartners() {
   const [partners, setPartners] = useState([])
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
   const [formData, setFormData] = useState({
     par_fullname: '',
     par_type: 'organization',
@@ -19,9 +21,17 @@ function AdminPartners() {
 
   const fetchData = async () => {
     setLoading(true)
-    const data = await adminApi.getPartners()
-    setPartners(data)
-    setLoading(false)
+    try {
+      const response = await getAllPartners()
+      const data = response.data.result || []
+      // Filter out items where the temporary deletion flag is active
+      const activeItems = data.filter(item => !item.par_is_temporarily_deleted)
+      setPartners(activeItems)
+    } catch (error) {
+      console.error("Failed fetching partners:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const columns = [
@@ -45,22 +55,64 @@ function AdminPartners() {
     setModalOpen(true)
   }
 
-  const handleDelete = async (item) => {
-    if (window.confirm('Are you sure you want to delete this partner?')) {
-      await adminApi.deletePartner(item.id)
+  const handleDelete = (item) => {
+    setDeleteTarget(item)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+
+    try {
+      await temporaryDeletePartner(deleteTarget.id)
+      setDeleteTarget(null)
+      fetchData() // Refresh view rows to omit the deleted item
+    } catch (error) {
+      console.error("Error setting temporary delete status:", error)
+    }
+  }
+
+  const handleAddPartner = async (formValues) => {
+    const payload = {
+      fullname: formValues.par_fullname || '',
+      par_fullname: formValues.par_fullname || '',
+      type: formValues.par_type || 'organization',
+      par_type: formValues.par_type || 'organization'
+    }
+
+    try {
+      await addPartner(payload)
       fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error creating partner:", error)
+    }
+  }
+
+  const handleUpdatePartner = async (id, formValues) => {
+    const payload = {
+      fullname: formValues.par_fullname || '',
+      par_fullname: formValues.par_fullname || '',
+      type: formValues.par_type || 'organization',
+      par_type: formValues.par_type || 'organization'
+    }
+
+    try {
+      await updatePartner(id, payload)
+      fetchData()
+      setModalOpen(false)
+    } catch (error) {
+      console.error("Error updating partner:", error)
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
     if (editingItem) {
-      await adminApi.updatePartner(editingItem.id, formData)
+      await handleUpdatePartner(editingItem.id, formData)
     } else {
-      await adminApi.createPartner(formData)
+      await handleAddPartner(formData)
     }
-    setModalOpen(false)
-    fetchData()
   }
 
   return (
@@ -81,6 +133,15 @@ function AdminPartners() {
         onEdit={handleEdit} 
         onDelete={handleDelete} 
         isLoading={loading}
+      />
+
+      <AdminConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete item?"
+        itemName={deleteTarget?.par_fullname}
+        confirmLabel="Delete"
       />
 
       <AdminModal 
@@ -106,6 +167,7 @@ function AdminPartners() {
             >
               <option value="individual">Individual</option>
               <option value="organization">Organization</option>
+              <option value="parent">Parent/Guardian</option>
             </select>
           </div>
           <div className="form-actions">
@@ -119,3 +181,4 @@ function AdminPartners() {
 }
 
 export default AdminPartners
+

@@ -1,6 +1,19 @@
 import { useState, useEffect } from 'react'
 import { partnerApi } from '../api/partnerApi'
 
+const defaultParentNames = [
+  'Rowena Pindug',
+  'Mirasol Trinidad',
+  '& Mrs Michael Olaso',
+  'Malou Bueno',
+  'Tita Ivy Sinones',
+  'Arsenia C. Sinones',
+  'Danica B. Par',
+  'Tita Josephine L. Malan',
+]
+
+const isPartnerType = (partner, type) => partner.par_type?.toLowerCase() === type
+
 function OurPartners() {
   const [data, setData] = useState([]);
 
@@ -31,25 +44,21 @@ function OurPartners() {
           <div className="partners-content-wrapper">
             <PartnersCategory
               title="ORGANIZATIONS"
-              names={data.filter(partner => partner.par_type === "Organization").map(partner => partner.par_fullname)}
+              names={data.filter(partner => isPartnerType(partner, 'organization')).map(partner => partner.par_fullname)}
             />
 
             <PartnersCategory
               title="INDIVIDUALS"
-              names={data.filter(partner => partner.par_type === "Individual").map(partner => partner.par_fullname)}
+              names={data.filter(partner => isPartnerType(partner, 'individual')).map(partner => partner.par_fullname)}
             />
 
             <PartnersCategory
               title="PARENTS/GUARDIANS OF VISIONISTAS"
               names={[
-                'Rowena Pindug',
-                'Mirasol Trinidad',
-                '& Mrs Michael Olaso',
-                'Malou Bueno',
-                'Tita Ivy Sinones',
-                'Arsenia C. Sinones',
-                'Danica B. Par',
-                'Tita Josephine L. Malan',
+                ...defaultParentNames,
+                ...data
+                  .filter(partner => isPartnerType(partner, 'parent'))
+                  .map(partner => partner.par_fullname),
               ]}
             />
           </div>

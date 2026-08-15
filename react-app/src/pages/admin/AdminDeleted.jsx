@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { galleryApi } from '../../api/galleryApi'
-import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
+import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
 
 const FILTERS = [
@@ -27,6 +27,8 @@ function AdminDeleted() {
   const [deletedItems, setDeletedItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState('visionista')
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [restoreTarget, setRestoreTarget] = useState(null)
 
   useEffect(() => {
     fetchData()
@@ -60,6 +62,20 @@ function AdminDeleted() {
     setLoading(false)
   }
 
+  const restoreMap = {
+    visionista: recentlyDeletedApi.restoreDeletedVisionista,
+    news: recentlyDeletedApi.restoreDeletedNews,
+    gallery: recentlyDeletedApi.restoreDeletedGallery,
+    partner: recentlyDeletedApi.restoreDeletedPartner,
+  };
+
+  const deleteMap = {
+    visionista: recentlyDeletedApi.permanentDeleteVisionista,
+    news: recentlyDeletedApi.permanentDeleteNews,
+    gallery: recentlyDeletedApi.permanentDeleteGallery,
+    partner: recentlyDeletedApi.permanentDeletePartner,
+  }
+
   const normalizeDate = (date) => {
     return new Date(date).toLocaleDateString('en-CA');
   };
@@ -79,17 +95,39 @@ function AdminDeleted() {
   const getFilterCount = (filterKey) => deletedItems.filter((item) => matchesFilter(item, filterKey)).length
 
   const handleRestore = async (item) => {
-    let isTemporarilyDeleted = !item.item.gal_is_temporarily_deleted;
-    
-    await galleryApi.temporaryDeleteGallery(item.id, { isTemporarilyDeleted: isTemporarilyDeleted});
+    setRestoreTarget(item)
+  }
+
+  const confirmRestore = async () => {
+    if (!restoreTarget) return
+
+    const fn = restoreMap[restoreTarget.type]
+
+    if (!fn) return
+
+    await fn(restoreTarget.id, {
+      isTemporarilyDeleted: false
+    })
+
+    setRestoreTarget(null)
     fetchData()
   }
 
   const handleDeletePermanent = async (item) => {
-    if (window.confirm('Are you sure you want to permanently delete this item? This action cannot be undone.')) {
-      await galleryApi.permanentDeleteGallery(item.id);
-      fetchData()
-    }
+    setDeleteTarget(item)
+  }
+
+  const confirmPermanentDelete = async () => {
+    if (!deleteTarget) return
+
+    const fn = deleteMap[deleteTarget.type]
+
+    if (!fn) return
+
+    await fn(deleteTarget.id)
+
+    setDeleteTarget(null)
+    fetchData()
   }
 
   return (
@@ -121,6 +159,33 @@ function AdminDeleted() {
         isLoading={loading}
         emptyMessage="No deleted records in this section."
       />
+
+      <AdminConfirmModal
+        isOpen={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        title="Delete item permanently?"
+        itemName={deleteTarget?.displayTitle}
+        confirmLabel="Delete Permanently"
+        onConfirm={confirmPermanentDelete}
+      >
+        <p>
+          This will permanently delete <strong>{deleteTarget?.displayTitle}</strong>. This action cannot be undone.
+        </p>
+      </AdminConfirmModal>
+
+      <AdminConfirmModal
+        isOpen={!!restoreTarget}
+        onClose={() => setRestoreTarget(null)}
+        title="Restore item?"
+        itemName={restoreTarget?.displayTitle}
+        action="restore"
+        confirmLabel="Restore"
+        onConfirm={confirmRestore}
+      >
+        <p>
+          This will restore <strong>{restoreTarget?.displayTitle}</strong> and make it available again.
+        </p>
+      </AdminConfirmModal>
     </div>
   )
 }

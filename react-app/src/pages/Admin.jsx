@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi } from '../api/authApi.js';
 
+const ADMIN_USER = 'admin'
+const ADMIN_PASS = '12345678'
 const SESSION_KEY = 'adminAuthenticated'
 const SESSION_TIME_KEY = 'adminLoginTime'
 const SESSION_MAX_AGE = 8 * 60 * 60 * 1000 // 8 hours
@@ -24,7 +25,7 @@ function Admin() {
     }
   }, [navigate])
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
 
@@ -33,22 +34,15 @@ function Admin() {
       return
     }
 
-    try {
-      const data = await authApi.loginAdmin({ username, password })
-
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      sessionStorage.setItem('token', data.result.token);
       navigate('/admin')
-    } catch (err) {
-      if (err?.retryAfter) {
-        setError(err.retryAfter);
-      }
-      else {
-        setError('Invalid username or password. Please try again.')
-      }
-      setPassword('')
+      return
     }
+
+    setError('Invalid username or password. Please try again.')
+    setPassword('')
   }
 
   return (

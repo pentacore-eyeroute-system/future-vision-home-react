@@ -13,9 +13,13 @@ function AdminLayout() {
   const location = useLocation()
 
   const handleLogout = () => {
+    sessionStorage.removeItem('token')
     sessionStorage.removeItem('adminAuthenticated')
     sessionStorage.removeItem('adminLoginTime')
-    navigate('/admin/login')
+    localStorage.removeItem('token')
+    localStorage.removeItem('adminAuthenticated')
+    localStorage.removeItem('adminLoginTime')
+    navigate('/admin/login', { replace: true })
   }
 
   return (

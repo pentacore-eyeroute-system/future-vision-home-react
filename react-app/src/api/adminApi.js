@@ -1,7 +1,7 @@
 /**
  * Frontend-only Admin API
  * Stores admin content in localStorage so the dashboard behaves more like an MVP
- * while the real backend is still being built.
+ * while the real backend is still being built. 
  */
 
 const STORAGE_KEY = 'fvh-admin-dashboard-v2'

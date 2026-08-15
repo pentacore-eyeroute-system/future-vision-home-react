@@ -2,19 +2,17 @@ import axios from 'axios';
 import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
 import { reviewAuthConfig } from '../config/reviewAuthConfig';
 
-const getReviewBaseUrl = () => {
-  const base = VITE_API_BASE_URL || 'http://localhost:3001/fvh/api';
-  if (base.endsWith('/fvh/api')) {
-    return base.replace('/fvh/api', '/api/reviews');
-  }
-  if (base.endsWith('/fvh/api/')) {
-    return base.replace('/fvh/api/', '/api/reviews');
-  }
-  return `${base}/reviews`;
-};
-
 const API = axios.create({
-  baseURL: getReviewBaseUrl(),
+  baseURL: `${VITE_API_BASE_URL}/reviews`,
+  withCredentials: true,
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 const normalizeUser = (source = {}) => ({
@@ -63,7 +61,10 @@ export const reviewApi = {
       return null;
     }
 
-    const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession));
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession), {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     const payload = response.data;
     return payload ? normalizeSession(payload) : null;
   },

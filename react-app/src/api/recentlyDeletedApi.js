@@ -1,84 +1,88 @@
+import axios from 'axios';
 import { buildApiUrl } from "../config/apiUrlConfig";
 
+const API = axios.create({
+  baseURL: buildApiUrl(''),
+  withCredentials: true,
+});
+
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  console.log("Interceptor Token:", token);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Standard response interceptor to handle errors uniformly, matching the original fetch error structure
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const payload = error.response?.data;
+    const message = payload?.message || `Request failed with status ${error.response?.status || error.message}.`;
+    return Promise.reject(new Error(message));
+  }
+);
+
 export const recentlyDeletedApi = {
-    getDeletedVisionistas: async () => {
-        const token = sessionStorage.getItem('token');
-        console.log("Token from sessionStorage:", token);
+  getDeletedVisionistas: async () => {
+    const response = await API.get('/visionistas/temporary-deleted-visionistas');
+    return response.data;
+  },
 
-        const response = await fetch(buildApiUrl('/visionistas/temporary-deleted-visionistas'), {
-            method: 'GET',
-            headers: {'Authorization' : `Bearer ${token}` },
-        });
+  getDeletedNews: async () => {
+    const response = await API.get('/news/temporary-deleted-news');
+    return response.data;
+  },
 
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
+  getDeletedGalleries: async () => {
+    const response = await API.get('/gallery/temporary-deleted-galleries');
+    return response.data;
+  },
 
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
+  getDeletedPartners: async () => {
+    const response = await API.get('/partners/temporary-deleted-partners');
+    return response.data;
+  },
 
-        return payload;
-    },
+  restoreDeletedVisionista: async (id, data) => {
+    const response = await API.patch(`/visionistas/temporary-delete-visionista/${id}`, data);
+    return response.data;
+  },
 
-    getDeletedNews: async () => {
-        const token = sessionStorage.getItem('token');
+  restoreDeletedNews: async (id, data) => {
+    const response = await API.patch(`/news/temporary-delete-news/${id}`, data);
+    return response.data;
+  },
 
-        const response = await fetch(buildApiUrl('/news/temporary-deleted-news'), {
-            method: 'GET',
-            headers: {'Authorization' : `Bearer ${token}` },
-        });
+  restoreDeletedGallery: async (id, data) => {
+    const response = await API.patch(`/gallery/temporary-delete-gallery/${id}`, data);
+    return response.data;
+  },
 
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
+  restoreDeletedPartner: async (id, data) => {
+    const response = await API.patch(`/partners/temporary-delete-partner/${id}`, data);
+    return response.data;
+  },
 
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
+  permanentDeleteVisionista: async (id) => {
+    const response = await API.put(`/visionistas/soft-delete-visionista/${id}`);
+    return response.data;
+  },
 
-        return payload;
-    },
+  permanentDeleteNews: async (id) => {
+    const response = await API.put(`/news/soft-delete-news/${id}`);
+    return response.data;
+  },
 
-    getDeletedGalleries : async () => {
-        const token = sessionStorage.getItem('token');
+  permanentDeleteGallery: async (id) => {
+    const response = await API.put(`/gallery/soft-delete-gallery/${id}`);
+    return response.data;
+  },
 
-        const response = await fetch(buildApiUrl('/gallery/temporary-deleted-galleries'), {
-            method: 'GET',
-            headers: {'Authorization' : `Bearer ${token}` },
-        });
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    },
-
-    getDeletedPartners: async () => {
-        const token = sessionStorage.getItem('token');
-
-        const response = await fetch(buildApiUrl('/partners/temporary-deleted-partners'), {
-            method: 'GET',
-            headers: {'Authorization' : `Bearer ${token}` },
-        });
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    },
+  permanentDeletePartner: async (id) => {
+    const response = await API.put(`/partners/soft-delete-partner/${id}`);
+    return response.data;
+  },
 };

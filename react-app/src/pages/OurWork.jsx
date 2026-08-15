@@ -1,7 +1,6 @@
 import { useMemo, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { visionistaApi } from '../api/visionistaApi'
-import { visionistas } from '../data/visionistas'
 import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
@@ -9,39 +8,88 @@ import { newsApi } from '../api/newsApi'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
+const getStoryParagraphs = (story = '') => (
+  String(story)
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+)
+
+const getPlainText = (value = '') => {
+  const parser = new DOMParser()
+  return parser.parseFromString(value, 'text/html').body.textContent || ''
+}
+
+const mapHashToTab = (hash) => {
+  if (!hash) return null
+  const clean = hash.replace(/^#/, '').toLowerCase()
+  if (clean === 'visionistas') return 'visionistas'
+  if (clean === 'gallery' || clean === 'news' || clean === 'news-gallery') return 'gallery'
+  if (clean === 'what-we-do' || clean === 'programs') return 'what-we-do'
+  return null
+}
+
 function OurWork() {
-  const [visionistas, setVisionistas] = useState([]);
-  const [news, setNews] = useState([]);
-  const [galleries, setGalleries] = useState([]);
-  const [activeTab, setActiveTab] = useState('what-we-do')
+  const location = useLocation()
+  const [visionistas, setVisionistas] = useState([])
+  const [news, setNews] = useState([])
+  const [galleries, setGalleries] = useState([])
+  const [activeTab, setActiveTab] = useState(() => mapHashToTab(location.hash) || 'what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
   const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    const tabFromHash = mapHashToTab(location.hash)
+    if (tabFromHash && tabFromHash !== activeTab) {
+      setActiveTab(tabFromHash)
+    }
+  }, [location.hash])
+
+  useEffect(() => {
+    if (!selectedVisionista) return
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedVisionista(null)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [selectedVisionista])
+
+  const fetchData = async () => {
+    const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }))
+    const newsResponse = await newsApi.getNews().catch(() => ({ result: [] }))
+    const galleryResponse = await galleryApi.getGalleries().catch(() => ({ result: [] }))
+
+    setVisionistas(visionistaResponse?.result || [])
+    setNews(newsResponse?.result || [])
+    setGalleries(galleryResponse?.result || [])
+  }
 
   const filteredNews = useMemo(() => {
     if (!query.trim()) return news
     const q = query.toLowerCase()
     return news.filter(
       (item) =>
-        item.news_title.toLowerCase().includes(q) ||
-        item.news_description.toLowerCase().includes(q)
+        item.news_title?.toLowerCase().includes(q) ||
+        item.news_description?.toLowerCase().includes(q)
     )
   }, [query, news])
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    const visionistaResponse = await visionistaApi.getVisionistas();
-    const newsResponse = await newsApi.getNews();
-    const galleryResponse = await galleryApi.getGalleries();
-
-    setVisionistas(visionistaResponse.result);
-    setNews(newsResponse.result);
-    setGalleries(galleryResponse.result);
-  };
-  
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    window.history.replaceState(null, '', `#${tab}`)
+  }
   return (
     <>
       <section className="page-header">
@@ -61,7 +109,7 @@ function OurWork() {
               <button
                 key={tab}
                 className={`tab-btn${activeTab === tab ? ' active' : ''}`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabChange(tab)}
               >
                 {tab === 'what-we-do' && 'What We Do'}
                 {tab === 'visionistas' && 'Visionistas'}
@@ -188,9 +236,20 @@ function OurWork() {
           </div>
 
           {selectedVisionista && (
-            <div className="visionista-dialog open" role="dialog" aria-modal="true">
+            <div
+              className="visionista-dialog-overlay"
+              role="presentation"
+              onClick={() => setSelectedVisionista(null)}
+            >
+            <div
+              className="visionista-dialog open"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="visionista-dialog-title"
+              onClick={(event) => event.stopPropagation()}
+            >
               <div className="visionista-dialog-header">
-                <h3 className="visionista-dialog-title">{selectedVisionista.vis_fullname}</h3>
+                <h3 className="visionista-dialog-title" id="visionista-dialog-title">{selectedVisionista.vis_fullname}</h3>
                 <button
                   type="button"
                   className="visionista-dialog-close"
@@ -208,10 +267,14 @@ function OurWork() {
                     alt={selectedVisionista.vis_fullname}
                   />
                 )}
-                <div className="whitespace-pre-line">
-                  {selectedVisionista.vis_story}
+                <div className="visionista-story-content">
+                  <span className="visionista-story-label">Visionista Story</span>
+                  {getStoryParagraphs(selectedVisionista.vis_story).map((paragraph, index) => (
+                    <p key={`${selectedVisionista.vis_fullname}-story-${index}`}>{paragraph}</p>
+                  ))}
                 </div>
               </div>
+            </div>
             </div>
           )}
         </section>
@@ -270,7 +333,12 @@ function OurWork() {
                 {galleries.sort((a, b) => new Date(b.gal_date) - new Date(a.gal_date)).map((gallery) => (
                   <div className="gallery-category" key={gallery.gal_title}>
                     <h4 className="gallery-category-title">{gallery.gal_title}</h4>
-                    <p className="gallery-date">{new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} {gallery.gal_description}</p>
+                    <p className="gallery-date">
+                      {new Date(gallery.gal_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </p>
+                    {gallery.gal_description && (
+                      <p className="gallery-description">{gallery.gal_description}</p>
+                    )}
                     <div className="gallery-grid">
                       {gallery.galleryPictures.map((img) => (
                         <button
@@ -337,7 +405,7 @@ function NewsCard({ article }) {
             {new Date(article.news_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         )}
-        <p className="news-article-excerpt">{article.news_description}</p>
+        <p className="news-article-excerpt">{getPlainText(article.news_description)}</p>
         <Link to={`/news/${article.news_slug}`} className="news-read-more">
           Read More
         </Link>

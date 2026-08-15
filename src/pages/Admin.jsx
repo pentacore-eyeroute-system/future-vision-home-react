@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { authApi } from '../api/authApi.js';
 
+const ADMIN_USER = 'admin'
+const ADMIN_PASS = '12345678'
 const SESSION_KEY = 'adminAuthenticated'
 const SESSION_TIME_KEY = 'adminLoginTime'
 const SESSION_MAX_AGE = 8 * 60 * 60 * 1000 // 8 hours
@@ -13,22 +14,18 @@ function Admin() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const isAuthed = (localStorage.getItem(SESSION_KEY) || sessionStorage.getItem(SESSION_KEY)) === 'true'
-    const loginTime = parseInt(localStorage.getItem(SESSION_TIME_KEY) || sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
+    const isAuthed = sessionStorage.getItem(SESSION_KEY) === 'true'
+    const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
     const expired = Date.now() - loginTime > SESSION_MAX_AGE
     if (isAuthed && !expired) {
-      navigate('/admin', { replace: true })
+      navigate('/admin')
     } else {
-      sessionStorage.removeItem('token')
       sessionStorage.removeItem(SESSION_KEY)
       sessionStorage.removeItem(SESSION_TIME_KEY)
-      localStorage.removeItem('token')
-      localStorage.removeItem(SESSION_KEY)
-      localStorage.removeItem(SESSION_TIME_KEY)
     }
   }, [navigate])
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
     setError('')
 
@@ -37,25 +34,15 @@ function Admin() {
       return
     }
 
-    try {
-      const data = await authApi.loginAdmin({ username, password })
-
-      localStorage.setItem(SESSION_KEY, 'true')
-      localStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      localStorage.setItem('token', data.result.token);
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
       sessionStorage.setItem(SESSION_KEY, 'true')
       sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      sessionStorage.setItem('token', data.result.token);
-      navigate('/admin', { replace: true })
-    } catch (err) {
-      if (err?.retryAfter) {
-        setError(err.retryAfter);
-      }
-      else {
-        setError('Invalid username or password. Please try again.')
-      }
-      setPassword('')
+      navigate('/admin')
+      return
     }
+
+    setError('Invalid username or password. Please try again.')
+    setPassword('')
   }
 
   return (

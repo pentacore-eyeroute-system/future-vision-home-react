@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { normalizeReview, reviewApi } from "../api/reviewApi";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
+import { VITE_API_BASE_URL } from "../config/apiUrlConfig";
 
 const demoFeedbacks = [
   {

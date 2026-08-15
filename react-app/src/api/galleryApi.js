@@ -1,104 +1,47 @@
-import { buildApiUrl } from "../config/apiUrlConfig";
+import axios from 'axios';
+import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
 
+const API = axios.create({
+  baseURL: `${VITE_API_BASE_URL}/gallery`,
+  withCredentials: true,
+});
+
+// Interceptor to attach the Admin JWT token securely
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const getAllGalleries = () => API.get('/get-all-galleries');
+export const createGallery = (formData) => API.post('/create-gallery', formData);
+export const updateGallery = (id, formData) => API.patch(`/update-gallery-info/${id}`, formData);
+export const temporaryDeleteGallery = (id) => API.patch(`/temporary-delete-gallery/${id}`, { isTemporarilyDeleted: true });
+export const permanentDeleteGallery = (id) => API.put(`/soft-delete-gallery/${id}`);
+
+// Backward compatibility wrapper for public-facing pages (e.g. OurWork.jsx)
 export const galleryApi = {
-    createGallery: async (formData) => {
-        const token = localStorage.getItem('token');
-    
-        const response = await fetch(buildApiUrl('/gallery/create-gallery'), {
-            method: 'POST',
-            headers: {'Authorization' : `Bearer ${token}` },
-            body: formData,
-        });
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;  
-    },
-
-    getGalleries: async () => {
-        const response = await fetch(buildApiUrl('/gallery/get-all-galleries'));
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    },
-
-    updateGallery: async (id, formData) => {
-        const token = localStorage.getItem('token');
-
-        const response = await fetch(buildApiUrl(`/gallery/update-gallery-info/${id}`), {
-            method: 'PATCH',
-            headers: {'Authorization' : `Bearer ${token}` },
-            body: formData,
-        });
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    },
-
-    temporaryDeleteGallery: async (id, data) => {
-        const token = localStorage.getItem('token');
-
-        const response = await fetch(buildApiUrl(`/gallery/temporary-delete-gallery/${id}`), {
-            method: 'PATCH',
-            headers: {
-                'Authorization' : `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }); 
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    },
-
-    permanentDeleteGallery: async (id) => {
-        const token = localStorage.getItem('token');
-
-        const response = await fetch(buildApiUrl(`/gallery/soft-delete-gallery/${id}`), {
-            method: 'PUT',
-            headers: { 'Authorization' : `Bearer ${token}` },
-        }); 
-
-        const contentType = response.headers.get('content-type') || ''
-        const payload = contentType.includes('application/json')
-            ? await response.json().catch(() => null)
-            : await response.text().then((text) => (text ? { message: text } : null)).catch(() => null)
-
-        if (!response.ok) {
-            throw new Error(payload?.message || `Request failed with status ${response.status}.`)
-        }
-
-        return payload;
-    }
+  createGallery: async (formData) => {
+    const response = await createGallery(formData);
+    return response.data;
+  },
+  getGalleries: async () => {
+    const response = await getAllGalleries();
+    return response.data;
+  },
+  updateGallery: async (id, formData) => {
+    const response = await updateGallery(id, formData);
+    return response.data;
+  },
+  temporaryDeleteGallery: async (id, data) => {
+    const isTemporarilyDeleted = data?.isTemporarilyDeleted !== undefined ? data.isTemporarilyDeleted : true;
+    const response = await API.patch(`/temporary-delete-gallery/${id}`, { isTemporarilyDeleted });
+    return response.data;
+  },
+  permanentDeleteGallery: async (id) => {
+    const response = await permanentDeleteGallery(id);
+    return response.data;
+  }
 };

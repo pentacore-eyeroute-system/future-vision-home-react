@@ -3,10 +3,12 @@ import { VITE_API_BASE_URL } from '../config/apiUrlConfig';
 
 const API = axios.create({
   baseURL: `${VITE_API_BASE_URL}/news`,
+  withCredentials: true,
 });
 
+// Interceptor to attach the Admin JWT token securely
 API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,8 +24,6 @@ export const temporaryDeleteNews = (id) => API.patch(`/temporary-delete-news/${i
 export const newsApi = {
   getNews: async () => {
     const response = await getAllNews();
-    const allNews = response.data.result || [];
-    const activeNews = allNews.filter(item => !item.news_is_temporarily_deleted);
-    return { result: activeNews };
+    return { result: response.data.result || [] };
   }
 };
