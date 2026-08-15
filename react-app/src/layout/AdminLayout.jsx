@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useContext, useLayoutEffect } from 'react'
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom'
-import ThemeToggle from '../components/ThemeToggle'
-import AdminModal from '../components/admin/AdminModal'
+import { ThemeContext } from '../context/ThemeContext'
+import AccountSettingsModal from '../components/admin/AccountSettingsModal'
 
 const contentNavItems = [
   { path: '/admin', label: 'Visionistas' },
@@ -18,6 +18,7 @@ const adminNavItems = [
 function AdminLayout() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { theme, toggleTheme } = useContext(ThemeContext)
 
   // Role state - defaults to 'Admin' if not explicitly stored
   const [userRole, setUserRole] = useState(() => {
@@ -25,15 +26,121 @@ function AdminLayout() {
   })
 
   const [userName, setUserName] = useState(() => {
-    return sessionStorage.getItem('userName') || localStorage.getItem('userName') || (userRole === 'Editor' ? 'Editor' : 'Admin')
+    return (
+      sessionStorage.getItem('userName') ||
+      localStorage.getItem('userName') ||
+      (userRole === 'Editor' ? 'Editor' : 'Admin')
+    )
   })
 
   const [userEmail] = useState(() => {
-    return sessionStorage.getItem('userEmail') || localStorage.getItem('userEmail') || (userRole === 'Editor' ? 'editor@futurevisionhome.com' : 'admin@futurevisionhome.com')
+    return (
+      sessionStorage.getItem('userEmail') ||
+      localStorage.getItem('userEmail') ||
+      (userRole === 'Editor' ? 'editor@futurevisionhome.com' : 'admin@futurevisionhome.com')
+    )
   })
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [pendingCount, setPendingCount] = useState(3)
+
+  const profileMenuRef = useRef(null)
+  const tabListRef = useRef(null)
+  const tabRefs = useRef({})
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 })
+
+  // All currently active navigation items based on role
+  const visibleNavItems =
+    userRole === 'Admin'
+      ? [...contentNavItems, ...adminNavItems]
+      : contentNavItems
+
+  const isTabActive = (path) => {
+    if (path === '/admin') {
+      return location.pathname === '/admin'
+    }
+    return location.pathname === path
+  }
+
+  // Update sliding tab indicator position
+  const updateIndicator = () => {
+    const activeItem = visibleNavItems.find((item) => isTabActive(item.path))
+    if (activeItem && tabRefs.current[activeItem.path] && tabListRef.current) {
+      const activeEl = tabRefs.current[activeItem.path]
+      const containerRect = tabListRef.current.getBoundingClientRect()
+      const elRect = activeEl.getBoundingClientRect()
+
+      setIndicatorStyle({
+        left: elRect.left - containerRect.left + tabListRef.current.scrollLeft,
+        width: elRect.width,
+        opacity: 1,
+      })
+    } else {
+      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }))
+    }
+  }
+
+  useLayoutEffect(() => {
+    updateIndicator()
+  }, [location.pathname, userRole])
+
+  useEffect(() => {
+    window.addEventListener('resize', updateIndicator)
+    return () => window.removeEventListener('resize', updateIndicator)
+  }, [location.pathname, userRole])
+
+  // Keyboard navigation for horizontal tabs (Left / Right / Home / End)
+  const handleTabKeyDown = (e, currentPath) => {
+    const currentIndex = visibleNavItems.findIndex((item) => item.path === currentPath)
+    if (currentIndex === -1) return
+
+    let targetIndex = -1
+
+    if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      targetIndex = (currentIndex + 1) % visibleNavItems.length
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      targetIndex = (currentIndex - 1 + visibleNavItems.length) % visibleNavItems.length
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      targetIndex = 0
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      targetIndex = visibleNavItems.length - 1
+    }
+
+    if (targetIndex !== -1) {
+      const targetPath = visibleNavItems[targetIndex].path
+      const targetEl = tabRefs.current[targetPath]
+      if (targetEl) {
+        targetEl.focus()
+      }
+    }
+  }
+
+  // Close profile dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [])
 
   useEffect(() => {
     try {
@@ -49,6 +156,7 @@ function AdminLayout() {
   }, [location.pathname])
 
   const handleLogout = () => {
+    setIsProfileMenuOpen(false)
     sessionStorage.removeItem('token')
     sessionStorage.removeItem('adminAuthenticated')
     sessionStorage.removeItem('adminLoginTime')
@@ -74,19 +182,18 @@ function AdminLayout() {
     localStorage.setItem('userName', newName)
   }
 
-  const initials = userName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2) || (userRole === 'Editor' ? 'ED' : 'AD')
+  const initials =
+    userName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || (userRole === 'Editor' ? 'ED' : 'AD')
 
-  const isTabActive = (path) => {
-    if (path === '/admin') {
-      return location.pathname === '/admin'
-    }
-    return location.pathname === path
-  }
+  const username =
+    userRole === 'Admin'
+      ? 'admin'
+      : userName.toLowerCase().replace(/\s+/g, '') || 'editor'
 
   return (
     <div className="admin-dashboard">
@@ -108,29 +215,172 @@ function AdminLayout() {
               </h1>
 
               <div className="flex items-center gap-3">
-                <ThemeToggle />
-
-                {/* Self Account Management Trigger */}
-                <button
-                  type="button"
-                  onClick={() => setIsAccountModalOpen(true)}
-                  className="admin-account-btn"
-                  title="Account Settings"
-                  aria-label="Account Settings"
-                >
-                  <span className="admin-avatar-pill">
+                {/* Profile Quick Menu & Avatar Trigger */}
+                <div className="admin-avatar-wrapper" ref={profileMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsProfileMenuOpen((prev) => !prev)}
+                    className={`admin-account-circle-btn ${isProfileMenuOpen ? 'active' : ''}`}
+                    title={`Profile Menu (${userName} • ${userRole})`}
+                    aria-label="User Profile Menu"
+                    aria-expanded={isProfileMenuOpen}
+                    aria-haspopup="true"
+                  >
                     <span className="admin-avatar-initials">{initials}</span>
-                  </span>
-                  <span className="admin-account-label">My Account</span>
-                  <span className={`admin-role-badge ${userRole === 'Editor' ? 'role-editor' : 'role-admin'}`}>
-                    {userRole}
-                  </span>
-                </button>
+                    {/* Active Status Dot */}
+                    <span
+                      className="admin-status-dot"
+                      aria-label="Active session status"
+                      title="Active authenticated session"
+                    />
+                  </button>
 
-                {/* Logout Button */}
-                <button onClick={handleLogout} className="admin-logout">
-                  Logout
-                </button>
+                  {/* Profile Quick Menu Popover */}
+                  {isProfileMenuOpen && (
+                    <div
+                      className="admin-profile-dropdown"
+                      role="menu"
+                      aria-orientation="vertical"
+                    >
+                      {/* Header info */}
+                      <div className="profile-dropdown-header">
+                        <div className="profile-dropdown-avatar">
+                          <span>{initials}</span>
+                        </div>
+                        <div className="profile-dropdown-info">
+                          <div className="profile-dropdown-name-row">
+                            <span className="profile-dropdown-name">{userName}</span>
+                            <span
+                              className={`admin-role-badge ${
+                                userRole === 'Editor' ? 'role-editor' : 'role-admin'
+                              }`}
+                            >
+                              {userRole}
+                            </span>
+                          </div>
+                          <span className="profile-dropdown-username">@{username}</span>
+                        </div>
+                      </div>
+
+                      {/* Menu actions */}
+                      <div className="profile-dropdown-menu">
+                        {/* ⚙️ Account & Security */}
+                        <button
+                          type="button"
+                          className="profile-dropdown-item"
+                          onClick={() => {
+                            setIsProfileMenuOpen(false)
+                            setIsAccountModalOpen(true)
+                          }}
+                          role="menuitem"
+                        >
+                          <div className="profile-dropdown-item-left">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="profile-dropdown-item-icon"
+                            >
+                              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                              <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <span>Account Settings</span>
+                          </div>
+                        </button>
+
+                        {/* 🎨 Theme Toggle */}
+                        <button
+                          type="button"
+                          className="profile-dropdown-item"
+                          onClick={toggleTheme}
+                          role="menuitem"
+                        >
+                          <div className="profile-dropdown-item-left">
+                            {theme === 'dark' ? (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="profile-dropdown-item-icon"
+                              >
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M12 2v2" />
+                                <path d="M12 20v2" />
+                                <path d="m4.93 4.93 1.41 1.41" />
+                                <path d="m17.66 17.66 1.41 1.41" />
+                                <path d="M2 12h2" />
+                                <path d="M20 12h2" />
+                                <path d="m6.34 17.66-1.41 1.41" />
+                                <path d="m19.07 4.93-1.41 1.41" />
+                              </svg>
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="profile-dropdown-item-icon"
+                              >
+                                <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                              </svg>
+                            )}
+                            <span>Theme</span>
+                          </div>
+                          <span className="text-xs font-semibold text-slate-500 uppercase">
+                            {theme}
+                          </span>
+                        </button>
+
+                        <div className="profile-dropdown-divider" />
+
+                        {/* 🚪 Sign Out */}
+                        <button
+                          type="button"
+                          className="profile-dropdown-item danger"
+                          onClick={handleLogout}
+                          role="menuitem"
+                        >
+                          <div className="profile-dropdown-item-left">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="18"
+                              height="18"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="profile-dropdown-item-icon"
+                            >
+                              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                              <polyline points="16 17 21 12 16 7" />
+                              <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                            <span>Sign Out</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -139,18 +389,42 @@ function AdminLayout() {
 
       {/* Admin Content Area */}
       <div className="admin-container">
-        {/* Horizontal Tab Bar (Role-Gated) */}
-        <div className="admin-tabs">
+        {/* Horizontal Tab Bar (Role-Gated with Sliding Indicator & Keyboard Navigation) */}
+        <nav
+          className="admin-tabs"
+          ref={tabListRef}
+          role="tablist"
+          aria-label="Dashboard Content Navigation"
+        >
+          {/* Animated Sliding Underline Indicator */}
+          <span
+            className="admin-tab-indicator"
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+              opacity: indicatorStyle.opacity,
+            }}
+            aria-hidden="true"
+          />
+
           {/* Core Content Tabs (Visible to both Editor and Admin) */}
-          {contentNavItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`admin-tab ${isTabActive(item.path) ? 'active' : ''}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {contentNavItems.map((item) => {
+            const active = isTabActive(item.path)
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                ref={(el) => (tabRefs.current[item.path] = el)}
+                role="tab"
+                aria-selected={active}
+                tabIndex={active ? 0 : -1}
+                onKeyDown={(e) => handleTabKeyDown(e, item.path)}
+                className={`admin-tab ${active ? 'active' : ''}`}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
 
           {/* Admin-Only Tabs (Visible only to Admin) */}
           {userRole === 'Admin' && (
@@ -158,23 +432,31 @@ function AdminLayout() {
               {/* Subtle visual divider before User Management */}
               <div className="admin-tab-divider" aria-hidden="true" />
 
-              {adminNavItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`admin-tab ${isTabActive(item.path) ? 'active' : ''}`}
-                >
-                  <span>{item.label}</span>
-                  {item.hasBadge && (
-                    <span className="admin-tab-badge" title={`${pendingCount} pending requests`}>
-                      {pendingCount}
-                    </span>
-                  )}
-                </Link>
-              ))}
+              {adminNavItems.map((item) => {
+                const active = isTabActive(item.path)
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    ref={(el) => (tabRefs.current[item.path] = el)}
+                    role="tab"
+                    aria-selected={active}
+                    tabIndex={active ? 0 : -1}
+                    onKeyDown={(e) => handleTabKeyDown(e, item.path)}
+                    className={`admin-tab ${active ? 'active' : ''}`}
+                  >
+                    <span>{item.label}</span>
+                    {item.hasBadge && (
+                      <span className="admin-tab-badge" title={`${pendingCount} pending requests`}>
+                        {pendingCount}
+                      </span>
+                    )}
+                  </Link>
+                )
+              })}
             </>
           )}
-        </div>
+        </nav>
 
         {/* Dynamic Content */}
         <div className="admin-content">
@@ -182,68 +464,15 @@ function AdminLayout() {
         </div>
       </div>
 
-      {/* Account Settings Modal Placeholder */}
-      <AdminModal
+      {/* Self Account Management Modal */}
+      <AccountSettingsModal
         isOpen={isAccountModalOpen}
         onClose={() => setIsAccountModalOpen(false)}
-        title="Account Settings"
-        subtitle="Manage your profile details and preferences."
-        maxWidth="max-w-xl"
-        footer={
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', width: '100%' }}>
-            <button
-              type="button"
-              className="admin-login-btn !w-auto !py-2 !px-6"
-              onClick={() => setIsAccountModalOpen(false)}
-            >
-              Close
-            </button>
-          </div>
-        }
-      >
-        <div className="account-modal-body">
-          <div className="account-modal-profile">
-            <div className="account-avatar-large">
-              <span>{initials}</span>
-            </div>
-            <div className="account-details">
-              <h3 className="account-name">{userName}</h3>
-              <p className="account-email">{userEmail}</p>
-              <div className="account-role-tag">
-                <span className={`admin-role-badge ${userRole === 'Editor' ? 'role-editor' : 'role-admin'}`}>
-                  {userRole} Role
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="account-section-divider" />
-
-          {/* Role Preview Switcher (Quick Toggle for Testing Admin/Editor views) */}
-          <div className="account-role-switcher">
-            <label className="admin-field-label">Switch Preview Role (RBAC Demo):</label>
-            <div className="role-toggle-group">
-              <button
-                type="button"
-                className={`role-toggle-btn ${userRole === 'Admin' ? 'active' : ''}`}
-                onClick={() => handleRoleToggle('Admin')}
-              >
-                Admin (Full Access)
-              </button>
-              <button
-                type="button"
-                className={`role-toggle-btn ${userRole === 'Editor' ? 'active' : ''}`}
-                onClick={() => handleRoleToggle('Editor')}
-              >
-                Editor (Content Only)
-              </button>
-            </div>
-            <p className="role-switcher-hint">
-              Switching roles dynamically updates header titles, tabs, and permissions.
-            </p>
-          </div>
-        </div>
-      </AdminModal>
+        userRole={userRole}
+        userName={userName}
+        userEmail={userEmail}
+        onRoleToggle={handleRoleToggle}
+      />
     </div>
   )
 }
