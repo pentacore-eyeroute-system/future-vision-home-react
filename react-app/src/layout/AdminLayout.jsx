@@ -143,15 +143,27 @@ function AdminLayout() {
   }, [])
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('pendingAccessRequests')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        const count = parsed.filter((r) => r.status === 'PENDING_APPROVAL').length
-        setPendingCount(count > 0 ? count : 3)
+    const syncCount = () => {
+      try {
+        const raw = localStorage.getItem('pendingAccessRequests')
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          const count = parsed.filter((r) => r.status === 'PENDING_APPROVAL').length
+          setPendingCount(count)
+        } else {
+          setPendingCount(3)
+        }
+      } catch {
+        setPendingCount(3)
       }
-    } catch {
-      setPendingCount(3)
+    }
+
+    syncCount()
+    window.addEventListener('pendingRequestsUpdated', syncCount)
+    window.addEventListener('storage', syncCount)
+    return () => {
+      window.removeEventListener('pendingRequestsUpdated', syncCount)
+      window.removeEventListener('storage', syncCount)
     }
   }, [location.pathname])
 

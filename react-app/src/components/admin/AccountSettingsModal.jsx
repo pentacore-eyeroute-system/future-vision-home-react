@@ -562,6 +562,38 @@ function AccountSettingsModal({
                     )}
                   </button>
                 </div>
+                {/* Inline Hint for New Password */}
+                <div className="account-field-hint">
+                  <span
+                    className={`account-hint-badge ${
+                      newPassword.length > 0
+                        ? isMinLengthMet
+                          ? 'is-valid'
+                          : 'is-invalid'
+                        : ''
+                    }`}
+                  >
+                    {isMinLengthMet ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="hint-icon"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <span className="hint-bullet" aria-hidden="true">•</span>
+                    )}
+                    <span>Must be at least 8 characters</span>
+                  </span>
+                </div>
               </div>
 
               {/* 3. Confirm New Password */}
@@ -625,38 +657,59 @@ function AccountSettingsModal({
                     )}
                   </button>
                 </div>
-              </div>
-
-              {/* Interactive Real-Time Password Checklist */}
-              <div className="account-password-checklist">
-                <div
-                  className={`account-checklist-item ${
-                    newPassword.length > 0
-                      ? isMinLengthMet
-                        ? 'is-valid'
-                        : 'is-invalid'
-                      : ''
-                  }`}
-                >
-                  <span className="account-checklist-icon">
-                    {isMinLengthMet ? '✓' : '•'}
+                {/* Inline Hint for Confirm Password */}
+                <div className="account-field-hint">
+                  <span
+                    className={`account-hint-badge ${
+                      confirmPassword.length > 0
+                        ? isMatchMet
+                          ? 'is-valid'
+                          : 'is-invalid'
+                        : ''
+                    }`}
+                  >
+                    {isMatchMet ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="hint-icon"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : confirmPassword.length > 0 ? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="hint-icon"
+                      >
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    ) : (
+                      <span className="hint-bullet" aria-hidden="true">•</span>
+                    )}
+                    <span>
+                      {confirmPassword.length > 0
+                        ? isMatchMet
+                          ? 'Passwords match'
+                          : 'Passwords do not match'
+                        : 'Must match new password'}
+                    </span>
                   </span>
-                  <span>At least 8 characters</span>
-                </div>
-
-                <div
-                  className={`account-checklist-item ${
-                    confirmPassword.length > 0
-                      ? isMatchMet
-                        ? 'is-valid'
-                        : 'is-invalid'
-                      : ''
-                  }`}
-                >
-                  <span className="account-checklist-icon">
-                    {isMatchMet ? '✓' : '•'}
-                  </span>
-                  <span>Passwords match</span>
                 </div>
               </div>
 
