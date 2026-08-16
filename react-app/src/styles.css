@@ -7821,3 +7821,172 @@ html[data-theme="dark"] .theme-switch-icon {
     flex-shrink: 0;
     margin-top: 0.15rem;
 }
+
+/* ==========================================================================
+   Audit Logs Styles (Decluttered, High-Legibility, Slide-Over Drawer)
+   ========================================================================== */
+
+.audit-count-alert {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+    border: 1px solid #fecaca;
+}
+
+[data-theme="dark"] .audit-count-alert {
+    background: rgba(239, 68, 68, 0.22) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.audit-decluttered-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.audit-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    justify-content: flex-end;
+    min-width: 280px;
+}
+
+.audit-search-clean {
+    flex: 1 1 240px;
+    max-width: 320px;
+}
+
+.audit-export-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem;
+    border-radius: 9999px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.audit-export-btn:hover {
+    border-color: var(--primary-color, #85A922);
+    color: var(--primary-color, #85A922);
+    background: var(--bg-secondary);
+}
+
+.audit-table th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.audit-table td {
+    padding: 0.85rem 1rem !important;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+[data-theme="dark"] .audit-table td {
+    border-bottom-color: #1e293b;
+}
+
+.audit-clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.audit-clickable-row:hover {
+    background-color: var(--bg-secondary) !important;
+}
+
+.audit-row-alert {
+    background-color: rgba(239, 68, 68, 0.03) !important;
+}
+
+[data-theme="dark"] .audit-row-alert {
+    background-color: rgba(239, 68, 68, 0.06) !important;
+}
+
+.audit-time-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.audit-details-condensed {
+    display: block;
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: default;
+}
+
+/* ==========================================================================
+   Audit Log Instant Hover Tooltip Popover
+   ========================================================================== */
+
+.audit-tooltip-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.audit-hover-popover {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    z-index: 100;
+    width: max-content;
+    max-width: 360px;
+    min-width: 200px;
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+    pointer-events: none;
+}
+
+.audit-tooltip-container:hover .audit-hover-popover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.audit-hover-popover::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--border-color) transparent transparent transparent;
+}
+
+.audit-popover-text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0;
+    word-break: break-word;
+}
+

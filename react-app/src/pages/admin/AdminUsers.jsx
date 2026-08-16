@@ -5,30 +5,21 @@ import AdminModal from '../../components/admin/AdminModal'
 const INITIAL_PENDING_REQUESTS = [
   {
     id: 'req_101',
-    fullName: 'Aira Batumbakal',
-    email: 'aira@futurevisionhome.com',
-    username: 'Aira',
+    fullName: 'Angel Faith Fernando',
+    email: 'angel.fernando@futurevisionhome.com',
+    username: 'afernando',
     requestedRole: 'Editor',
     status: 'PENDING_APPROVAL',
     submittedAt: new Date(Date.now() - 3600000 * 5).toISOString(),
   },
   {
     id: 'req_102',
-    fullName: 'Carlos Reyes',
-    email: 'carlos.reyes@futurevisionhome.com',
-    username: 'creyes',
+    fullName: 'Jamaine Grace M. Tuazon',
+    email: 'jamaine.tuazon@futurevisionhome.com',
+    username: 'jtuazon',
     requestedRole: 'Editor',
     status: 'PENDING_APPROVAL',
     submittedAt: new Date(Date.now() - 3600000 * 24).toISOString(),
-  },
-  {
-    id: 'req_103',
-    fullName: 'Elena Gomez',
-    email: 'elena.gomez@futurevisionhome.com',
-    username: 'elenag',
-    requestedRole: 'Editor',
-    status: 'PENDING_APPROVAL',
-    submittedAt: new Date(Date.now() - 3600000 * 48).toISOString(),
   },
 ]
 
@@ -36,35 +27,35 @@ const INITIAL_PENDING_REQUESTS = [
 const INITIAL_STAFF_MEMBERS = [
   {
     id: 'usr_01',
-    fullName: 'Administrator',
-    email: 'admin@futurevisionhome.com',
-    username: 'admin',
+    fullName: 'Jorge Omar K. Fuertes',
+    email: 'jorge.fuertes@futurevisionhome.com',
+    username: 'jfuertes',
     role: 'Admin',
     joinedAt: '2025-01-10T08:00:00.000Z',
   },
   {
     id: 'usr_02',
-    fullName: 'Sarah Connor',
-    email: 'sarah.connor@futurevisionhome.com',
-    username: 'sarahc',
+    fullName: 'Rishaye Abigail G. Melad',
+    email: 'rishaye.melad@futurevisionhome.com',
+    username: 'rmelad',
+    role: 'Admin',
+    joinedAt: '2025-03-01T09:00:00.000Z',
+  },
+  {
+    id: 'usr_03',
+    fullName: 'Gwyenth A. Lim',
+    email: 'gwyenth.lim@futurevisionhome.com',
+    username: 'glim',
     role: 'Editor',
     joinedAt: '2025-06-12T10:00:00.000Z',
   },
   {
-    id: 'usr_03',
-    fullName: 'Michael Scott',
-    email: 'mscott@futurevisionhome.com',
-    username: 'mscott',
+    id: 'usr_04',
+    fullName: 'Jamaine Grace M. Tuazon',
+    email: 'jamaine.tuazon@futurevisionhome.com',
+    username: 'jtuazon',
     role: 'Editor',
     joinedAt: '2025-09-20T11:30:00.000Z',
-  },
-  {
-    id: 'usr_04',
-    fullName: 'David Wallace',
-    email: 'dwallace@futurevisionhome.com',
-    username: 'dwallace',
-    role: 'Admin',
-    joinedAt: '2025-03-01T09:00:00.000Z',
   },
 ]
 
@@ -77,19 +68,28 @@ function AdminUsers() {
   const currentAdminEmail =
     sessionStorage.getItem('userEmail') ||
     localStorage.getItem('userEmail') ||
-    'admin@futurevisionhome.com'
+    'jorge.fuertes@futurevisionhome.com'
 
   const currentAdminUsername =
     sessionStorage.getItem('userName') ||
     localStorage.getItem('userName') ||
-    'admin'
+    'jfuertes'
 
   // Pending Requests State
   const [pendingRequests, setPendingRequests] = useState(() => {
     try {
       const stored = localStorage.getItem('pendingAccessRequests')
       if (stored) {
-        return JSON.parse(stored)
+        const parsed = JSON.parse(stored)
+        const hasOldNames = parsed.some(
+          (r) =>
+            r.fullName?.includes('Aira Batumbakal') ||
+            r.fullName?.includes('Carlos Reyes') ||
+            r.fullName?.includes('Elena Gomez')
+        )
+        if (!hasOldNames) {
+          return parsed
+        }
       }
       localStorage.setItem('pendingAccessRequests', JSON.stringify(INITIAL_PENDING_REQUESTS))
       return INITIAL_PENDING_REQUESTS
@@ -103,7 +103,17 @@ function AdminUsers() {
     try {
       const stored = localStorage.getItem('staffMembersList') || localStorage.getItem('activeUsersList')
       if (stored) {
-        return JSON.parse(stored)
+        const parsed = JSON.parse(stored)
+        const hasOldNames = parsed.some(
+          (u) =>
+            u.fullName?.includes('Sarah Connor') ||
+            u.fullName?.includes('Michael Scott') ||
+            u.fullName?.includes('David Wallace') ||
+            u.fullName === 'Administrator'
+        )
+        if (!hasOldNames) {
+          return parsed
+        }
       }
       localStorage.setItem('staffMembersList', JSON.stringify(INITIAL_STAFF_MEMBERS))
       return INITIAL_STAFF_MEMBERS
@@ -177,6 +187,53 @@ function AdminUsers() {
   // Number of administrators currently in the system
   const adminCount = staffMembers.filter((u) => u.role === 'Admin').length
 
+  // Helper to record an audit log event to localStorage and dispatch event
+  const recordAuditEvent = ({
+    actionType,
+    actionLabel,
+    category = 'ACCESS',
+    severity = 'info',
+    isSecurityAlert = false,
+    targetUser,
+    details,
+  }) => {
+    try {
+      const stored = localStorage.getItem('auditLogsList')
+      const currentLogs = stored ? JSON.parse(stored) : []
+      const newLog = {
+        id: 'log_' + Date.now(),
+        timestamp: new Date().toISOString(),
+        actor: {
+          fullName: 'Administrator',
+          username: currentAdminUsername || 'admin',
+          email: currentAdminEmail || 'admin@futurevisionhome.com',
+        },
+        actionType,
+        actionLabel,
+        category,
+        severity,
+        isSecurityAlert,
+        targetUser: {
+          fullName: targetUser?.fullName || 'Unknown',
+          username: targetUser?.username || 'user',
+          email: targetUser?.email || '',
+        },
+        details,
+        metadata: {
+          ipAddress: '127.0.0.1 (Local UI)',
+          sessionType: 'Web UI (Active Session)',
+          authMethod: isSecurityAlert ? 'Password Re-Auth' : 'Session Token',
+        },
+      }
+
+      const updated = [newLog, ...currentLogs]
+      localStorage.setItem('auditLogsList', JSON.stringify(updated))
+      window.dispatchEvent(new Event('auditLogsUpdated'))
+    } catch {
+      // ignore
+    }
+  }
+
   // Handlers for Pending Requests
   const handleApproveRequest = (request) => {
     // 1. Remove or set status in pending requests
@@ -196,6 +253,17 @@ function AdminUsers() {
     const nextStaffList = [newStaff, ...staffMembers]
     updateStaffStorage(nextStaffList)
 
+    // Record audit event
+    recordAuditEvent({
+      actionType: 'APPROVED_REQUEST',
+      actionLabel: 'Approved Staff Request',
+      category: 'ACCESS',
+      severity: 'info',
+      isSecurityAlert: false,
+      targetUser: request,
+      details: `Approved internal access request for ${request.fullName}; assigned default Editor role.`,
+    })
+
     showToast(`Approved ${request.fullName} as an Editor.`)
   }
 
@@ -203,6 +271,18 @@ function AdminUsers() {
     if (!rejectTarget) return
     const nextPending = pendingRequests.filter((r) => r.id !== rejectTarget.id)
     updatePendingStorage(nextPending)
+
+    // Record audit event
+    recordAuditEvent({
+      actionType: 'REJECTED_REQUEST',
+      actionLabel: 'Rejected Access Request',
+      category: 'ACCESS',
+      severity: 'warning',
+      isSecurityAlert: false,
+      targetUser: rejectTarget,
+      details: `Rejected access request submitted by ${rejectTarget.fullName} (${rejectTarget.email}).`,
+    })
+
     showToast(`Access request from ${rejectTarget.fullName} was rejected.`, 'info')
     setRejectTarget(null)
   }
@@ -285,10 +365,34 @@ function AdminUsers() {
         u.id === targetUser.id ? { ...u, role: 'Editor' } : u
       )
       updateStaffStorage(nextList)
+
+      // Record audit event
+      recordAuditEvent({
+        actionType: 'DEMOTED_TO_EDITOR',
+        actionLabel: 'Demoted to Editor',
+        category: 'ROLES',
+        severity: 'warning',
+        isSecurityAlert: true,
+        targetUser,
+        details: `Demoted ${targetUser.fullName} from Administrator to Editor with password re-auth.`,
+      })
+
       showToast(`${targetUser.fullName} was demoted to Editor.`)
     } else if (authActionModal.type === 'REMOVE') {
       const nextList = staffMembers.filter((u) => u.id !== targetUser.id)
       updateStaffStorage(nextList)
+
+      // Record audit event
+      recordAuditEvent({
+        actionType: 'REMOVED_STAFF_MEMBER',
+        actionLabel: 'Removed Staff Member',
+        category: 'STAFF',
+        severity: 'critical',
+        isSecurityAlert: true,
+        targetUser,
+        details: `Permanently deleted ${targetUser.fullName} (${targetUser.email}) from staff directory.`,
+      })
+
       showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
     }
 
@@ -314,6 +418,18 @@ function AdminUsers() {
         u.id === user.id ? { ...u, role: 'Admin' } : u
       )
       updateStaffStorage(nextList)
+
+      // Record audit event
+      recordAuditEvent({
+        actionType: 'PROMOTED_TO_ADMIN',
+        actionLabel: 'Promoted to Admin',
+        category: 'ROLES',
+        severity: 'info',
+        isSecurityAlert: false,
+        targetUser: user,
+        details: `Promoted ${user.fullName} to Administrator.`,
+      })
+
       showToast(`${user.fullName} was promoted to Administrator.`)
     }
   }
