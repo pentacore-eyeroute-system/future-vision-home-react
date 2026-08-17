@@ -96,6 +96,28 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Global Theme Transition Smoothing */
+body,
+header,
+nav,
+footer,
+section,
+.navbar,
+.card,
+.admin-card,
+.admin-login-card,
+.admin-login-page,
+.admin-status-modal-card,
+.admin-form-group input,
+.admin-form-select,
+.admin-table-container,
+.admin-modal-card,
+.visionista-card,
+.partner-card,
+.news-card {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
 p {
     font-family: 'Poppins-Regular', sans-serif;
     font-size: 1.125rem;
@@ -5282,6 +5304,190 @@ html[data-theme="dark"] .theme-switch-icon {
     }
 }
 
+/* Admin Select Field Styles */
+.admin-select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.admin-form-select {
+    width: 100%;
+    padding: 0.875rem 2.5rem 0.875rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins-Light', sans-serif;
+    transition: all 0.3s ease;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.admin-form-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(149, 171, 47, 0.15);
+}
+
+.admin-form-select:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.admin-select-chevron {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Admin Auth Footer Link */
+.admin-auth-footer {
+    margin-top: 1.75rem;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1.25rem;
+}
+
+.admin-auth-footer p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+}
+
+.admin-auth-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.admin-auth-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+/* Post-Submit Status Modal Overlay */
+.admin-status-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    z-index: 100;
+    animation: fadeInModal 0.25s ease-out forwards;
+}
+
+.admin-status-modal-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: clamp(2rem, 4vw, 2.5rem);
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow-xl);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.admin-status-modal-icon-wrapper {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(149, 171, 47, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    border: 1.5px solid rgba(149, 171, 47, 0.3);
+}
+
+.admin-status-modal-icon {
+    color: var(--primary-color);
+}
+
+.admin-status-modal-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-family: 'Poppins-Bold', 'Poppins-SemiBold', sans-serif;
+}
+
+.admin-status-modal-body {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.94) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+[data-theme="dark"] .admin-form-select {
+    background: #020617;
+    border-color: #334155;
+    color: #f8fafc;
+}
+
+[data-theme="dark"] .admin-form-select:focus {
+    border-color: #95AC29;
+    box-shadow: 0 0 0 3px rgba(149, 172, 41, 0.2);
+}
+
+[data-theme="dark"] .admin-auth-footer {
+    border-top-color: #1e293b;
+}
+
+[data-theme="dark"] .admin-auth-link {
+    color: #A6C430;
+}
+
+[data-theme="dark"] .admin-status-modal-card {
+    background: #0F172A;
+    border-color: #1e293b;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .admin-status-modal-icon-wrapper {
+    background: rgba(149, 172, 41, 0.15);
+    border-color: rgba(149, 172, 41, 0.4);
+}
+
+[data-theme="dark"] .admin-status-modal-icon {
+    color: #A6C430;
+}
+
 /* Legacy Admin Dashboard Styles */
 .admin-dashboard {
     min-height: 100vh;
@@ -5356,8 +5562,71 @@ html[data-theme="dark"] .theme-switch-icon {
     transform: translateY(-2px);
 }
 
+.admin-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 9999px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--text-primary);
+}
+
+.admin-account-btn:hover {
+    border-color: var(--primary-color, #85A922);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-avatar-pill {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-color, #85A922);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+}
+
+.admin-avatar-initials {
+    line-height: 1;
+}
+
+.admin-account-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.admin-role-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.admin-role-badge.role-admin {
+    background: rgba(133, 169, 34, 0.15);
+    color: var(--primary-color, #85A922);
+}
+
+.admin-role-badge.role-editor {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+}
+
 .admin-tabs {
     display: flex;
+    align-items: center;
     gap: 1.5rem;
     margin-bottom: 1rem;
     border-bottom: 2px solid var(--border-color);
@@ -5365,7 +5634,10 @@ html[data-theme="dark"] .theme-switch-icon {
 }
 
 .admin-tab {
-    padding: 1rem 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.75rem;
     background: transparent;
     border: none;
     border-bottom: 3px solid transparent;
@@ -5375,15 +5647,147 @@ html[data-theme="dark"] .theme-switch-icon {
     color: var(--text-secondary);
     transition: all 0.3s ease;
     font-family: 'Poppins-SemiBold', sans-serif;
+    text-decoration: none;
+    position: relative;
 }
 
 .admin-tab.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
+    color: var(--primary-color, #85A922);
+    border-bottom-color: var(--primary-color, #85A922);
 }
 
 .admin-tab:hover {
-    color: var(--primary-color);
+    color: var(--primary-color, #85A922);
+}
+
+.admin-tab-divider {
+    width: 1.5px;
+    height: 24px;
+    background: var(--border-color);
+    margin: 0 0.25rem;
+    opacity: 0.7;
+    align-self: center;
+}
+
+.admin-tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 9999px;
+    background: var(--primary-color, #85A922);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.admin-tab.active .admin-tab-badge {
+    background: var(--primary-color, #85A922);
+    transform: scale(1.08);
+}
+
+/* Account Modal Styling */
+.account-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0.5rem 0;
+}
+
+.account-modal-profile {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.account-avatar-large {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-color, #85A922);
+    color: #ffffff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.account-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.account-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.account-email {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.account-role-tag {
+    margin-top: 0.25rem;
+}
+
+.account-section-divider {
+    height: 1px;
+    background: var(--border-color);
+    width: 100%;
+}
+
+.account-role-switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.role-toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.role-toggle-btn {
+    padding: 0.65rem 1rem;
+    border: 1.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.role-toggle-btn:hover {
+    border-color: var(--primary-color, #85A922);
+}
+
+.role-toggle-btn.active {
+    border-color: var(--primary-color, #85A922);
+    background: rgba(133, 169, 34, 0.12);
+    color: var(--primary-color, #85A922);
+    font-weight: 700;
+}
+
+.role-switcher-hint {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0.25rem 0 0 0;
 }
 
 .admin-content {

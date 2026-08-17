@@ -10,11 +10,14 @@ import EyeRoute from './pages/EyeRoute'
 import Donate from './pages/Donate'
 import Contact from './pages/Contact'
 import Admin from './pages/Admin'
+import RequestAccess from './pages/RequestAccess'
 import Article from './pages/Article'
 import AdminVisionistas from './pages/admin/AdminVisionistas'
 import AdminPartners from './pages/admin/AdminPartners'
 import AdminNewsGallery from './pages/admin/AdminNewsGallery'
 import AdminDeleted from './pages/admin/AdminDeleted'
+import AdminUsers from './pages/admin/AdminUsers'
+import AdminAuditLogs from './pages/admin/AdminAuditLogs'
 
 const publicRoutes = [
   { path: '/', element: <Home /> },
@@ -32,6 +35,8 @@ const adminRoutes = [
   { path: 'news-gallery', element: <AdminNewsGallery /> },
   { path: 'partners', element: <AdminPartners /> },
   { path: 'deleted', element: <AdminDeleted /> },
+  { path: 'users', element: <AdminUsers /> },
+  { path: 'audit-logs', element: <AdminAuditLogs /> },
 ]
 
 // Simple Auth Guard
@@ -53,6 +58,10 @@ function App() {
 
         {/* Admin Login - No Layout */}
         <Route path="/admin/login" element={<Admin />} />
+        <Route path="/login" element={<Admin />} />
+
+        {/* Request Access Page - No Layout */}
+        <Route path="/internal/request-access" element={<RequestAccess />} />
 
         {/* Protected Admin Routes */}
         <Route
