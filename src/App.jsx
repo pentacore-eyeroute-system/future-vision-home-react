@@ -60,8 +60,11 @@ function App() {
         <Route path="/admin/login" element={<Admin />} />
         <Route path="/login" element={<Admin />} />
 
-        {/* Request Access Page - No Layout */}
+        {/* Sign Up / Request Access Routes - No Layout */}
         <Route path="/internal/request-access" element={<RequestAccess />} />
+        <Route path="/signup" element={<RequestAccess />} />
+        <Route path="/sign-up" element={<RequestAccess />} />
+        <Route path="/register" element={<RequestAccess />} />
 
         {/* Protected Admin Routes */}
         <Route
