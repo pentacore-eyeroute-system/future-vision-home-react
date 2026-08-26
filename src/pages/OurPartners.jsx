@@ -22,9 +22,13 @@ function OurPartners() {
   }, []);
 
   const fetchData = async () => {
-    const partners = await partnerApi.getPartners();
-
-    setData(partners.result);
+    try {
+      const partners = await partnerApi.getPartners();
+      setData(partners?.result || []);
+    } catch (error) {
+      console.error("Failed fetching partners:", error);
+      setData([]);
+    }
   };
  
   return (

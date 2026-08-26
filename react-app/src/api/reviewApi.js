@@ -82,6 +82,14 @@ export const reviewApi = {
     return response.data.result || response.data;
   },
 
+  updateReview: async (session, id, formData) => {
+    const token = typeof session === 'object' && session !== null ? session.token : session;
+    const response = await API.patch(`/update-review/${id}`, formData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data.result || response.data;
+  },
+
   deleteReview: async (session, id) => {
     const token = typeof session === 'object' && session !== null ? session.token : session;
     const response = await API.put(`/soft-delete-review/${id}`, {}, {

@@ -216,15 +216,17 @@ function EyeRoute() {
     setReviewActionError("");
 
     try {
-      // Since /add-review is dual-purpose, pass the current rating/feedback context 
       const payload = {
         rating: editForm.rating,
         feedback: editForm.comment,
       };
 
-      const rawUpdated = await reviewApi.submitReview(session, payload);
+      const rawUpdated = await reviewApi.updateReview(session, reviewId, payload);
       const normalizedUpdated = {
         ...normalizeReview(rawUpdated),
+        id: reviewId,
+        rating: Number(editForm.rating),
+        comment: editForm.comment,
         name: user?.name || 'Anonymous User',
         picture: user?.picture || '',
         email: user?.email || '',

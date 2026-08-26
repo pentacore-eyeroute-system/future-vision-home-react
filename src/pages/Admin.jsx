@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { authApi } from '../api/authApi'
 
-const ADMIN_USER = 'admin'
-const ADMIN_PASS = '12345678'
 const SESSION_KEY = 'adminAuthenticated'
 const SESSION_TIME_KEY = 'adminLoginTime'
 const SESSION_MAX_AGE = 8 * 60 * 60 * 1000 // 8 hours
@@ -16,18 +15,24 @@ function Admin() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const isAuthed = sessionStorage.getItem(SESSION_KEY) === 'true'
-    const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || '0', 10)
+    const isAuthed = sessionStorage.getItem(SESSION_KEY) === 'true' || localStorage.getItem(SESSION_KEY) === 'true'
+    const loginTime = parseInt(sessionStorage.getItem(SESSION_TIME_KEY) || localStorage.getItem(SESSION_TIME_KEY) || '0', 10)
+    const token = sessionStorage.getItem('token') || localStorage.getItem('token')
     const expired = Date.now() - loginTime > SESSION_MAX_AGE
-    if (isAuthed && !expired) {
+
+    if (isAuthed && token && !expired) {
       navigate('/admin')
-    } else {
+    } else if (expired || !token) {
       sessionStorage.removeItem(SESSION_KEY)
       sessionStorage.removeItem(SESSION_TIME_KEY)
+      sessionStorage.removeItem('token')
+      localStorage.removeItem(SESSION_KEY)
+      localStorage.removeItem(SESSION_TIME_KEY)
+      localStorage.removeItem('token')
     }
   }, [navigate])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -38,16 +43,39 @@ function Admin() {
 
     setIsSubmitting(true)
 
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
-      sessionStorage.setItem(SESSION_KEY, 'true')
-      sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
-      navigate('/admin')
-      return
-    }
+    try {
+      const response = await authApi.loginAdmin({
+        username: username.trim(),
+        password: password.trim(),
+      })
 
-    setError('Invalid username or password. Please try again.')
-    setPassword('')
-    setIsSubmitting(false)
+      const token = response?.result?.token || response?.token
+      const role = response?.result?.role || response?.role || 'Admin'
+
+      if (token) {
+        sessionStorage.setItem('token', token)
+        localStorage.setItem('token', token)
+      }
+      sessionStorage.setItem(SESSION_KEY, 'true')
+      localStorage.setItem(SESSION_KEY, 'true')
+      sessionStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
+      localStorage.setItem(SESSION_TIME_KEY, Date.now().toString())
+      sessionStorage.setItem('userRole', role === 'admin' ? 'Admin' : role)
+      localStorage.setItem('userRole', role === 'admin' ? 'Admin' : role)
+      sessionStorage.setItem('userName', username.trim())
+      localStorage.setItem('userName', username.trim())
+
+      navigate('/admin')
+    } catch (err) {
+      const errorMessage =
+        err?.error ||
+        err?.message ||
+        'Invalid username or password. Please try again.'
+      setError(errorMessage)
+      setPassword('')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
