@@ -192,12 +192,12 @@ function AdminAuditLogs() {
     }
 
     return (
-      <div className="flex items-center gap-2 text-sm font-medium text-slate-800 dark:text-slate-200">
+      <div className="flex items-center gap-2 text-sm font-medium">
         <span
-          className={`inline-block w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotClass}`}
+          className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${dotClass}`}
           aria-hidden="true"
         />
-        <span className="truncate">{log.actionLabel || log.actionType}</span>
+        <span className="truncate audit-action-text">{log.actionLabel || log.actionType}</span>
       </div>
     )
   }
@@ -335,10 +335,10 @@ function AdminAuditLogs() {
                     {/* 1. Timestamp */}
                     <td>
                       <div className="audit-time-cell">
-                        <span className="font-semibold text-slate-800 dark:text-slate-200 text-sm">
+                        <span className="audit-time-date">
                           {datePart}
                         </span>
-                        <span className="text-xs text-slate-400 font-mono">
+                        <span className="audit-time-sub">
                           {timePart} {relativeTime ? `• ${relativeTime}` : ''}
                         </span>
                       </div>
@@ -352,7 +352,7 @@ function AdminAuditLogs() {
                         </div>
                         <div className="user-info-stack">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                            <span className="audit-actor-name">
                               {log.actor?.fullName || 'System'}
                             </span>
                             {isActorSelf && (
@@ -361,7 +361,7 @@ function AdminAuditLogs() {
                               </span>
                             )}
                           </div>
-                          <span className="text-xs text-slate-400 font-mono">
+                          <span className="user-username-badge font-mono text-xs">
                             @{log.actor?.username || 'system'}
                           </span>
                         </div>
@@ -377,10 +377,10 @@ function AdminAuditLogs() {
                         <span className="text-slate-400 font-medium text-base select-none">—</span>
                       ) : (
                         <div className="user-info-stack">
-                          <span className="font-medium text-slate-800 dark:text-slate-200 text-sm">
+                          <span className="audit-target-name">
                             {log.targetUser.fullName}
                           </span>
-                          <span className="text-xs text-slate-400 font-mono">
+                          <span className="audit-target-email">
                             {log.targetUser.email}
                           </span>
                         </div>
