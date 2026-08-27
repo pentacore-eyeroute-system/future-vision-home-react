@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { authApi } from '../api/authApi'
 
 function RequestAccess() {
   const navigate = useNavigate()
@@ -27,7 +28,7 @@ function RequestAccess() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
 
@@ -71,48 +72,22 @@ function RequestAccess() {
 
     setIsSubmitting(true)
 
-    // Check duplicate username or email from stored requests
     try {
-      const existingRequests = JSON.parse(localStorage.getItem('pendingAccessRequests') || '[]')
-      const isDuplicateEmail = existingRequests.some(
-        (req) => req.email.toLowerCase() === email.trim().toLowerCase()
-      )
-      const isDuplicateUsername = existingRequests.some(
-        (req) => req.username.toLowerCase() === username.trim().toLowerCase()
-      )
+      await authApi.signup({
+        fullName: fullName.trim(),
+        email: email.trim(),
+        username: username.trim(),
+        password: password.trim(),
+      })
 
-      if (isDuplicateEmail) {
-        setError('A request with this email address has already been submitted.')
-        setIsSubmitting(false)
-        return
-      }
-
-      if (isDuplicateUsername || username.trim().toLowerCase() === 'admin') {
-        setError('This username is already taken or pending review.')
-        setIsSubmitting(false)
-        return
-      }
-
-      // Simulate network latency for submission
-      setTimeout(() => {
-        const newRequest = {
-          id: 'req_' + Date.now(),
-          fullName: fullName.trim(),
-          email: email.trim(),
-          username: username.trim(),
-          requestedRole: 'Editor',
-          status: 'PENDING_APPROVAL',
-          submittedAt: new Date().toISOString(),
-        }
-
-        existingRequests.push(newRequest)
-        localStorage.setItem('pendingAccessRequests', JSON.stringify(existingRequests))
-
-        setIsSubmitting(false)
-        setIsSubmitted(true)
-      }, 700)
-    } catch {
-      setError('An error occurred while submitting your request. Please try again.')
+      setIsSubmitted(true)
+    } catch (err) {
+      const errorMessage =
+        err?.error ||
+        err?.message ||
+        'An error occurred while submitting your request. Please try again.'
+      setError(errorMessage)
+    } finally {
       setIsSubmitting(false)
     }
   }

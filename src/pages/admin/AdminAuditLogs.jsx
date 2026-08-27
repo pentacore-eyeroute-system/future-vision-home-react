@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
+import { auditLogApi } from '../../api/auditLogApi'
 
-// Initial seed audit logs with updated members
+// Initial seed fallback audit logs if offline
 const INITIAL_AUDIT_LOGS = [
   {
     id: 'log_101',
@@ -125,22 +126,11 @@ function AdminAuditLogs() {
     try {
       const stored = localStorage.getItem('auditLogsList')
       if (stored) {
-        const parsed = JSON.parse(stored)
-        const hasOldNames = parsed.some(
-          (l) =>
-            l.targetUser?.fullName?.includes('David Wallace') ||
-            l.targetUser?.fullName?.includes('Sarah Connor') ||
-            l.targetUser?.fullName?.includes('Michael Scott') ||
-            l.targetUser?.fullName?.includes('John Doe')
-        )
-        if (!hasOldNames) {
-          return parsed
-        }
+        return JSON.parse(stored)
       }
-      localStorage.setItem('auditLogsList', JSON.stringify(INITIAL_AUDIT_LOGS))
-      return INITIAL_AUDIT_LOGS
+      return []
     } catch {
-      return INITIAL_AUDIT_LOGS
+      return []
     }
   })
 
@@ -148,11 +138,62 @@ function AdminAuditLogs() {
   const [searchQuery, setSearchQuery] = useState('')
   const [toast, setToast] = useState(null)
 
-  // Current logged in admin
+  // Current logged in admin identification from session
+  const currentUserId =
+    sessionStorage.getItem('currentUserId') ||
+    localStorage.getItem('currentUserId') ||
+    sessionStorage.getItem('userId') ||
+    localStorage.getItem('userId') ||
+    ''
+
   const currentAdminEmail =
     sessionStorage.getItem('userEmail') ||
     localStorage.getItem('userEmail') ||
-    'admin@futurevisionhome.com'
+    ''
+
+  const currentAdminUsername =
+    sessionStorage.getItem('userName') ||
+    localStorage.getItem('userName') ||
+    ''
+
+  const fetchAuditLogs = async () => {
+    try {
+      const data = await auditLogApi.getAllLogs()
+      if (Array.isArray(data) && data.length > 0) {
+        const normalized = data.map((l) => ({
+          id: l.id,
+          timestamp: l.timestamp || l.createdAt,
+          actor: {
+            id: l.actor?.id || l.actorUserId,
+            fullName: l.actor?.fullname || l.actor?.fullName || l.actor?.username || 'Administrator',
+            username: l.actor?.username || 'admin',
+            email: l.actor?.email || '',
+            role: l.actor?.role || 'admin',
+          },
+          actionType: l.actionType || l.action_type || 'SYSTEM_ACTION',
+          actionLabel: l.actionLabel || l.actionType || 'System Event',
+          category: l.category || 'ACCESS',
+          severity: l.severity || 'info',
+          isSecurityAlert: Boolean(l.isSecurityAlert),
+          targetUser: l.targetUser ? {
+            fullName: l.targetUser.fullname || l.targetUser.fullName || l.targetUser.username,
+            username: l.targetUser.username,
+            email: l.targetUser.email,
+          } : null,
+          details: l.details || '',
+          metadata: typeof l.metadata === 'string' ? JSON.parse(l.metadata || '{}') : (l.metadata || {}),
+        }))
+        setLogs(normalized)
+        localStorage.setItem('auditLogsList', JSON.stringify(normalized))
+      }
+    } catch (err) {
+      console.error('Failed to load audit logs from backend:', err)
+    }
+  }
+
+  useEffect(() => {
+    fetchAuditLogs()
+  }, [])
 
   // Sync with auditLogsUpdated event and localStorage
   useEffect(() => {
@@ -413,9 +454,11 @@ function AdminAuditLogs() {
               filteredLogs.map((log) => {
                 const { datePart, timePart } = formatTimestamp(log.timestamp)
                 const relativeTime = getRelativeTime(log.timestamp)
-                const isActorSelf =
-                  log.actor?.email?.toLowerCase() === currentAdminEmail.toLowerCase() ||
-                  log.actor?.username?.toLowerCase() === 'admin'
+                const isActorSelf = Boolean(
+                  (currentUserId && (log.actor?.id || log.actorUserId) && String(log.actor?.id || log.actorUserId) === String(currentUserId)) ||
+                  (currentAdminEmail && log.actor?.email && log.actor.email.trim().toLowerCase() === currentAdminEmail.trim().toLowerCase()) ||
+                  (currentAdminUsername && log.actor?.username && log.actor.username.trim().toLowerCase() === currentAdminUsername.trim().toLowerCase())
+                )
 
                 const actorInitials =
                   log.actor?.fullName

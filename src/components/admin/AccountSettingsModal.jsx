@@ -1,15 +1,34 @@
 import { useState, useEffect } from 'react'
 import AdminModal from './AdminModal'
+import { authApi } from '../../api/authApi'
+import { useAdminAuth } from '../../context/AdminAuthContext'
 
 function AccountSettingsModal({
   isOpen,
   onClose,
-  userRole = 'Admin',
-  userName = 'Administrator',
-  userEmail = 'admin@futurevisionhome.com',
+  userRole: propUserRole,
+  userName: propUserName,
+  userEmail: propUserEmail,
+  username: propUsername,
   onRoleToggle,
 }) {
+  const { currentUser } = useAdminAuth()
   const [activeTab, setActiveTab] = useState('profile') // 'profile' | 'security'
+
+  // Dynamic user data derivation with zero hardcoded fallbacks
+  const userRole = propUserRole || currentUser?.role || sessionStorage.getItem('userRole') || 'Admin'
+  const userName = propUserName || currentUser?.fullName || sessionStorage.getItem('userFullName') || currentUser?.username || sessionStorage.getItem('userName') || 'Administrator'
+  const userEmail = propUserEmail || currentUser?.email || sessionStorage.getItem('userEmail') || ''
+  const username = propUsername || currentUser?.username || sessionStorage.getItem('userName') || (userRole === 'Admin' ? 'admin' : 'editor')
+
+  const initials =
+    userName
+      .split(' ')
+      .filter(Boolean)
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || (userRole === 'Editor' ? 'ED' : 'AD')
 
   // Form states for password tab
   const [currentPassword, setCurrentPassword] = useState('')
@@ -27,21 +46,6 @@ function AccountSettingsModal({
   // Copy-to-clipboard state
   const [copiedField, setCopiedField] = useState(null) // 'email' | 'username'
 
-  // Derive username and initials
-  const username =
-    userRole === 'Admin'
-      ? 'admin'
-      : userName.toLowerCase().replace(/\s+/g, '') || 'editor'
-
-  const initials =
-    userName
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || (userRole === 'Editor' ? 'ED' : 'AD')
-
-  // Real-time validation rules
   const isMinLengthMet = newPassword.length >= 8
   const isMatchMet = confirmPassword.length > 0 && newPassword === confirmPassword
   const isFormValid = Boolean(currentPassword && isMinLengthMet && isMatchMet)
@@ -71,7 +75,7 @@ function AccountSettingsModal({
     }
   }
 
-  const handlePasswordSubmit = (e) => {
+  const handlePasswordSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setSuccessMessage('')
@@ -101,16 +105,6 @@ function AccountSettingsModal({
       return
     }
 
-    const storedPassword =
-      sessionStorage.getItem('userPassword') ||
-      localStorage.getItem('userPassword') ||
-      '12345678'
-
-    if (currentPassword !== storedPassword) {
-      setError('The current password you entered is incorrect.')
-      return
-    }
-
     if (currentPassword === newPassword) {
       setError('New password must be different from your current password.')
       return
@@ -118,11 +112,15 @@ function AccountSettingsModal({
 
     setIsSubmitting(true)
 
-    setTimeout(() => {
-      sessionStorage.setItem('userPassword', newPassword)
-      localStorage.setItem('userPassword', newPassword)
+    try {
+      await authApi.updateSettings({
+        password: newPassword.trim(),
+      })
 
-      setIsSubmitting(false)
+      // Update local storage credentials
+      sessionStorage.setItem('userPassword', newPassword.trim())
+      localStorage.setItem('userPassword', newPassword.trim())
+
       setSuccessMessage('Password changed successfully!')
       setCurrentPassword('')
       setNewPassword('')
@@ -131,7 +129,15 @@ function AccountSettingsModal({
       setTimeout(() => {
         onClose()
       }, 1500)
-    }, 600)
+    } catch (err) {
+      const errorMessage =
+        err?.error ||
+        err?.message ||
+        'Failed to update password. Please try again.'
+      setError(errorMessage)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (

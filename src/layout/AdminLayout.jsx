@@ -1,17 +1,20 @@
-import { useState, useEffect, useRef, useContext, useLayoutEffect } from 'react'
-import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom'
-import { ThemeContext } from '../context/ThemeContext'
+import { useState, useRef, useEffect, useLayoutEffect, useContext } from 'react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import AccountSettingsModal from '../components/admin/AccountSettingsModal'
+import { ThemeContext } from '../context/ThemeContext'
+import { useAdminAuth } from '../context/AdminAuthContext'
 
+// Core Content Navigation (Visible to both Editor and Admin)
 const contentNavItems = [
   { path: '/admin', label: 'Visionistas' },
   { path: '/admin/news-gallery', label: 'News & Gallery' },
-  { path: '/admin/partners', label: 'Our Partners' },
+  { path: '/admin/partners', label: 'Partners' },
   { path: '/admin/deleted', label: 'Recently Deleted' },
 ]
 
+// Administrative-only Navigation (Visible exclusively to Admin)
 const adminNavItems = [
-  { path: '/admin/users', label: 'User Management', hasBadge: true },
+  { path: '/admin/users', label: 'User Management' },
   { path: '/admin/audit-logs', label: 'Audit Logs' },
 ]
 
@@ -19,27 +22,13 @@ function AdminLayout() {
   const navigate = useNavigate()
   const location = useLocation()
   const { theme, toggleTheme } = useContext(ThemeContext)
+  const { currentUser, logout, updateUser } = useAdminAuth()
 
-  // Role state - defaults to 'Admin' if not explicitly stored
-  const [userRole, setUserRole] = useState(() => {
-    return sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'Admin'
-  })
-
-  const [userName, setUserName] = useState(() => {
-    return (
-      sessionStorage.getItem('userName') ||
-      localStorage.getItem('userName') ||
-      (userRole === 'Editor' ? 'Editor' : 'Admin')
-    )
-  })
-
-  const [userEmail] = useState(() => {
-    return (
-      sessionStorage.getItem('userEmail') ||
-      localStorage.getItem('userEmail') ||
-      (userRole === 'Editor' ? 'editor@futurevisionhome.com' : 'admin@futurevisionhome.com')
-    )
-  })
+  // Role and User profile dynamic state from active auth session
+  const userRole = currentUser?.role || sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'Admin'
+  const userName = currentUser?.fullName || sessionStorage.getItem('userFullName') || currentUser?.username || sessionStorage.getItem('userName') || 'Administrator'
+  const username = currentUser?.username || sessionStorage.getItem('userName') || 'admin'
+  const userEmail = currentUser?.email || sessionStorage.getItem('userEmail') || ''
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
@@ -169,43 +158,29 @@ function AdminLayout() {
 
   const handleLogout = () => {
     setIsProfileMenuOpen(false)
-    sessionStorage.removeItem('token')
-    sessionStorage.removeItem('adminAuthenticated')
-    sessionStorage.removeItem('adminLoginTime')
-    sessionStorage.removeItem('userRole')
-    sessionStorage.removeItem('userName')
-    sessionStorage.removeItem('userEmail')
-    localStorage.removeItem('token')
-    localStorage.removeItem('adminAuthenticated')
-    localStorage.removeItem('adminLoginTime')
-    localStorage.removeItem('userRole')
-    localStorage.removeItem('userName')
-    localStorage.removeItem('userEmail')
+    logout()
     navigate('/admin/login', { replace: true })
   }
 
+  const handleBackToWebsite = (e) => {
+    e?.preventDefault?.()
+    setIsProfileMenuOpen(false)
+    logout()
+    navigate('/', { replace: true })
+  }
+
   const handleRoleToggle = (newRole) => {
-    setUserRole(newRole)
-    sessionStorage.setItem('userRole', newRole)
-    localStorage.setItem('userRole', newRole)
-    const newName = newRole === 'Editor' ? 'Editor' : 'Admin'
-    setUserName(newName)
-    sessionStorage.setItem('userName', newName)
-    localStorage.setItem('userName', newName)
+    updateUser({ role: newRole })
   }
 
   const initials =
     userName
       .split(' ')
+      .filter(Boolean)
       .map((n) => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2) || (userRole === 'Editor' ? 'ED' : 'AD')
-
-  const username =
-    userRole === 'Admin'
-      ? 'admin'
-      : userName.toLowerCase().replace(/\s+/g, '') || 'editor'
 
   return (
     <div className="admin-dashboard">
@@ -213,7 +188,12 @@ function AdminLayout() {
       <header className="admin-header">
         <div className="admin-container">
           <div className="admin-header-content">
-            <Link to="/" className="admin-logo">
+            <Link
+              to="/"
+              className="admin-logo"
+              onClick={handleBackToWebsite}
+              title="Return to Public Website (Ends Admin Session)"
+            >
               <img src="/images/fvh-logo.png" alt="Future Vision Home" className="logo-image" />
               <div className="logo-text-wrapper">
                 <span className="logo-text">Future Vision Home</span>
@@ -483,6 +463,7 @@ function AdminLayout() {
         userRole={userRole}
         userName={userName}
         userEmail={userEmail}
+        username={username}
         onRoleToggle={handleRoleToggle}
       />
     </div>
