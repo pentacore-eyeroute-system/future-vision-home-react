@@ -98,30 +98,10 @@ function AdminUsers() {
   }
 
   // Pending Requests State
-  const [pendingRequests, setPendingRequests] = useState(() => {
-    try {
-      const stored = localStorage.getItem('pendingAccessRequests')
-      if (stored) {
-        return JSON.parse(stored)
-      }
-      return []
-    } catch {
-      return []
-    }
-  })
+  const [pendingRequests, setPendingRequests] = useState([])
 
   // Staff Members State
-  const [staffMembers, setStaffMembers] = useState(() => {
-    try {
-      const stored = localStorage.getItem('staffMembersList') || localStorage.getItem('activeUsersList')
-      if (stored) {
-        return JSON.parse(stored)
-      }
-      return []
-    } catch {
-      return []
-    }
-  })
+  const [staffMembers, setStaffMembers] = useState([])
 
   const fetchUsersData = async () => {
     try {
@@ -141,8 +121,6 @@ function AdminUsers() {
           joinedAt: u.createdAt || u.joinedAt || new Date().toISOString(),
         }))
         setStaffMembers(normalizedStaff)
-        localStorage.setItem('staffMembersList', JSON.stringify(normalizedStaff))
-        localStorage.setItem('activeUsersList', JSON.stringify(normalizedStaff))
       }
 
       if (pendingData.status === 'fulfilled' && Array.isArray(pendingData.value)) {
@@ -156,7 +134,6 @@ function AdminUsers() {
           submittedAt: r.createdAt || r.submittedAt || new Date().toISOString(),
         }))
         setPendingRequests(normalizedPending)
-        localStorage.setItem('pendingAccessRequests', JSON.stringify(normalizedPending))
         window.dispatchEvent(new Event('pendingRequestsUpdated'))
       }
     } catch (err) {

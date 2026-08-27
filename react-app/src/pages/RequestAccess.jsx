@@ -80,25 +80,6 @@ function RequestAccess() {
         password: password.trim(),
       })
 
-      // Also update local cache for offline sync
-      try {
-        const existingRequests = JSON.parse(localStorage.getItem('pendingAccessRequests') || '[]')
-        const newRequest = {
-          id: 'req_' + Date.now(),
-          fullName: fullName.trim(),
-          email: email.trim(),
-          username: username.trim(),
-          requestedRole: 'Editor',
-          status: 'PENDING_APPROVAL',
-          submittedAt: new Date().toISOString(),
-        }
-        existingRequests.push(newRequest)
-        localStorage.setItem('pendingAccessRequests', JSON.stringify(existingRequests))
-        window.dispatchEvent(new Event('pendingRequestsUpdated'))
-      } catch {
-        // ignore cache write error
-      }
-
       setIsSubmitted(true)
     } catch (err) {
       const errorMessage =
