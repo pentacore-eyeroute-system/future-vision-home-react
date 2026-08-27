@@ -150,14 +150,21 @@ function AdminNewsGallery() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setImageError('')
+    setDescriptionError('')
 
-    if (formData.type === 'news' && !formData.description.trim()) {
-      setDescriptionError('Please add a description for news posts.')
+    if (formData.type === 'news' && !formData.description?.trim()) {
+      setDescriptionError('Please add content/description for the news article.')
       return
     }
 
-    if (formData.type === 'gallery' && formData.images.length === 0) {
-      setImageError('Please upload at least one photo for gallery posts.')
+    if (formData.type === 'gallery' && !formData.description?.trim()) {
+      setDescriptionError('Please add a description for the gallery event.')
+      return
+    }
+
+    if (!formData.images || formData.images.length === 0) {
+      setImageError(`Photo is required. Please upload at least one image for ${formData.type === 'news' ? 'the news article' : 'the gallery entry'}.`)
       return
     }
 
@@ -329,6 +336,16 @@ function AdminNewsGallery() {
         maxWidth="max-w-4xl"
       >
         <form onSubmit={handleSubmit} className="admin-form">
+          {(imageError || descriptionError) && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{imageError || descriptionError}</span>
+            </div>
+          )}
           {formData.type === 'gallery' ? (
             <div className="news-gallery-modal-grid">
               {/* Left Column: Image Uploader */}
@@ -338,10 +355,9 @@ function AdminNewsGallery() {
                   label="Gallery Photos"
                   images={formData.images}
                   multiple
-                  required={formData.type === 'gallery' && formData.images.length === 0}
+                  required={true}
                   onFilesSelected={handleImageUpload}
                   onRemoveImage={handleRemoveImage}
-                  errorText={imageError}
                   helperText="Upload at least one photo for this gallery."
                 />
               </div>
@@ -410,10 +426,9 @@ function AdminNewsGallery() {
                     label="Cover Photo / Images"
                     images={formData.images}
                     multiple
-                    required={false}
+                    required={true}
                     onFilesSelected={handleImageUpload}
                     onRemoveImage={handleRemoveImage}
-                    errorText={imageError}
                     helperText="Upload a featured cover image."
                   />
                 </div>
@@ -471,7 +486,6 @@ function AdminNewsGallery() {
                     setDescriptionError('')
                   }}
                 />
-                {descriptionError && <p className="admin-upload-error">{descriptionError}</p>}
               </div>
             </div>
           )}

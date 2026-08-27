@@ -13,6 +13,7 @@ function AdminVisionistas() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState('')
   const fileInputRef = useRef(null)
 
   const [formData, setFormData] = useState({
@@ -42,11 +43,11 @@ function AdminVisionistas() {
   }
 
   const columns = [
-    { key: 'vis_fullname', label: 'Name' },
+    { key: 'vis_fullname', label: 'Full Name' },
     { key: 'vis_age', label: 'Age' },
     {
       key: 'vis_images',
-      label: 'Photos',
+      label: 'Photo',
       render: (val, item) => {
         const list = normalizeImageList(val || item.vis_pic_url || item.vis_pic_path)
         return `${list.length} uploaded`
@@ -61,12 +62,14 @@ function AdminVisionistas() {
 
   const handleOpenAdd = () => {
     setEditingItem(null)
+    setFormError('')
     setFormData({ vis_fullname: '', vis_age: '', vis_story: '', vis_images: [], vis_is_archived: false })
     setModalOpen(true)
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
+    setFormError('')
     setFormData({
       vis_fullname: item.vis_fullname || '',
       vis_age: item.vis_age || '',
@@ -95,7 +98,7 @@ function AdminVisionistas() {
 
   const handleImageUpload = async (event) => {
     const nextImages = await filesToImageEntries(event.target.files)
-
+    setFormError('')
     setFormData((current) => ({
       ...current,
       vis_images: nextImages.slice(0, 1),
@@ -122,6 +125,7 @@ function AdminVisionistas() {
     setIsDragging(false)
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       const nextImages = await filesToImageEntries(e.dataTransfer.files)
+      setFormError('')
       setFormData((current) => ({
         ...current,
         vis_images: nextImages.slice(0, 1),
@@ -189,8 +193,21 @@ function AdminVisionistas() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitting(true)
+    setFormError('')
     const imageFile = formData.vis_images.find((img) => img.file)?.file || null
+    const hasExistingImage = formData.vis_images && formData.vis_images.length > 0
+
+    if (!editingItem && !imageFile) {
+      setFormError('Photo is required. Please upload a profile photo for the Visionista.')
+      return
+    }
+
+    if (editingItem && !hasExistingImage && !imageFile) {
+      setFormError('Photo is required. Please upload a profile photo for the Visionista.')
+      return
+    }
+
+    setSubmitting(true)
 
     try {
       if (editingItem) {
@@ -246,15 +263,25 @@ function AdminVisionistas() {
         maxWidth="max-w-4xl"
       >
         <form onSubmit={handleSubmit} className="visionista-form">
+          {formError && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{formError}</span>
+            </div>
+          )}
           <div className="visionista-modal-grid">
             {/* Left Column: Dedicated Photo Upload Dropzone */}
             <div className="visionista-photo-col">
               <label className="visionista-field-label">
-                Profile Photo
+                Profile Photo <span className="text-red-500">*</span>
               </label>
 
               <div
-                className={`visionista-dropzone ${isDragging ? 'is-dragging' : ''} ${currentPhoto ? 'has-image' : ''}`}
+                className={`visionista-dropzone ${isDragging ? 'is-dragging' : ''} ${currentPhoto ? 'has-image' : ''} ${formError && !currentPhoto ? 'has-error' : ''}`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}

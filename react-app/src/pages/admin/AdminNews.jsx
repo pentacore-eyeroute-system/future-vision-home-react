@@ -12,6 +12,7 @@ function AdminNews() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [formError, setFormError] = useState('')
   const [formData, setFormData] = useState({
     news_title: '',
     news_description: '',
@@ -45,12 +46,14 @@ function AdminNews() {
 
   const handleOpenAdd = () => {
     setEditingItem(null)
+    setFormError('')
     setFormData({ news_title: '', news_description: '', news_date: '', news_images: [] })
     setModalOpen(true)
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
+    setFormError('')
     setFormData({
       news_title: item.news_title || '',
       news_description: item.news_description || '',
@@ -72,6 +75,7 @@ function AdminNews() {
 
   const handleImageUpload = async (event) => {
     const nextImages = await filesToImageEntries(event.target.files)
+    setFormError('')
     setFormData((current) => ({
       ...current,
       news_images: [...current.news_images, ...nextImages],
@@ -163,6 +167,14 @@ function AdminNews() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setFormError('')
+    const hasImages = formData.news_images && formData.news_images.length > 0
+
+    if (!hasImages) {
+      setFormError('Photo is required. Please upload at least one image for the news article.')
+      return
+    }
+
     const newFiles = formData.news_images.filter(img => img.file).map(img => img.file)
     const imageFile = newFiles[0] || null
 
@@ -208,8 +220,18 @@ function AdminNews() {
         title={editingItem ? 'Edit News Article' : 'Post New News Article'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{formError}</span>
+            </div>
+          )}
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title <span className="text-red-500">*</span></label>
             <input 
               type="text" 
               required
@@ -219,7 +241,7 @@ function AdminNews() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Date</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Date <span className="text-red-500">*</span></label>
             <input 
               type="date" 
               required
@@ -229,7 +251,7 @@ function AdminNews() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description / Content</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description / Content <span className="text-red-500">*</span></label>
             <textarea 
               rows="6"
               required
@@ -242,6 +264,7 @@ function AdminNews() {
             <AdminImageUploadField
               inputId="newsImages"
               label="Pictures"
+              required={true}
               images={formData.news_images}
               multiple={true}
               onFilesSelected={handleImageUpload}

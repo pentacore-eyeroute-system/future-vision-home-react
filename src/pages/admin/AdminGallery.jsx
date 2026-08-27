@@ -10,6 +10,7 @@ function AdminGallery() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [formError, setFormError] = useState('')
   const [formData, setFormData] = useState({
     gal_title: '',
     gal_description: '',
@@ -35,12 +36,14 @@ function AdminGallery() {
 
   const handleOpenAdd = () => {
     setEditingItem(null)
+    setFormError('')
     setFormData({ gal_title: '', gal_description: '', gal_date: '', gal_pic_path: '' })
     setModalOpen(true)
   }
 
   const handleEdit = (item) => {
     setEditingItem(item)
+    setFormError('')
     setFormData({ ...item })
     setModalOpen(true)
   }
@@ -59,6 +62,13 @@ function AdminGallery() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setFormError('')
+
+    if (!formData.gal_pic_path?.trim()) {
+      setFormError('Photo path is required. Please provide an image for the gallery event.')
+      return
+    }
+
     if (editingItem) {
       await adminApi.updateGallery(editingItem.id, formData)
     } else {
@@ -102,8 +112,18 @@ function AdminGallery() {
         title={editingItem ? 'Edit Gallery Event' : 'Add New Gallery Event'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {formError && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{formError}</span>
+            </div>
+          )}
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Event Title</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Event Title <span className="text-red-500">*</span></label>
             <input 
               type="text" 
               required
@@ -113,7 +133,7 @@ function AdminGallery() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Event Date</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Event Date <span className="text-red-500">*</span></label>
             <input 
               type="date" 
               required
@@ -132,13 +152,16 @@ function AdminGallery() {
             ></textarea>
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Main Image Path</label>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Main Image Path <span className="text-red-500">*</span></label>
             <input 
               type="text" 
               placeholder="/images/gallery-example.png"
-              className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
+              className={`w-full p-3 rounded-xl border ${formError && !formData.gal_pic_path?.trim() ? 'border-red-500 bg-red-50/50' : 'border-gray-200 dark:border-slate-700 dark:bg-slate-900'} focus:ring-2 focus:ring-primary outline-none transition-all`}
               value={formData.gal_pic_path}
-              onChange={(e) => setFormData({...formData, gal_pic_path: e.target.value})}
+              onChange={(e) => {
+                setFormError('')
+                setFormData({...formData, gal_pic_path: e.target.value})
+              }}
             />
           </div>
           <p className="text-xs text-gray-500 italic">Tip: You can add more pictures once the gallery event is created.</p>

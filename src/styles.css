@@ -4634,6 +4634,53 @@ html[data-theme="dark"] .theme-switch-icon {
     box-shadow: 0 0 0 4px rgba(149, 171, 47, 0.2);
 }
 
+.visionista-dropzone.has-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+[data-theme="dark"] .visionista-dropzone.has-error {
+    border-color: #f87171 !important;
+    background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.admin-form-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #991b1b;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+}
+
+[data-theme="dark"] .admin-form-error-banner {
+    color: #fca5a5;
+    background-color: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.admin-dropzone-box.has-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+[data-theme="dark"] .admin-dropzone-box.has-error {
+    border-color: #f87171 !important;
+    background-color: rgba(239, 68, 68, 0.12) !important;
+}
+
+.admin-upload-error {
+    color: #dc2626;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.4rem;
+}
+
 [data-theme="dark"] .visionista-dropzone.is-dragging {
     background: #192a14;
 }

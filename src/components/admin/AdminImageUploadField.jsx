@@ -54,7 +54,7 @@ function AdminImageUploadField({
       </div>
 
       <div
-        className={`admin-dropzone-box ${isDragging ? 'is-dragging' : ''}`}
+        className={`admin-dropzone-box ${isDragging ? 'is-dragging' : ''} ${errorText && images.length === 0 ? 'has-error' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -66,7 +66,6 @@ function AdminImageUploadField({
           type="file"
           accept="image/*"
           multiple={multiple}
-          required={required && images.length === 0}
           onChange={onFilesSelected}
           style={{ display: 'none' }}
         />
