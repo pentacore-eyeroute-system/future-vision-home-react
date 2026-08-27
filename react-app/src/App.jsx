@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext'
 import AppLayout from './layout/AppLayout'
 import AdminLayout from './layout/AdminLayout'
 import Placeholder from './components/Placeholder'
@@ -39,51 +41,79 @@ const adminRoutes = [
   { path: 'audit-logs', element: <AdminAuditLogs /> },
 ]
 
-// Simple Auth Guard
+// Protected Route / Middleware Guard with Cache & bfcache Teardown Protection
 const ProtectedRoute = ({ children }) => {
-  const isAuthed = sessionStorage.getItem('adminAuthenticated') === 'true'
-  return isAuthed ? children : <Navigate to="/admin/login" replace />
+  const { currentUser, isAuthenticated } = useAdminAuth()
+  const sessionAuth = sessionStorage.getItem('adminAuthenticated') === 'true'
+  const token = sessionStorage.getItem('token')
+  const userRole = currentUser?.role || sessionStorage.getItem('userRole') || ''
+
+  // Allowed staff roles (Admin / Editor)
+  const hasValidRole = ['admin', 'editor'].includes(userRole.toLowerCase())
+  const isAuthorized = (isAuthenticated || sessionAuth) && Boolean(token) && hasValidRole
+
+  // Prevent browser back-forward cache (bfcache) from showing stale dashboard after logout
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      const currentToken = sessionStorage.getItem('token')
+      const currentAuth = sessionStorage.getItem('adminAuthenticated') === 'true'
+      if (event.persisted || !currentToken || !currentAuth) {
+        window.location.replace('/admin/login')
+      }
+    }
+
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [])
+
+  if (!isAuthorized) {
+    return <Navigate to="/admin/login" replace />
+  }
+
+  return children
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route element={<AppLayout />}>
-          {publicRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-        </Route>
+    <AdminAuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route element={<AppLayout />}>
+            {publicRoutes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element} />
+            ))}
+          </Route>
 
-        {/* Admin Login - No Layout */}
-        <Route path="/admin/login" element={<Admin />} />
-        <Route path="/login" element={<Admin />} />
+          {/* Admin Login - No Layout */}
+          <Route path="/admin/login" element={<Admin />} />
+          <Route path="/login" element={<Admin />} />
 
-        {/* Sign Up / Request Access Routes - No Layout */}
-        <Route path="/internal/request-access" element={<RequestAccess />} />
-        <Route path="/signup" element={<RequestAccess />} />
-        <Route path="/sign-up" element={<RequestAccess />} />
-        <Route path="/register" element={<RequestAccess />} />
+          {/* Sign Up / Request Access Routes - No Layout */}
+          <Route path="/internal/request-access" element={<RequestAccess />} />
+          <Route path="/signup" element={<RequestAccess />} />
+          <Route path="/sign-up" element={<RequestAccess />} />
+          <Route path="/register" element={<RequestAccess />} />
 
-        {/* Protected Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          {adminRoutes.map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
-          ))}
-        </Route>
+          {/* Protected Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            {adminRoutes.map((route) => (
+              <Route key={route.path} path={route.path} element={route.element} />
+            ))}
+          </Route>
 
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Catch-all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AdminAuthProvider>
   )
 }
 

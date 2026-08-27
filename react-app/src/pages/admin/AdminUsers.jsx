@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminModal from '../../components/admin/AdminModal'
+import { userManagementApi } from '../../api/userManagementApi'
+import { useAdminAuth } from '../../context/AdminAuthContext'
 
-// Initial seed mock data for pending requests if none exist
+// Initial seed fallback data for pending requests if offline
 const INITIAL_PENDING_REQUESTS = [
   {
     id: 'req_101',
@@ -23,7 +25,7 @@ const INITIAL_PENDING_REQUESTS = [
   },
 ]
 
-// Initial seed mock data for staff members if none exist
+// Initial seed fallback data for staff members if offline
 const INITIAL_STAFF_MEMBERS = [
   {
     id: 'usr_01',
@@ -33,68 +35,78 @@ const INITIAL_STAFF_MEMBERS = [
     role: 'Admin',
     joinedAt: '2025-01-10T08:00:00.000Z',
   },
-  {
-    id: 'usr_02',
-    fullName: 'Rishaye Abigail G. Melad',
-    email: 'rishaye.melad@futurevisionhome.com',
-    username: 'rmelad',
-    role: 'Admin',
-    joinedAt: '2025-03-01T09:00:00.000Z',
-  },
-  {
-    id: 'usr_03',
-    fullName: 'Gwyenth A. Lim',
-    email: 'gwyenth.lim@futurevisionhome.com',
-    username: 'glim',
-    role: 'Editor',
-    joinedAt: '2025-06-12T10:00:00.000Z',
-  },
-  {
-    id: 'usr_04',
-    fullName: 'Jamaine Grace M. Tuazon',
-    email: 'jamaine.tuazon@futurevisionhome.com',
-    username: 'jtuazon',
-    role: 'Editor',
-    joinedAt: '2025-09-20T11:30:00.000Z',
-  },
 ]
 
 function AdminUsers() {
+  const { currentUser } = useAdminAuth()
   const [subTab, setSubTab] = useState('pending') // 'pending' | 'staff'
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState('ALL') // 'ALL' | 'Admin' | 'Editor'
+  const [isLoading, setIsLoading] = useState(false)
 
-  // Acting admin identification
+  // Acting admin identification from authenticated session
+  const currentUserId =
+    currentUser?.id ||
+    sessionStorage.getItem('currentUserId') ||
+    localStorage.getItem('currentUserId') ||
+    sessionStorage.getItem('userId') ||
+    localStorage.getItem('userId') ||
+    ''
+
   const currentAdminEmail =
+    currentUser?.email ||
     sessionStorage.getItem('userEmail') ||
     localStorage.getItem('userEmail') ||
-    'jorge.fuertes@futurevisionhome.com'
+    ''
 
   const currentAdminUsername =
+    currentUser?.username ||
     sessionStorage.getItem('userName') ||
     localStorage.getItem('userName') ||
-    'jfuertes'
+    ''
+
+  const currentAdminFullName =
+    currentUser?.fullName ||
+    sessionStorage.getItem('userFullName') ||
+    localStorage.getItem('userFullName') ||
+    'Administrator'
+
+  // Helper to dynamically check if user matches logged-in session
+  const isSelfUser = (user) => {
+    if (!user) return false
+
+    const loggedInId = currentUser?.id || currentUserId
+    const loggedInEmail = currentUser?.email || currentAdminEmail
+    const loggedInUsername = currentUser?.username || currentAdminUsername
+
+    const userIdMatch =
+      Boolean(loggedInId) &&
+      Boolean(user.id || user.usr_id) &&
+      String(user.id || user.usr_id) === String(loggedInId)
+
+    const emailMatch =
+      Boolean(loggedInEmail) &&
+      Boolean(user.email || user.usr_email) &&
+      (user.email || user.usr_email).trim().toLowerCase() === loggedInEmail.trim().toLowerCase()
+
+    const usernameMatch =
+      Boolean(loggedInUsername) &&
+      Boolean(user.username || user.usr_username) &&
+      (user.username || user.usr_username).trim().toLowerCase() === loggedInUsername.trim().toLowerCase()
+
+    return userIdMatch || emailMatch || usernameMatch
+  }
 
   // Pending Requests State
   const [pendingRequests, setPendingRequests] = useState(() => {
     try {
       const stored = localStorage.getItem('pendingAccessRequests')
       if (stored) {
-        const parsed = JSON.parse(stored)
-        const hasOldNames = parsed.some(
-          (r) =>
-            r.fullName?.includes('Aira Batumbakal') ||
-            r.fullName?.includes('Carlos Reyes') ||
-            r.fullName?.includes('Elena Gomez')
-        )
-        if (!hasOldNames) {
-          return parsed
-        }
+        return JSON.parse(stored)
       }
-      localStorage.setItem('pendingAccessRequests', JSON.stringify(INITIAL_PENDING_REQUESTS))
-      return INITIAL_PENDING_REQUESTS
+      return []
     } catch {
-      return INITIAL_PENDING_REQUESTS
+      return []
     }
   })
 
@@ -103,24 +115,60 @@ function AdminUsers() {
     try {
       const stored = localStorage.getItem('staffMembersList') || localStorage.getItem('activeUsersList')
       if (stored) {
-        const parsed = JSON.parse(stored)
-        const hasOldNames = parsed.some(
-          (u) =>
-            u.fullName?.includes('Sarah Connor') ||
-            u.fullName?.includes('Michael Scott') ||
-            u.fullName?.includes('David Wallace') ||
-            u.fullName === 'Administrator'
-        )
-        if (!hasOldNames) {
-          return parsed
-        }
+        return JSON.parse(stored)
       }
-      localStorage.setItem('staffMembersList', JSON.stringify(INITIAL_STAFF_MEMBERS))
-      return INITIAL_STAFF_MEMBERS
+      return []
     } catch {
-      return INITIAL_STAFF_MEMBERS
+      return []
     }
   })
+
+  const fetchUsersData = async () => {
+    try {
+      setIsLoading(true)
+      const [staffData, pendingData] = await Promise.allSettled([
+        userManagementApi.getStaffMembers(),
+        userManagementApi.getPendingRequests(),
+      ])
+
+      if (staffData.status === 'fulfilled' && Array.isArray(staffData.value)) {
+        const normalizedStaff = staffData.value.map((u) => ({
+          id: u.id,
+          fullName: u.usr_fullname || u.fullName || u.usr_username || 'Staff Member',
+          email: u.usr_email || u.email || '',
+          username: u.usr_username || u.username || '',
+          role: (u.usr_role || u.role || 'editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor',
+          joinedAt: u.createdAt || u.joinedAt || new Date().toISOString(),
+        }))
+        setStaffMembers(normalizedStaff)
+        localStorage.setItem('staffMembersList', JSON.stringify(normalizedStaff))
+        localStorage.setItem('activeUsersList', JSON.stringify(normalizedStaff))
+      }
+
+      if (pendingData.status === 'fulfilled' && Array.isArray(pendingData.value)) {
+        const normalizedPending = pendingData.value.map((r) => ({
+          id: r.id,
+          fullName: r.apl_fullname || r.fullName || r.apl_username || 'Applicant',
+          email: r.apl_email || r.email || '',
+          username: r.apl_username || r.username || '',
+          requestedRole: 'Editor',
+          status: (r.apl_status || r.status || 'pending').toLowerCase() === 'pending' ? 'PENDING_APPROVAL' : r.status,
+          submittedAt: r.createdAt || r.submittedAt || new Date().toISOString(),
+        }))
+        setPendingRequests(normalizedPending)
+        localStorage.setItem('pendingAccessRequests', JSON.stringify(normalizedPending))
+        window.dispatchEvent(new Event('pendingRequestsUpdated'))
+      }
+    } catch (err) {
+      console.error('Failed to fetch user management data from backend:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchUsersData()
+  }, [])
 
   // Modals & Feedback State
   const [rejectTarget, setRejectTarget] = useState(null)
@@ -204,7 +252,8 @@ function AdminUsers() {
         id: 'log_' + Date.now(),
         timestamp: new Date().toISOString(),
         actor: {
-          fullName: 'Administrator',
+          id: currentUserId || null,
+          fullName: currentAdminFullName || 'Administrator',
           username: currentAdminUsername || 'admin',
           email: currentAdminEmail || 'admin@futurevisionhome.com',
         },
@@ -235,61 +284,40 @@ function AdminUsers() {
   }
 
   // Handlers for Pending Requests
-  const handleApproveRequest = (request) => {
-    // 1. Remove or set status in pending requests
-    const nextPending = pendingRequests.filter((r) => r.id !== request.id)
-    updatePendingStorage(nextPending)
-
-    // 2. Add to staff directory with default role 'Editor'
-    const newStaff = {
-      id: 'usr_' + Date.now(),
-      fullName: request.fullName,
-      email: request.email,
-      username: request.username,
-      role: 'Editor',
-      joinedAt: new Date().toISOString(),
+  const handleApproveRequest = async (request) => {
+    try {
+      await userManagementApi.updatePendingRequest(request.id, 'approved')
+      showToast(`Approved ${request.fullName} as an Editor.`)
+      await fetchUsersData()
+    } catch (err) {
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to approve request'
+      showToast(errorMsg, 'error')
+      await fetchUsersData()
     }
-
-    const nextStaffList = [newStaff, ...staffMembers]
-    updateStaffStorage(nextStaffList)
-
-    // Record audit event
-    recordAuditEvent({
-      actionType: 'APPROVED_REQUEST',
-      actionLabel: 'Approved Staff Request',
-      category: 'ACCESS',
-      severity: 'info',
-      isSecurityAlert: false,
-      targetUser: request,
-      details: `Approved internal access request for ${request.fullName}; assigned default Editor role.`,
-    })
-
-    showToast(`Approved ${request.fullName} as an Editor.`)
   }
 
-  const handleConfirmReject = () => {
+  const handleConfirmReject = async () => {
     if (!rejectTarget) return
-    const nextPending = pendingRequests.filter((r) => r.id !== rejectTarget.id)
-    updatePendingStorage(nextPending)
-
-    // Record audit event
-    recordAuditEvent({
-      actionType: 'REJECTED_REQUEST',
-      actionLabel: 'Rejected Access Request',
-      category: 'ACCESS',
-      severity: 'warning',
-      isSecurityAlert: false,
-      targetUser: rejectTarget,
-      details: `Rejected access request submitted by ${rejectTarget.fullName} (${rejectTarget.email}).`,
-    })
-
-    showToast(`Access request from ${rejectTarget.fullName} was rejected.`, 'info')
-    setRejectTarget(null)
+    try {
+      await userManagementApi.updatePendingRequest(rejectTarget.id, 'rejected')
+      showToast(`Access request from ${rejectTarget.fullName} was rejected.`, 'info')
+      setRejectTarget(null)
+      await fetchUsersData()
+    } catch (err) {
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to reject request'
+      showToast(errorMsg, 'error')
+      setRejectTarget(null)
+      await fetchUsersData()
+    }
   }
 
   // Handlers for Administrative Action Authentication Modal
   const handleOpenDemoteModal = (user) => {
     setOpenActionMenuId(null)
+    if (isSelfUser(user)) {
+      showToast('You cannot demote your own account.', 'error')
+      return
+    }
     if (adminCount <= 1) {
       showToast('Cannot demote the only Administrator in the system.', 'error')
       return
@@ -309,10 +337,7 @@ function AdminUsers() {
     setOpenActionMenuId(null)
 
     // Self-delete protection
-    if (
-      user.email.toLowerCase() === currentAdminEmail.toLowerCase() ||
-      user.username.toLowerCase() === currentAdminUsername.toLowerCase()
-    ) {
+    if (isSelfUser(user)) {
       showToast('You cannot remove your own account.', 'error')
       return
     }
@@ -343,65 +368,37 @@ function AdminUsers() {
     setIsVerifyingPassword(false)
   }
 
-  const handleConfirmAuthAction = (e) => {
+  const handleConfirmAuthAction = async (e) => {
     e?.preventDefault()
     if (!authActionModal.targetUser) return
-
-    // =========================================================================
-    // Hi Rishaye
-    // Call your backend password verification API endpoint here.
-    // Example:
-    //   const response = await api.verifyAdminAction({ password: adminPasswordInput, action: authActionModal.type, targetId: authActionModal.targetUser.id })
-    //   if (!response.success) {
-    //     setAdminPasswordError(response.message || 'Incorrect password. Please try again.')
-    //     setAttemptsRemaining(response.attemptsRemaining) // e.g. 2, 1, 0
-    //     return
-    //   }
-    // =========================================================================
-
     const targetUser = authActionModal.targetUser
-    if (authActionModal.type === 'DEMOTE') {
-      const nextList = staffMembers.map((u) =>
-        u.id === targetUser.id ? { ...u, role: 'Editor' } : u
-      )
-      updateStaffStorage(nextList)
 
-      // Record audit event
-      recordAuditEvent({
-        actionType: 'DEMOTED_TO_EDITOR',
-        actionLabel: 'Demoted to Editor',
-        category: 'ROLES',
-        severity: 'warning',
-        isSecurityAlert: true,
-        targetUser,
-        details: `Demoted ${targetUser.fullName} from Administrator to Editor with password re-auth.`,
-      })
-
-      showToast(`${targetUser.fullName} was demoted to Editor.`)
-    } else if (authActionModal.type === 'REMOVE') {
-      const nextList = staffMembers.filter((u) => u.id !== targetUser.id)
-      updateStaffStorage(nextList)
-
-      // Record audit event
-      recordAuditEvent({
-        actionType: 'REMOVED_STAFF_MEMBER',
-        actionLabel: 'Removed Staff Member',
-        category: 'STAFF',
-        severity: 'critical',
-        isSecurityAlert: true,
-        targetUser,
-        details: `Permanently deleted ${targetUser.fullName} (${targetUser.email}) from staff directory.`,
-      })
-
-      showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
+    try {
+      if (authActionModal.type === 'DEMOTE') {
+        await userManagementApi.updateStaffRole(targetUser.id, 'editor')
+        showToast(`${targetUser.fullName} was demoted to Editor.`)
+      } else if (authActionModal.type === 'REMOVE') {
+        await userManagementApi.updateStaffStatus(targetUser.id, 'disabled')
+        showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
+      }
+      await fetchUsersData()
+    } catch (err) {
+      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to update member'
+      showToast(errorMsg, 'error')
+      await fetchUsersData()
+    } finally {
+      handleCloseAuthModal()
     }
-
-    handleCloseAuthModal()
   }
 
   // Handlers for Staff Members
-  const handleToggleRole = (user) => {
+  const handleToggleRole = async (user) => {
     setOpenActionMenuId(null)
+
+    if (user.role === 'Admin' && isSelfUser(user)) {
+      showToast('You cannot demote your own account.', 'error')
+      return
+    }
 
     // Last admin guardrail: Cannot demote the only Admin
     if (user.role === 'Admin' && adminCount <= 1) {
@@ -413,24 +410,14 @@ function AdminUsers() {
       // Demoting Admin requires password re-authentication modal
       handleOpenDemoteModal(user)
     } else {
-      // Promoting Editor to Admin proceeds directly
-      const nextList = staffMembers.map((u) =>
-        u.id === user.id ? { ...u, role: 'Admin' } : u
-      )
-      updateStaffStorage(nextList)
-
-      // Record audit event
-      recordAuditEvent({
-        actionType: 'PROMOTED_TO_ADMIN',
-        actionLabel: 'Promoted to Admin',
-        category: 'ROLES',
-        severity: 'info',
-        isSecurityAlert: false,
-        targetUser: user,
-        details: `Promoted ${user.fullName} to Administrator.`,
-      })
-
-      showToast(`${user.fullName} was promoted to Administrator.`)
+      // Promoting Editor to Admin
+      try {
+        await userManagementApi.updateStaffRole(user.id, 'admin')
+        showToast(`${user.fullName} was promoted to Administrator.`)
+        await fetchUsersData()
+      } catch (err) {
+        showToast(err?.response?.data?.error || err?.message || 'Failed to promote user', 'error')
+      }
     }
   }
 
@@ -763,9 +750,7 @@ function AdminUsers() {
             <tbody>
               {filteredStaff.length > 0 ? (
                 filteredStaff.map((user) => {
-                  const isSelf =
-                    user.email.toLowerCase() === currentAdminEmail.toLowerCase() ||
-                    user.username.toLowerCase() === currentAdminUsername.toLowerCase()
+                  const isSelf = isSelfUser(user)
                   const isLastAdmin = user.role === 'Admin' && adminCount <= 1
 
                   const initials =
@@ -818,131 +803,153 @@ function AdminUsers() {
                         </span>
                       </td>
 
-                      {/* 4. Actions (Dropdown Menu) */}
+                      {/* 4. Actions (Dropdown Menu or Current User Badge) */}
                       <td>
                         <div className="admin-actions justify-end relative">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setOpenActionMenuId((prev) => (prev === user.id ? null : user.id))
-                            }
-                            className={`btn-user-more ${isMenuOpen ? 'active' : ''}`}
-                            aria-label={`Actions for ${user.fullName}`}
-                            aria-expanded={isMenuOpen}
-                            aria-haspopup="true"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          {isSelf ? (
+                            <span
+                              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200/80 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 px-3 py-1.5 rounded-full select-none"
+                              title="Your active account — manage via Account Settings modal"
                             >
-                              <circle cx="12" cy="12" r="1" />
-                              <circle cx="19" cy="12" r="1" />
-                              <circle cx="5" cy="12" r="1" />
-                            </svg>
-                          </button>
-
-                          {/* Action Menu Popover */}
-                          {isMenuOpen && (
-                            <div
-                              className="user-action-popover"
-                              role="menu"
-                              aria-orientation="vertical"
-                            >
-                              {/* Role Toggle Option */}
-                              <button
-                                type="button"
-                                className="user-action-popover-item"
-                                onClick={() => handleToggleRole(user)}
-                                disabled={isLastAdmin}
-                                title={
-                                  isLastAdmin
-                                    ? 'Cannot demote the only Administrator.'
-                                    : user.role === 'Admin'
-                                    ? 'Demote user to Editor'
-                                    : 'Promote user to Admin'
-                                }
-                                role="menuitem"
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="text-slate-400"
                               >
-                                {user.role === 'Admin' ? (
-                                  <>
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                                      <circle cx="12" cy="7" r="4" />
-                                    </svg>
-                                    <span>Demote to Editor</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                    >
-                                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-                                    </svg>
-                                    <span>Promote to Admin</span>
-                                  </>
-                                )}
-                              </button>
-
-                              <div className="user-action-popover-divider" />
-
-                              {/* Remove Staff Member Option */}
+                                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                              </svg>
+                              Current User
+                            </span>
+                          ) : (
+                            <>
                               <button
                                 type="button"
-                                className="user-action-popover-item danger"
-                                onClick={() => handleOpenRemoveModal(user)}
-                                disabled={isSelf || isLastAdmin}
-                                title={
-                                  isSelf
-                                    ? 'You cannot remove your own account.'
-                                    : isLastAdmin
-                                    ? 'Cannot remove the only Administrator.'
-                                    : 'Remove staff member from directory'
+                                onClick={() =>
+                                  setOpenActionMenuId((prev) => (prev === user.id ? null : user.id))
                                 }
-                                role="menuitem"
+                                className={`btn-user-more ${isMenuOpen ? 'active' : ''}`}
+                                aria-label={`Actions for ${user.fullName}`}
+                                aria-expanded={isMenuOpen}
+                                aria-haspopup="true"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
+                                  width="18"
+                                  height="18"
                                   viewBox="0 0 24 24"
                                   fill="none"
                                   stroke="currentColor"
-                                  strokeWidth="2"
+                                  strokeWidth="2.5"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
                                 >
-                                  <path d="M3 6h18" />
-                                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                  <circle cx="12" cy="12" r="1" />
+                                  <circle cx="19" cy="12" r="1" />
+                                  <circle cx="5" cy="12" r="1" />
                                 </svg>
-                                <span>Remove Member</span>
                               </button>
-                            </div>
+
+                              {/* Action Menu Popover */}
+                              {isMenuOpen && (
+                                <div
+                                  className="user-action-popover"
+                                  role="menu"
+                                  aria-orientation="vertical"
+                                >
+                                  {/* Role Toggle Option */}
+                                  <button
+                                    type="button"
+                                    className="user-action-popover-item"
+                                    onClick={() => handleToggleRole(user)}
+                                    title={
+                                      isLastAdmin
+                                        ? 'Cannot demote the only Administrator.'
+                                        : user.role === 'Admin'
+                                        ? 'Demote user to Editor'
+                                        : 'Promote user to Admin'
+                                    }
+                                    role="menuitem"
+                                  >
+                                    {user.role === 'Admin' ? (
+                                      <>
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                                          <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                        <span>Demote to Editor</span>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <svg
+                                          xmlns="http://www.w3.org/2000/svg"
+                                          width="16"
+                                          height="16"
+                                          viewBox="0 0 24 24"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          strokeWidth="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                        >
+                                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+                                        </svg>
+                                        <span>Promote to Admin</span>
+                                      </>
+                                    )}
+                                  </button>
+
+                                  <div className="user-action-popover-divider" />
+
+                                  {/* Remove Staff Member Option */}
+                                  <button
+                                    type="button"
+                                    className="user-action-popover-item danger"
+                                    onClick={() => handleOpenRemoveModal(user)}
+                                    title={
+                                      isLastAdmin
+                                        ? 'Cannot remove the only Administrator.'
+                                        : 'Remove staff member from directory'
+                                    }
+                                    role="menuitem"
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M3 6h18" />
+                                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                                    </svg>
+                                    <span>Remove Member</span>
+                                  </button>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       </td>
