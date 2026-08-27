@@ -17,7 +17,14 @@ API.interceptors.request.use((config) => {
 export const auditLogApi = {
   getAllLogs: async (params = {}) => {
     const response = await API.get('/', { params });
-    return response.data?.result || response.data?.logs || response.data || [];
+    const resData = response.data?.result || response.data;
+    if (Array.isArray(resData)) {
+      return resData;
+    }
+    if (Array.isArray(resData?.logs)) {
+      return resData.logs;
+    }
+    return [];
   },
 
   getLogById: async (id) => {

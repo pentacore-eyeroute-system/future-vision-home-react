@@ -1,138 +1,9 @@
 import { useState, useEffect } from 'react'
 import { auditLogApi } from '../../api/auditLogApi'
 
-// Initial seed fallback audit logs if offline
-const INITIAL_AUDIT_LOGS = [
-  {
-    id: 'log_101',
-    timestamp: new Date(Date.now() - 3600000 * 1.5).toISOString(),
-    actor: {
-      fullName: 'Jorge Omar K. Fuertes',
-      username: 'jfuertes',
-      email: 'jorge.fuertes@futurevisionhome.com',
-    },
-    actionType: 'PROMOTED_TO_ADMIN',
-    actionLabel: 'Promoted to Admin',
-    category: 'ROLES',
-    severity: 'info',
-    isSecurityAlert: false,
-    targetUser: {
-      fullName: 'Rishaye Abigail G. Melad',
-      username: 'rmelad',
-      email: 'rishaye.melad@futurevisionhome.com',
-    },
-    details: 'Upgraded role permissions for Rishaye Abigail G. Melad from Editor to Administrator.',
-  },
-  {
-    id: 'log_102',
-    timestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
-    actor: {
-      fullName: 'Jorge Omar K. Fuertes',
-      username: 'jfuertes',
-      email: 'jorge.fuertes@futurevisionhome.com',
-    },
-    actionType: 'APPROVED_REQUEST',
-    actionLabel: 'Approved Staff Request',
-    category: 'ACCESS',
-    severity: 'info',
-    isSecurityAlert: false,
-    targetUser: {
-      fullName: 'Gwyenth A. Lim',
-      username: 'glim',
-      email: 'gwyenth.lim@futurevisionhome.com',
-    },
-    details: 'Approved internal staff access request for Gwyenth A. Lim; assigned default Editor role.',
-  },
-  {
-    id: 'log_103',
-    timestamp: new Date(Date.now() - 3600000 * 18).toISOString(),
-    actor: {
-      fullName: 'Rishaye Abigail G. Melad',
-      username: 'rmelad',
-      email: 'rishaye.melad@futurevisionhome.com',
-    },
-    actionType: 'DEMOTED_TO_EDITOR',
-    actionLabel: 'Demoted to Editor',
-    category: 'ROLES',
-    severity: 'warning',
-    isSecurityAlert: true,
-    targetUser: {
-      fullName: 'Jamaine Grace M. Tuazon',
-      username: 'jtuazon',
-      email: 'jamaine.tuazon@futurevisionhome.com',
-    },
-    details: 'Demoted Jamaine Grace M. Tuazon from Administrator to Editor with password re-authentication challenge.',
-  },
-  {
-    id: 'log_104',
-    timestamp: new Date(Date.now() - 3600000 * 24).toISOString(),
-    actor: {
-      fullName: 'System Security',
-      username: 'system',
-      email: 'security@futurevisionhome.com',
-    },
-    actionType: 'AUTH_FAILED_LOCKOUT',
-    actionLabel: 'Failed Auth Lockout',
-    category: 'SECURITY',
-    severity: 'critical',
-    isSecurityAlert: true,
-    targetUser: null, // System event target displays as clean em-dash (—)
-    details: 'Multiple invalid password attempts detected during admin verification challenge.',
-  },
-  {
-    id: 'log_105',
-    timestamp: new Date(Date.now() - 3600000 * 48).toISOString(),
-    actor: {
-      fullName: 'Jorge Omar K. Fuertes',
-      username: 'jfuertes',
-      email: 'jorge.fuertes@futurevisionhome.com',
-    },
-    actionType: 'REJECTED_REQUEST',
-    actionLabel: 'Rejected Access Request',
-    category: 'ACCESS',
-    severity: 'warning',
-    isSecurityAlert: false,
-    targetUser: {
-      fullName: 'Angel Faith Fernando',
-      username: 'afernando',
-      email: 'angel.fernando@external-guest.com',
-    },
-    details: 'Rejected access request for Angel Faith Fernando from unregistered external email domain.',
-  },
-  {
-    id: 'log_106',
-    timestamp: new Date(Date.now() - 3600000 * 72).toISOString(),
-    actor: {
-      fullName: 'Jorge Omar K. Fuertes',
-      username: 'jfuertes',
-      email: 'jorge.fuertes@futurevisionhome.com',
-    },
-    actionType: 'REMOVED_STAFF_MEMBER',
-    actionLabel: 'Removed Staff Member',
-    category: 'STAFF',
-    severity: 'critical',
-    isSecurityAlert: true,
-    targetUser: {
-      fullName: 'Angel Faith Fernando',
-      username: 'afernando',
-      email: 'angel.fernando@futurevisionhome.com',
-    },
-    details: 'Deleted staff credentials and revoked workspace access for Angel Faith Fernando with password confirmation.',
-  },
-]
-
 function AdminAuditLogs() {
-  const [logs, setLogs] = useState(() => {
-    try {
-      const stored = localStorage.getItem('auditLogsList')
-      if (stored) {
-        return JSON.parse(stored)
-      }
-      return []
-    } catch {
-      return []
-    }
-  })
+  const [logs, setLogs] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('')
@@ -158,9 +29,11 @@ function AdminAuditLogs() {
 
   const fetchAuditLogs = async () => {
     try {
+      setIsLoading(true)
       const data = await auditLogApi.getAllLogs()
-      if (Array.isArray(data) && data.length > 0) {
-        const normalized = data.map((l) => ({
+      const logList = Array.isArray(data) ? data : (data?.logs || data?.result?.logs || [])
+      if (Array.isArray(logList)) {
+        const normalized = logList.map((l) => ({
           id: l.id,
           timestamp: l.timestamp || l.createdAt,
           actor: {
@@ -179,41 +52,25 @@ function AdminAuditLogs() {
             fullName: l.targetUser.fullname || l.targetUser.fullName || l.targetUser.username,
             username: l.targetUser.username,
             email: l.targetUser.email,
-          } : null,
+          } : (l.targetApplication ? {
+            fullName: l.targetApplication.fullname || l.targetApplication.fullName || l.targetApplication.username,
+            username: l.targetApplication.username,
+            email: l.targetApplication.email,
+          } : null),
           details: l.details || '',
           metadata: typeof l.metadata === 'string' ? JSON.parse(l.metadata || '{}') : (l.metadata || {}),
         }))
         setLogs(normalized)
-        localStorage.setItem('auditLogsList', JSON.stringify(normalized))
       }
     } catch (err) {
       console.error('Failed to load audit logs from backend:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
     fetchAuditLogs()
-  }, [])
-
-  // Sync with auditLogsUpdated event and localStorage
-  useEffect(() => {
-    const syncLogs = () => {
-      try {
-        const stored = localStorage.getItem('auditLogsList')
-        if (stored) {
-          setLogs(JSON.parse(stored))
-        }
-      } catch {
-        // keep current
-      }
-    }
-
-    window.addEventListener('auditLogsUpdated', syncLogs)
-    window.addEventListener('storage', syncLogs)
-    return () => {
-      window.removeEventListener('auditLogsUpdated', syncLogs)
-      window.removeEventListener('storage', syncLogs)
-    }
   }, [])
 
   const showToast = (message, type = 'success') => {
