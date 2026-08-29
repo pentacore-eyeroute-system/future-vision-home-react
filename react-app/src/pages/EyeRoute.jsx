@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getApiErrorMessage, normalizeReview, reviewApi } from "../api/reviewApi";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
@@ -107,30 +107,20 @@ function EyeRoute() {
     user,
   } = useReviewAuth();
 
-  useEffect(() => {
-    let isActive = true;
-
-    reviewApi
-      .getReviews()
-      .then((reviews) => {
-        if (!isActive) {
-          return;
-        }
-
-        const normalized = reviews.map(normalizeReview);
-        setFeedbacks(normalized);
-        setLoadNotice("");
-      })
-      .catch(() => {
-        if (isActive) {
-          setLoadNotice("");
-        }
-      });
-
-    return () => {
-      isActive = false;
-    };
+  const fetchReviews = useCallback(async () => {
+    try {
+      const reviews = await reviewApi.getReviews();
+      const normalized = reviews.map(normalizeReview);
+      setFeedbacks(normalized);
+      setLoadNotice("");
+    } catch {
+      setLoadNotice("");
+    }
   }, []);
+
+  useEffect(() => {
+    void fetchReviews();
+  }, [fetchReviews]);
 
   useEffect(() => {
     if (!openMenuReviewId) {
@@ -176,9 +166,26 @@ function EyeRoute() {
         userId: user?.id || null,
       };
 
-      setFeedbacks((currentFeedbacks) => [normalized, ...currentFeedbacks]);
+      setFeedbacks((currentFeedbacks) => {
+        const existingIndex = currentFeedbacks.findIndex(
+          (item) =>
+            (normalized.id && item.id === normalized.id) ||
+            (normalized.userId && item.userId === normalized.userId) ||
+            (normalized.email && user?.email && item.email && item.email.toLowerCase() === user.email.toLowerCase())
+        );
+
+        if (existingIndex !== -1) {
+          const updated = [...currentFeedbacks];
+          updated[existingIndex] = { ...updated[existingIndex], ...normalized };
+          return updated;
+        }
+
+        return [normalized, ...currentFeedbacks];
+      });
+
       setFormData(emptyForm);
       setSubmitMessage("Thanks! Your review was successfully published.");
+      void fetchReviews();
     } catch (error) {
       setSubmitError(
         getApiErrorMessage(error, "Unable to submit your review right now.")
@@ -240,6 +247,7 @@ function EyeRoute() {
       );
       handleCancelEdit();
       setSubmitMessage("Your review was successfully updated.");
+      void fetchReviews();
     } catch (error) {
       setReviewActionError(
         getApiErrorMessage(error, "Unable to update your review right now.")
@@ -274,6 +282,7 @@ function EyeRoute() {
         handleCancelEdit();
       }
       setSubmitMessage("Your review has been successfully removed.");
+      void fetchReviews();
     } catch (error) {
       setReviewActionError(
         getApiErrorMessage(error, "Unable to delete your review right now.")
