@@ -2335,8 +2335,9 @@ html[data-theme="dark"] .theme-switch-icon {
 /* Visionistas Section */
 .visionistas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
+    align-items: stretch;
 }
 
 .visionistas-grid-note {
@@ -2361,6 +2362,13 @@ html[data-theme="dark"] .theme-switch-icon {
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .visionista-card-btn {
@@ -2369,6 +2377,8 @@ html[data-theme="dark"] .theme-switch-icon {
     appearance: none;
     -webkit-appearance: none;
     border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    font-family: inherit;
 }
 
 .visionista-card-btn:focus-visible {
@@ -2387,6 +2397,7 @@ html[data-theme="dark"] .theme-switch-icon {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-shrink: 0;
 }
 
 .visionista-icon img,
@@ -2399,6 +2410,8 @@ html[data-theme="dark"] .theme-switch-icon {
     box-shadow: 0 4px 12px rgba(149, 171, 47, 0.2);
     background: var(--bg-secondary);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block;
+    flex-shrink: 0;
 }
 
 .visionista-card-btn:hover .visionista-card-photo {
@@ -2421,6 +2434,7 @@ html[data-theme="dark"] .theme-switch-icon {
     font-family: 'Poppins-Bold', sans-serif;
     box-shadow: 0 4px 12px rgba(149, 171, 47, 0.2);
     transition: transform 0.3s ease, background 0.3s ease;
+    flex-shrink: 0;
 }
 
 .visionista-card-btn:hover .visionista-avatar-fallback {
@@ -2433,6 +2447,10 @@ html[data-theme="dark"] .theme-switch-icon {
     font-family: 'Poppins-SemiBold', sans-serif;
     color: var(--primary-color);
     margin-bottom: 0.75rem;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    flex-shrink: 0;
 }
 
 .visionista-story {
@@ -2443,6 +2461,10 @@ html[data-theme="dark"] .theme-switch-icon {
     font-size: 1rem;
     font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 400;
+    width: 100%;
+    flex-grow: 1;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .visionista-story-preview {
@@ -2450,6 +2472,7 @@ html[data-theme="dark"] .theme-switch-icon {
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .visionista-readmore {
@@ -2458,11 +2481,12 @@ html[data-theme="dark"] .theme-switch-icon {
     gap: 0.35rem;
     font-weight: 700;
     color: var(--primary-color);
-    margin-top: 0.25rem;
+    margin-top: auto;
     font-size: 0.95rem;
     font-family: 'Poppins-SemiBold', sans-serif;
     text-decoration: none;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .visionista-readmore:hover {
@@ -2479,6 +2503,7 @@ html[data-theme="dark"] .theme-switch-icon {
     justify-content: center;
     padding: 1.5rem;
     background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
 }
 
 .visionista-dialog {
@@ -2490,6 +2515,8 @@ html[data-theme="dark"] .theme-switch-icon {
     color: var(--text-primary);
     box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
     max-height: 85vh;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
 }
 
@@ -2500,6 +2527,7 @@ html[data-theme="dark"] .theme-switch-icon {
     gap: 1rem;
     padding: 22px 28px;
     border-bottom: 1px solid #e5e7eb;
+    flex-shrink: 0;
 }
 
 .visionista-dialog-title {
@@ -2509,6 +2537,8 @@ html[data-theme="dark"] .theme-switch-icon {
     color: var(--primary-color);
     line-height: 1.2;
     font-family: 'Poppins-SemiBold', sans-serif;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .visionista-dialog-close {
@@ -2526,6 +2556,7 @@ html[data-theme="dark"] .theme-switch-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .visionista-dialog-close:hover {
@@ -2540,7 +2571,7 @@ html[data-theme="dark"] .theme-switch-icon {
 
 .visionista-dialog-body {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 220px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
     padding: 28px;
@@ -2549,14 +2580,39 @@ html[data-theme="dark"] .theme-switch-icon {
     color: #374151;
     font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-weight: 400;
+    box-sizing: border-box;
 }
 
-.visionista-dialog-body p {
-    margin: 0;
-    color: #374151;
-    font-size: 15.5px;
-    line-height: 1.75;
-    text-align: left;
+.visionista-modal-photo-column {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.visionista-dialog-body .visionista-modal-photo {
+    width: 100%;
+    max-width: 220px;
+    max-height: 300px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+    margin: 0 auto;
+    display: block;
+    background: var(--bg-secondary);
+    flex-shrink: 0;
+}
+
+.visionista-modal-avatar-fallback {
+    width: 130px;
+    height: 130px;
+    font-size: 2.75rem;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 .visionista-story-content {
@@ -2564,6 +2620,21 @@ html[data-theme="dark"] .theme-switch-icon {
     flex-direction: column;
     gap: 14px;
     min-width: 0;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+.visionista-dialog-body p,
+.visionista-story-content p {
+    margin: 0;
+    color: #374151;
+    font-size: 15.5px;
+    line-height: 1.75;
+    text-align: left;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: pre-line;
 }
 
 .visionista-story-label {
@@ -2573,21 +2644,6 @@ html[data-theme="dark"] .theme-switch-icon {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-family: 'Poppins-SemiBold', sans-serif;
-}
-
-.visionista-dialog-body .visionista-modal-photo {
-    width: auto;
-    max-width: 260px;
-    max-height: 320px;
-    height: auto;
-    object-fit: contain;
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
-    margin: 0 auto;
-    float: none;
-    display: block;
-    background: var(--bg-secondary);
 }
 
 @media (max-width: 700px) {
@@ -2614,13 +2670,24 @@ html[data-theme="dark"] .theme-switch-icon {
         padding: 22px;
     }
 
+    .visionista-modal-photo-column {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
     .visionista-dialog-body .visionista-modal-photo {
         width: auto;
-        max-width: 100%;
-        max-height: 280px;
+        max-width: 200px;
+        max-height: 240px;
         height: auto;
-        object-fit: contain;
+        object-fit: cover;
         margin: 0 auto;
+    }
+
+    .visionista-modal-avatar-fallback {
+        width: 100px;
+        height: 100px;
+        font-size: 2.25rem;
     }
 }
 

@@ -274,13 +274,26 @@ function OurWork() {
                 </button>
               </div>
               <div className="visionista-dialog-body">
-                {selectedVisionista.vis_pic_url && (
-                  <img
-                    className="visionista-modal-photo"
-                    src={selectedVisionista.vis_pic_url}
-                    alt={selectedVisionista.vis_fullname}
-                  />
-                )}
+                <div className="visionista-modal-photo-column">
+                  {selectedVisionista.vis_pic_url ? (
+                    <img
+                      className="visionista-modal-photo"
+                      src={selectedVisionista.vis_pic_url}
+                      alt={selectedVisionista.vis_fullname}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null
+                        e.currentTarget.src = '/images/daily.png'
+                      }}
+                    />
+                  ) : (
+                    <div
+                      className="visionista-avatar-fallback visionista-modal-avatar-fallback"
+                      aria-label={selectedVisionista.vis_fullname}
+                    >
+                      {selectedVisionista.vis_fullname?.charAt(0) || 'V'}
+                    </div>
+                  )}
+                </div>
                 <div className="visionista-story-content">
                   <span className="visionista-story-label">Visionista Story</span>
                   {getStoryParagraphs(selectedVisionista.vis_story).map((paragraph, index) => (
