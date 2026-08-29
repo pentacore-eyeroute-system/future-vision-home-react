@@ -144,3 +144,61 @@ export const normalizeReview = (item) => {
     email: item.email || '',
   };
 };
+
+export const getApiErrorMessage = (error, defaultMessage = 'An unexpected error occurred.') => {
+  if (!error) return defaultMessage;
+
+  const data = error.response?.data;
+
+  if (typeof data === 'string' && data.trim() && !data.includes('<!DOCTYPE') && !data.includes('<html')) {
+    return data.trim();
+  }
+
+  if (data && typeof data === 'object') {
+    if (typeof data.message === 'string' && data.message.trim()) {
+      return data.message.trim();
+    }
+    if (typeof data.error === 'string' && data.error.trim()) {
+      return data.error.trim();
+    }
+    if (typeof data.error?.message === 'string' && data.error.message.trim()) {
+      return data.error.message.trim();
+    }
+    if (typeof data.msg === 'string' && data.msg.trim()) {
+      return data.msg.trim();
+    }
+    if (typeof data.detail === 'string' && data.detail.trim()) {
+      return data.detail.trim();
+    }
+    if (Array.isArray(data.errors) && data.errors.length > 0) {
+      const first = data.errors[0];
+      if (typeof first === 'string' && first.trim()) return first.trim();
+      if (first && typeof first.message === 'string' && first.message.trim()) return first.message.trim();
+      if (first && typeof first.msg === 'string' && first.msg.trim()) return first.msg.trim();
+    }
+    if (data.errors && typeof data.errors === 'object') {
+      const messages = Object.values(data.errors)
+        .flat()
+        .filter((val) => typeof val === 'string' && val.trim());
+      if (messages.length > 0) {
+        return messages.join('. ');
+      }
+    }
+    if (typeof data.result === 'string' && data.result.trim()) {
+      return data.result.trim();
+    }
+    if (typeof data.result?.message === 'string' && data.result.message.trim()) {
+      return data.result.message.trim();
+    }
+  }
+
+  if (
+    typeof error.message === 'string' &&
+    error.message.trim() &&
+    !error.message.toLowerCase().includes('request failed with status code')
+  ) {
+    return error.message.trim();
+  }
+
+  return defaultMessage;
+};

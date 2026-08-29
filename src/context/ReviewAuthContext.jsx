@@ -4,7 +4,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { reviewApi } from '../api/reviewApi'
+import { getApiErrorMessage, reviewApi } from '../api/reviewApi'
 import { reviewAuthConfig } from '../config/reviewAuthConfig'
 import { disableGoogleAutoSelect, initializeGoogleIdentity } from '../lib/googleIdentity'
 import { ReviewAuthContext } from './reviewAuth'
@@ -64,7 +64,7 @@ export function ReviewAuthProvider({ children }) {
     } catch (authError) {
       clearStoredSession()
       setSession(null)
-      setError(authError instanceof Error ? authError.message : 'Unable to finish Google sign-in.')
+      setError(getApiErrorMessage(authError, 'Unable to finish Google sign-in.'))
     } finally {
       setIsAuthenticating(false)
     }

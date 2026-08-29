@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { normalizeReview, reviewApi } from "../api/reviewApi";
+import { getApiErrorMessage, normalizeReview, reviewApi } from "../api/reviewApi";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
 import { VITE_API_BASE_URL } from "../config/apiUrlConfig";
@@ -181,7 +181,7 @@ function EyeRoute() {
       setSubmitMessage("Thanks! Your review was successfully published.");
     } catch (error) {
       setSubmitError(
-        error instanceof Error ? error.message : "Unable to submit your review right now."
+        getApiErrorMessage(error, "Unable to submit your review right now.")
       );
     } finally {
       setIsSubmitting(false);
@@ -242,7 +242,7 @@ function EyeRoute() {
       setSubmitMessage("Your review was successfully updated.");
     } catch (error) {
       setReviewActionError(
-        error instanceof Error ? error.message : "Unable to update your review right now."
+        getApiErrorMessage(error, "Unable to update your review right now.")
       );
     } finally {
       setUpdatingReviewId(null);
@@ -276,7 +276,7 @@ function EyeRoute() {
       setSubmitMessage("Your review has been successfully removed.");
     } catch (error) {
       setReviewActionError(
-        error instanceof Error ? error.message : "Unable to delete your review right now."
+        getApiErrorMessage(error, "Unable to delete your review right now.")
       );
     } finally {
       setDeletingReviewId(null);
@@ -649,6 +649,12 @@ function EyeRoute() {
                           }))
                         }
                       ></textarea>
+
+                      {editingReviewId === feedback.id && reviewActionError && (
+                        <p className="feedback-status feedback-status-error" style={{ margin: "0.75rem 0" }}>
+                          {reviewActionError}
+                        </p>
+                      )}
 
                       <div className="feedback-edit-actions">
                         <button
