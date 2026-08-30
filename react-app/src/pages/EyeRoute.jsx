@@ -122,21 +122,32 @@ function EyeRoute() {
     void fetchReviews();
   }, [fetchReviews]);
 
+  // Auto-dismiss success message after 5 seconds
   useEffect(() => {
-    if (!openMenuReviewId) {
-      return;
-    }
+    if (!submitMessage) return;
+    const timer = setTimeout(() => {
+      setSubmitMessage("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [submitMessage]);
 
-    const handleOutsideClick = () => {
-      setOpenMenuReviewId(null);
-    };
+  // Auto-dismiss submission error after 5 seconds
+  useEffect(() => {
+    if (!submitError) return;
+    const timer = setTimeout(() => {
+      setSubmitError("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [submitError]);
 
-    document.addEventListener("click", handleOutsideClick);
-
-    return () => {
-      document.removeEventListener("click", handleOutsideClick);
-    };
-  }, [openMenuReviewId]);
+  // Auto-dismiss review action error after 5 seconds
+  useEffect(() => {
+    if (!reviewActionError) return;
+    const timer = setTimeout(() => {
+      setReviewActionError("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [reviewActionError]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -481,12 +492,14 @@ function EyeRoute() {
                       <select
                         id="rating"
                         value={formData.rating}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          setSubmitError("");
+                          setSubmitMessage("");
                           setFormData((currentForm) => ({
                             ...currentForm,
                             rating: parseInt(event.target.value, 10),
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <option value="5">5 Stars - Excellent</option>
                         <option value="4">4 Stars - Very Good</option>
@@ -504,12 +517,14 @@ function EyeRoute() {
                         rows="4"
                         maxLength="500"
                         value={formData.comment}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          setSubmitError("");
+                          setSubmitMessage("");
                           setFormData((currentForm) => ({
                             ...currentForm,
                             comment: event.target.value,
-                          }))
-                        }
+                          }));
+                        }}
                         placeholder="Tell us about your experience..."
                       ></textarea>
                     </div>
@@ -630,12 +645,13 @@ function EyeRoute() {
                       <select
                         id={`edit-rating-${feedback.id}`}
                         value={editForm.rating}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          setReviewActionError("");
                           setEditForm((currentForm) => ({
                             ...currentForm,
                             rating: parseInt(event.target.value, 10),
-                          }))
-                        }
+                          }));
+                        }}
                       >
                         <option value="5">5 Stars - Excellent</option>
                         <option value="4">4 Stars - Very Good</option>
@@ -651,12 +667,13 @@ function EyeRoute() {
                         rows="4"
                         maxLength="500"
                         value={editForm.comment}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                          setReviewActionError("");
                           setEditForm((currentForm) => ({
                             ...currentForm,
                             comment: event.target.value,
-                          }))
-                        }
+                          }));
+                        }}
                       ></textarea>
 
                       {editingReviewId === feedback.id && reviewActionError && (

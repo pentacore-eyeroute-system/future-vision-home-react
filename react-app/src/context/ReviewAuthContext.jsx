@@ -48,6 +48,15 @@ export function ReviewAuthProvider({ children }) {
   const [error, setError] = useState('')
   const restoreAttemptedRef = useRef(false)
 
+  // Auto-dismiss auth error after 5 seconds
+  useEffect(() => {
+    if (!error) return
+    const timer = setTimeout(() => {
+      setError('')
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [error])
+
   const handleCredentialResponse = useEffectEvent(async (response) => {
     if (!response?.credential) {
       setError('Google did not return an ID token.')
