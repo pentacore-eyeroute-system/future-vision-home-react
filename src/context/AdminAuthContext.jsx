@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { jwtDecode } from 'jwt-decode'
 
 const AdminAuthContext = createContext(null)
 
@@ -11,10 +12,21 @@ export const AdminAuthProvider = ({ children }) => {
       return null
     }
 
+    let tokenRole = null
+    try {
+      if (token) {
+        const decoded = jwtDecode(token)
+        tokenRole = decoded?.role
+      }
+    } catch {
+      // ignore invalid token
+    }
+
     const username = sessionStorage.getItem('userName') || ''
     const fullName = sessionStorage.getItem('userFullName') || username || 'Staff Member'
     const email = sessionStorage.getItem('userEmail') || ''
-    const role = (sessionStorage.getItem('userRole') || 'Editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
+    const storedRole = sessionStorage.getItem('userRole') || tokenRole || 'Editor'
+    const role = storedRole.toLowerCase() === 'admin' ? 'Admin' : 'Editor'
     const id = sessionStorage.getItem('currentUserId') || null
 
     return {
@@ -29,11 +41,22 @@ export const AdminAuthProvider = ({ children }) => {
   })
 
   const login = useCallback((userData, token) => {
+    let tokenRole = null
+    try {
+      if (token) {
+        const decoded = jwtDecode(token)
+        tokenRole = decoded?.role
+      }
+    } catch {
+      // ignore invalid token
+    }
+
     const id = userData?.id || userData?.usr_id || ''
     const username = userData?.usr_username || userData?.username || ''
     const fullName = userData?.usr_fullname || userData?.fullName || username || 'Staff Member'
     const email = userData?.usr_email || userData?.email || ''
-    const role = (userData?.usr_role || userData?.role || 'editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
+    const resolvedRole = userData?.usr_role || userData?.role || tokenRole || 'editor'
+    const role = resolvedRole.toLowerCase() === 'admin' ? 'Admin' : 'Editor'
 
     const sessionUser = {
       id: String(id),

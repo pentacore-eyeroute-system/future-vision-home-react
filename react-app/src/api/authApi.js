@@ -58,4 +58,13 @@ export const authApi = {
       throw error.response?.data || error;
     }
   },
+
+  confirmPassword: async (password) => {
+    try {
+      const response = await API.post('/auth/confirm-password', { password });
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || error;
+    }
+  },
 };

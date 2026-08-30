@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import AdminModal from '../../components/admin/AdminModal'
 import { userManagementApi } from '../../api/userManagementApi'
+import { authApi } from '../../api/authApi'
 import { useAdminAuth } from '../../context/AdminAuthContext'
 
 // Initial seed fallback data for pending requests if offline
@@ -350,21 +351,51 @@ function AdminUsers() {
     if (!authActionModal.targetUser) return
     const targetUser = authActionModal.targetUser
 
+    const trimmedPassword = adminPasswordInput.trim()
+    if (!trimmedPassword) {
+      setAdminPasswordError('Please enter your password to confirm.')
+      return
+    }
+
     try {
-      if (authActionModal.type === 'DEMOTE') {
-        await userManagementApi.updateStaffRole(targetUser.id, 'editor')
-        showToast(`${targetUser.fullName} was demoted to Editor.`)
-      } else if (authActionModal.type === 'REMOVE') {
-        await userManagementApi.updateStaffStatus(targetUser.id, 'disabled')
-        showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
+      setIsVerifyingPassword(true)
+      setAdminPasswordError('')
+
+      // Step 1: Verify current admin password via /confirm-password
+      await authApi.confirmPassword(trimmedPassword)
+
+      // Step 2: Automatically proceed to execute the administrative action upon successful verification
+      try {
+        if (authActionModal.type === 'DEMOTE') {
+          await userManagementApi.updateStaffRole(targetUser.id, 'editor')
+          showToast(`${targetUser.fullName} was demoted to Editor.`)
+        } else if (authActionModal.type === 'REMOVE') {
+          await userManagementApi.updateStaffStatus(targetUser.id, 'disabled')
+          showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
+        }
+        handleCloseAuthModal()
+        await fetchUsersData()
+      } catch (actionErr) {
+        const errorMsg =
+          actionErr?.error ||
+          actionErr?.response?.data?.error ||
+          actionErr?.message ||
+          'Failed to complete the administrative action.'
+        showToast(errorMsg, 'error')
+        handleCloseAuthModal()
+        await fetchUsersData()
       }
-      await fetchUsersData()
-    } catch (err) {
-      const errorMsg = err?.response?.data?.error || err?.message || 'Failed to update member'
+    } catch (authErr) {
+      // Step 1 failed (incorrect password / auth failure) - do NOT proceed to demote/remove
+      const errorMsg =
+        authErr?.error ||
+        authErr?.response?.data?.error ||
+        authErr?.message ||
+        'Incorrect password. Please try again.'
+      setAdminPasswordError(errorMsg)
       showToast(errorMsg, 'error')
-      await fetchUsersData()
     } finally {
-      handleCloseAuthModal()
+      setIsVerifyingPassword(false)
     }
   }
 
@@ -1017,6 +1048,8 @@ function AdminUsers() {
           title={
             authActionModal.type === 'DEMOTE'
               ? 'Demote Administrator'
+              : authActionModal.targetUser?.role === 'Admin'
+              ? 'Remove Administrator'
               : 'Remove Staff Member'
           }
           subtitle="Password re-authentication is required to authorize this administrative change."
@@ -1043,7 +1076,7 @@ function AdminUsers() {
                   : 'This will delete their workspace credentials and revoke their access.'}
               </p>
 
-              {/* Inline Error Alert (Hook ready for teammate to trigger if backend validation fails) */}
+              {/* Inline Error Alert */}
               {adminPasswordError && (
                 <div className="admin-login-alert mb-4" role="alert">
                   <svg
@@ -1089,6 +1122,8 @@ function AdminUsers() {
                       setAdminPasswordInput(e.target.value)
                       if (adminPasswordError) setAdminPasswordError('')
                     }}
+                    disabled={isVerifyingPassword}
+                    autoComplete="current-password"
                     autoFocus
                     required
                     aria-label="Current admin password"
@@ -1099,6 +1134,7 @@ function AdminUsers() {
                     onClick={() => setShowAdminPasswordInput((prev) => !prev)}
                     aria-label={showAdminPasswordInput ? 'Hide password' : 'Show password'}
                     tabIndex={-1}
+                    disabled={isVerifyingPassword}
                   >
                     {showAdminPasswordInput ? (
                       <svg
@@ -1148,12 +1184,17 @@ function AdminUsers() {
               <button
                 type="submit"
                 className={authActionModal.type === 'DEMOTE' ? 'restore-confirm-btn !bg-amber-600 hover:!bg-amber-700 !border-amber-600' : 'delete-confirm-btn'}
-                disabled={isVerifyingPassword}
+                disabled={isVerifyingPassword || !adminPasswordInput.trim()}
               >
                 {isVerifyingPassword ? (
-                  <span>Verifying...</span>
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="admin-login-spinner" aria-hidden="true" />
+                    <span>Processing...</span>
+                  </span>
                 ) : authActionModal.type === 'DEMOTE' ? (
                   'Confirm Demotion'
+                ) : authActionModal.targetUser?.role === 'Admin' ? (
+                  'Remove Administrator'
                 ) : (
                   'Remove Member'
                 )}
