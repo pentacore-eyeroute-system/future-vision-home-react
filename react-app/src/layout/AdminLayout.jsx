@@ -25,8 +25,10 @@ function AdminLayout() {
   const { currentUser, logout, updateUser } = useAdminAuth()
 
   // Role and User profile dynamic state from active auth session
-  const userRole = currentUser?.role || sessionStorage.getItem('userRole') || localStorage.getItem('userRole') || 'Admin'
-  const userName = currentUser?.fullName || sessionStorage.getItem('userFullName') || currentUser?.username || sessionStorage.getItem('userName') || 'Administrator'
+  const rawRole = currentUser?.role || sessionStorage.getItem('userRole') || 'Editor'
+  const userRole = rawRole.toLowerCase() === 'admin' ? 'Admin' : 'Editor'
+  const isAdmin = userRole === 'Admin'
+  const userName = currentUser?.fullName || sessionStorage.getItem('userFullName') || currentUser?.username || sessionStorage.getItem('userName') || 'Staff Member'
   const username = currentUser?.username || sessionStorage.getItem('userName') || 'admin'
   const userEmail = currentUser?.email || sessionStorage.getItem('userEmail') || ''
 
@@ -40,10 +42,9 @@ function AdminLayout() {
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 })
 
   // All currently active navigation items based on role
-  const visibleNavItems =
-    userRole === 'Admin'
-      ? [...contentNavItems, ...adminNavItems]
-      : contentNavItems
+  const visibleNavItems = isAdmin
+    ? [...contentNavItems, ...adminNavItems]
+    : contentNavItems
 
   const isTabActive = (path) => {
     if (path === '/admin') {

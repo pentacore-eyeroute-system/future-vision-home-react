@@ -32,13 +32,40 @@ const publicRoutes = [
   { path: '/news/:slug', element: <Article /> },
 ]
 
+// Admin-Only Route Guard (Restricts User Management & Audit Logs strictly to Admin)
+const AdminOnlyRoute = ({ children }) => {
+  const { currentUser } = useAdminAuth()
+  const rawRole = currentUser?.role || sessionStorage.getItem('userRole') || 'Editor'
+  const isAdmin = rawRole.toLowerCase() === 'admin'
+
+  if (!isAdmin) {
+    return <Navigate to="/admin" replace />
+  }
+
+  return children
+}
+
 const adminRoutes = [
   { path: '', element: <AdminVisionistas /> },
   { path: 'news-gallery', element: <AdminNewsGallery /> },
   { path: 'partners', element: <AdminPartners /> },
   { path: 'deleted', element: <AdminDeleted /> },
-  { path: 'users', element: <AdminUsers /> },
-  { path: 'audit-logs', element: <AdminAuditLogs /> },
+  {
+    path: 'users',
+    element: (
+      <AdminOnlyRoute>
+        <AdminUsers />
+      </AdminOnlyRoute>
+    ),
+  },
+  {
+    path: 'audit-logs',
+    element: (
+      <AdminOnlyRoute>
+        <AdminAuditLogs />
+      </AdminOnlyRoute>
+    ),
+  },
 ]
 
 // Protected Route / Middleware Guard with Cache & bfcache Teardown Protection

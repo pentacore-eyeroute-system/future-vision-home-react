@@ -4,6 +4,7 @@ import { auditLogApi } from '../../api/auditLogApi'
 function AdminAuditLogs() {
   const [logs, setLogs] = useState([])
   const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState('')
@@ -30,6 +31,7 @@ function AdminAuditLogs() {
   const fetchAuditLogs = async () => {
     try {
       setIsLoading(true)
+      setErrorMessage('')
       const data = await auditLogApi.getAllLogs()
       const logList = Array.isArray(data) ? data : (data?.logs || data?.result?.logs || [])
       if (Array.isArray(logList)) {
@@ -63,6 +65,8 @@ function AdminAuditLogs() {
         setLogs(normalized)
       }
     } catch (err) {
+      const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to load audit logs from backend.'
+      setErrorMessage(msg)
       console.error('Failed to load audit logs from backend:', err)
     } finally {
       setIsLoading(false)
@@ -404,37 +408,67 @@ function AdminAuditLogs() {
             ) : (
               <tr>
                 <td colSpan={5} className="user-empty-table-cell">
-                  <div className="user-empty-state">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="32"
-                      height="32"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="user-empty-icon"
-                    >
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                      <polyline points="10 9 9 9 8 9" />
-                    </svg>
-                    <h4>No Audit Logs Found</h4>
-                    <p>No event records match your current criteria.</p>
-                    {searchQuery && (
+                  {errorMessage ? (
+                    <div className="user-empty-state">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="#ef4444"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="user-empty-icon"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                      </svg>
+                      <h4 style={{ color: '#ef4444' }}>Unable to Load Audit Logs</h4>
+                      <p>{errorMessage}</p>
                       <button
                         type="button"
-                        onClick={() => setSearchQuery('')}
+                        onClick={() => fetchAuditLogs()}
                         className="user-filter-pill active mt-2"
                       >
-                        Clear Search
+                        Retry Fetch
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  ) : (
+                    <div className="user-empty-state">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="32"
+                        height="32"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="user-empty-icon"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                      </svg>
+                      <h4>No Audit Logs Found</h4>
+                      <p>No event records match your current criteria.</p>
+                      {searchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchQuery('')}
+                          className="user-filter-pill active mt-2"
+                        >
+                          Clear Search
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </td>
               </tr>
             )}

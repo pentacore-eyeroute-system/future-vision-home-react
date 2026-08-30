@@ -12,9 +12,9 @@ export const AdminAuthProvider = ({ children }) => {
     }
 
     const username = sessionStorage.getItem('userName') || ''
-    const fullName = sessionStorage.getItem('userFullName') || username || 'Administrator'
+    const fullName = sessionStorage.getItem('userFullName') || username || 'Staff Member'
     const email = sessionStorage.getItem('userEmail') || ''
-    const role = sessionStorage.getItem('userRole') || 'Admin'
+    const role = (sessionStorage.getItem('userRole') || 'Editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
     const id = sessionStorage.getItem('currentUserId') || null
 
     return {
@@ -31,9 +31,9 @@ export const AdminAuthProvider = ({ children }) => {
   const login = useCallback((userData, token) => {
     const id = userData?.id || userData?.usr_id || ''
     const username = userData?.usr_username || userData?.username || ''
-    const fullName = userData?.usr_fullname || userData?.fullName || username || 'Administrator'
+    const fullName = userData?.usr_fullname || userData?.fullName || username || 'Staff Member'
     const email = userData?.usr_email || userData?.email || ''
-    const role = (userData?.usr_role || userData?.role || 'admin').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
+    const role = (userData?.usr_role || userData?.role || 'editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
 
     const sessionUser = {
       id: String(id),
@@ -122,9 +122,9 @@ export const AdminAuthProvider = ({ children }) => {
         setCurrentUser(null)
       } else {
         const username = sessionStorage.getItem('userName') || ''
-        const fullName = sessionStorage.getItem('userFullName') || username || 'Administrator'
+        const fullName = sessionStorage.getItem('userFullName') || username || 'Staff Member'
         const email = sessionStorage.getItem('userEmail') || ''
-        const role = sessionStorage.getItem('userRole') || 'Admin'
+        const role = (sessionStorage.getItem('userRole') || 'Editor').toLowerCase() === 'admin' ? 'Admin' : 'Editor'
         const id = sessionStorage.getItem('currentUserId') || null
 
         setCurrentUser({
