@@ -95,6 +95,7 @@ function EyeRoute() {
   const [updatingReviewId, setUpdatingReviewId] = useState(null);
   const [deletingReviewId, setDeletingReviewId] = useState(null);
   const [openMenuReviewId, setOpenMenuReviewId] = useState(null);
+  const [reviewToDelete, setReviewToDelete] = useState(null);
 
   const {
     error: authError,
@@ -268,36 +269,43 @@ function EyeRoute() {
     }
   };
 
-  const handleDeleteReview = async (reviewId) => {
+  const handlePromptDeleteReview = (feedback) => {
+    setOpenMenuReviewId(null);
+    setReviewActionError("");
+    setReviewToDelete(feedback);
+  };
+
+  const confirmDeleteReview = async () => {
+    if (!reviewToDelete) return;
     if (!session) {
       setReviewActionError("Sign in again before deleting your review.");
+      setReviewToDelete(null);
       return;
     }
 
-    const shouldDelete = window.confirm("Delete this review? This action cannot be undone.");
-    if (!shouldDelete) return;
-
-    setOpenMenuReviewId(null);
+    const reviewId = reviewToDelete.id;
     setDeletingReviewId(reviewId);
     setReviewActionError("");
 
     try {
       await reviewApi.deleteReview(session, reviewId);
-      
+
       // Filter out deleted feedback row items dynamically from UI state arrays
       setFeedbacks((currentFeedbacks) =>
         currentFeedbacks.filter((feedback) => feedback.id !== reviewId)
       );
-      
+
       if (editingReviewId === reviewId) {
         handleCancelEdit();
       }
       setSubmitMessage("Your review has been successfully removed.");
+      setReviewToDelete(null);
       void fetchReviews();
     } catch (error) {
       setReviewActionError(
         getApiErrorMessage(error, "Unable to delete your review right now.")
       );
+      setReviewToDelete(null);
     } finally {
       setDeletingReviewId(null);
     }
@@ -619,7 +627,7 @@ function EyeRoute() {
                                 role="menuitem"
                                 className="feedback-overflow-item feedback-overflow-danger"
                                 disabled={deletingReviewId === feedback.id}
-                                onClick={() => handleDeleteReview(feedback.id)}
+                                onClick={() => handlePromptDeleteReview(feedback)}
                               >
                                 {deletingReviewId === feedback.id ? "Deleting..." : "Delete Review"}
                               </button>
@@ -706,6 +714,93 @@ function EyeRoute() {
           </div>
         </div>
       </section>
+
+      {/* Delete Review Confirmation Modal */}
+      {reviewToDelete && (
+        <div
+          className="modal active"
+          onClick={(e) => e.target.classList.contains('modal') && setReviewToDelete(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-review-modal-title"
+        >
+          <div
+            className="modal-content animate-fadeInUp"
+            style={{ maxWidth: '460px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <div className="modal-header-text">
+                <h2 id="delete-review-modal-title" className="modal-title">Delete Review</h2>
+                <p className="modal-subtitle">Confirm removal of your feedback</p>
+              </div>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setReviewToDelete(null)}
+                aria-label="Close modal"
+                disabled={deletingReviewId === reviewToDelete.id}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="delete-confirmation-body">
+              <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+                Are you sure you want to permanently delete your review? This action cannot be undone.
+              </p>
+              {reviewToDelete.comment && (
+                <blockquote
+                  style={{
+                    marginTop: '0.875rem',
+                    padding: '0.75rem 1rem',
+                    background: 'var(--bg-secondary, rgba(0,0,0,0.04))',
+                    borderLeft: '3px solid #ef4444',
+                    borderRadius: '6px',
+                    fontSize: '0.875rem',
+                    fontStyle: 'italic',
+                    color: 'var(--text-primary, #1e293b)',
+                    maxHeight: '90px',
+                    overflowY: 'auto',
+                  }}
+                >
+                  &ldquo;{reviewToDelete.comment}&rdquo;
+                </blockquote>
+              )}
+            </div>
+            <div className="delete-confirmation-footer">
+              <button
+                type="button"
+                className="delete-cancel-btn"
+                onClick={() => setReviewToDelete(null)}
+                disabled={deletingReviewId === reviewToDelete.id}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="delete-confirm-btn"
+                onClick={confirmDeleteReview}
+                disabled={deletingReviewId === reviewToDelete.id}
+              >
+                {deletingReviewId === reviewToDelete.id ? "Deleting..." : "Delete Review"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
