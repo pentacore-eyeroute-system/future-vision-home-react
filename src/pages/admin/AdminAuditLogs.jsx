@@ -3,6 +3,10 @@ import { auditLogApi } from '../../api/auditLogApi'
 
 function AdminAuditLogs() {
   const [logs, setLogs] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [limit] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
@@ -28,42 +32,63 @@ function AdminAuditLogs() {
     localStorage.getItem('userName') ||
     ''
 
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = async (pageToFetch = currentPage) => {
     try {
       setIsLoading(true)
       setErrorMessage('')
-      const data = await auditLogApi.getAllLogs()
-      const logList = Array.isArray(data) ? data : (data?.logs || data?.result?.logs || [])
-      if (Array.isArray(logList)) {
-        const normalized = logList.map((l) => ({
-          id: l.id,
-          timestamp: l.timestamp || l.createdAt,
-          actor: {
-            id: l.actor?.id || l.actorUserId,
-            fullName: l.actor?.fullname || l.actor?.fullName || l.actor?.username || 'Administrator',
-            username: l.actor?.username || 'admin',
-            email: l.actor?.email || '',
-            role: l.actor?.role || 'admin',
-          },
-          actionType: l.actionType || l.action_type || 'SYSTEM_ACTION',
-          actionLabel: l.actionLabel || l.actionType || 'System Event',
-          category: l.category || 'ACCESS',
-          severity: l.severity || 'info',
-          isSecurityAlert: Boolean(l.isSecurityAlert),
-          targetUser: l.targetUser ? {
-            fullName: l.targetUser.fullname || l.targetUser.fullName || l.targetUser.username,
-            username: l.targetUser.username,
-            email: l.targetUser.email,
-          } : (l.targetApplication ? {
-            fullName: l.targetApplication.fullname || l.targetApplication.fullName || l.targetApplication.username,
-            username: l.targetApplication.username,
-            email: l.targetApplication.email,
-          } : null),
-          details: l.details || '',
-          metadata: typeof l.metadata === 'string' ? JSON.parse(l.metadata || '{}') : (l.metadata || {}),
-        }))
-        setLogs(normalized)
-      }
+      const responseData = await auditLogApi.getAllLogs({
+        page: pageToFetch,
+        limit,
+      })
+
+      const rawLogs = Array.isArray(responseData)
+        ? responseData
+        : (responseData?.logs || [])
+
+      const total = typeof responseData?.total === 'number'
+        ? responseData.total
+        : rawLogs.length
+
+      const pages = typeof responseData?.totalPages === 'number'
+        ? responseData.totalPages
+        : Math.max(1, Math.ceil(total / limit))
+
+      const resolvedPage = typeof responseData?.currentPage === 'number'
+        ? responseData.currentPage
+        : pageToFetch
+
+      setTotalCount(total)
+      setTotalPages(pages)
+      setCurrentPage(resolvedPage)
+
+      const normalized = rawLogs.map((l) => ({
+        id: l.id,
+        timestamp: l.timestamp || l.createdAt,
+        actor: {
+          id: l.actor?.id || l.actorUserId,
+          fullName: l.actor?.fullname || l.actor?.fullName || l.actor?.username || 'Administrator',
+          username: l.actor?.username || 'admin',
+          email: l.actor?.email || '',
+          role: l.actor?.role || 'admin',
+        },
+        actionType: l.actionType || l.action_type || 'SYSTEM_ACTION',
+        actionLabel: l.actionLabel || l.actionType || 'System Event',
+        category: l.category || 'ACCESS',
+        severity: l.severity || 'info',
+        isSecurityAlert: Boolean(l.isSecurityAlert),
+        targetUser: l.targetUser ? {
+          fullName: l.targetUser.fullname || l.targetUser.fullName || l.targetUser.username,
+          username: l.targetUser.username,
+          email: l.targetUser.email,
+        } : (l.targetApplication ? {
+          fullName: l.targetApplication.fullname || l.targetApplication.fullName || l.targetApplication.username,
+          username: l.targetApplication.username,
+          email: l.targetApplication.email,
+        } : null),
+        details: l.details || '',
+        metadata: typeof l.metadata === 'string' ? JSON.parse(l.metadata || '{}') : (l.metadata || {}),
+      }))
+      setLogs(normalized)
     } catch (err) {
       const msg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to load audit logs from backend.'
       setErrorMessage(msg)
@@ -74,8 +99,58 @@ function AdminAuditLogs() {
   }
 
   useEffect(() => {
-    fetchAuditLogs()
-  }, [])
+    fetchAuditLogs(currentPage)
+  }, [currentPage])
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages && newPage !== currentPage && !isLoading) {
+      setCurrentPage(newPage)
+    }
+  }
+
+  const handlePrevPage = () => {
+    if (currentPage > 1 && !isLoading) {
+      setCurrentPage((prev) => prev - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages && !isLoading) {
+      setCurrentPage((prev) => prev + 1)
+    }
+  }
+
+  const getPageNumbers = () => {
+    const pages = []
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      if (currentPage <= 4) {
+        for (let i = 1; i <= 5; i++) {
+          pages.push(i)
+        }
+        pages.push('...')
+        pages.push(totalPages)
+      } else if (currentPage >= totalPages - 3) {
+        pages.push(1)
+        pages.push('...')
+        for (let i = totalPages - 4; i <= totalPages; i++) {
+          pages.push(i)
+        }
+      } else {
+        pages.push(1)
+        pages.push('...')
+        pages.push(currentPage - 1)
+        pages.push(currentPage)
+        pages.push(currentPage + 1)
+        pages.push('...')
+        pages.push(totalPages)
+      }
+    }
+    return pages
+  }
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type })
@@ -311,7 +386,20 @@ function AdminAuditLogs() {
             </tr>
           </thead>
           <tbody>
-            {filteredLogs.length > 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={5} className="user-empty-table-cell !py-16">
+                  <div className="user-empty-state">
+                    <div
+                      className="admin-login-spinner !w-8 !h-8 !border-3 !border-primary !border-t-transparent"
+                      aria-hidden="true"
+                    />
+                    <h4 className="mt-3">Loading Audit Logs...</h4>
+                    <p className="text-slate-500 font-medium">Fetching page {currentPage} of logs</p>
+                  </div>
+                </td>
+              </tr>
+            ) : filteredLogs.length > 0 ? (
               filteredLogs.map((log) => {
                 const { datePart, timePart } = formatTimestamp(log.timestamp)
                 const relativeTime = getRelativeTime(log.timestamp)
@@ -430,7 +518,7 @@ function AdminAuditLogs() {
                       <p>{errorMessage}</p>
                       <button
                         type="button"
-                        onClick={() => fetchAuditLogs()}
+                        onClick={() => fetchAuditLogs(currentPage)}
                         className="user-filter-pill active mt-2"
                       >
                         Retry Fetch
@@ -475,6 +563,85 @@ function AdminAuditLogs() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalCount > 0 && (
+        <div className="audit-pagination-container" aria-label="Audit logs pagination">
+          <div className="audit-pagination-info">
+            Showing <span className="font-semibold text-slate-900 dark:text-slate-100">{Math.min((currentPage - 1) * limit + 1, totalCount)}</span> to{' '}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{Math.min(currentPage * limit, totalCount)}</span> of{' '}
+            <span className="font-semibold text-slate-900 dark:text-slate-100">{totalCount}</span> log entries
+          </div>
+
+          <div className="audit-pagination-controls">
+            <button
+              type="button"
+              className="audit-page-btn"
+              onClick={handlePrevPage}
+              disabled={currentPage <= 1 || isLoading}
+              aria-label="Previous Page"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              <span className="hidden sm:inline ml-1">Previous</span>
+            </button>
+
+            {getPageNumbers().map((pageItem, index) =>
+              pageItem === '...' ? (
+                <span key={`ellipsis-${index}`} className="audit-page-ellipsis" aria-hidden="true">
+                  •••
+                </span>
+              ) : (
+                <button
+                  key={`page-${pageItem}`}
+                  type="button"
+                  className={`audit-page-btn ${pageItem === currentPage ? 'active' : ''}`}
+                  onClick={() => handlePageChange(pageItem)}
+                  disabled={isLoading}
+                  aria-label={`Page ${pageItem}`}
+                  aria-current={pageItem === currentPage ? 'page' : undefined}
+                >
+                  {pageItem}
+                </button>
+              )
+            )}
+
+            <button
+              type="button"
+              className="audit-page-btn"
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || isLoading}
+              aria-label="Next Page"
+            >
+              <span className="hidden sm:inline mr-1">Next</span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

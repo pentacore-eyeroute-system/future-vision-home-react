@@ -8140,3 +8140,75 @@ html[data-theme="dark"] .theme-switch-icon {
     word-break: break-word;
 }
 
+/* ==========================================================================
+   Audit Logs Pagination Controls
+   ========================================================================== */
+
+.audit-pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0.5rem 0.5rem 0.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.audit-pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.audit-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.audit-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.audit-page-btn:hover:not(:disabled):not(.active) {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color, #85A922);
+    color: var(--primary-color, #85A922);
+}
+
+.audit-page-btn.active {
+    background: var(--primary-color, #85A922);
+    border-color: var(--primary-color, #85A922);
+    color: #ffffff;
+}
+
+.audit-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: var(--border-color);
+}
+
+.audit-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 36px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    user-select: none;
+}
+
