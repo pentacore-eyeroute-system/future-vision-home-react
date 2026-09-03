@@ -381,6 +381,23 @@ function EyeRoute() {
         </div>
       </section>
 
+      <section className="eyeroute-video-section">
+        <div className="container">
+          <div className="eyeroute-video-wrapper">
+            <div className="eyeroute-video-container">
+              <iframe
+                src="https://www.youtube.com/embed/TARb1Ip1J-I?rel=0"
+                title="EyeRoute Infomercial"
+                className="eyeroute-video-iframe"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="eyeroute-details-section">
         <div className="container">
           <div className="eyeroute-details-content">
