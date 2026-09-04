@@ -1,0 +1,19 @@
+.audit-th-timestamp {
+  width: 170px;
+}
+
+.audit-th-actor {
+  width: 210px;
+}
+
+.audit-th-action {
+  width: 180px;
+}
+
+.audit-th-target {
+  width: 200px;
+}
+
+.audit-error-title {
+  color: #ef4444;
+}

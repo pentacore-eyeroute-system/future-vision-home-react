@@ -1,0 +1,9 @@
+.about-story-text-top {
+  margin-top: 0;
+}
+
+.about-svm-column-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}

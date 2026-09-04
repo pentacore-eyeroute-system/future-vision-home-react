@@ -1,0 +1,10 @@
+.admin-news-gallery-type-tag {
+  text-transform: capitalize;
+}
+
+.admin-news-gallery-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}

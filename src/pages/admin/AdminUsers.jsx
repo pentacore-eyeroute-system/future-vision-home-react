@@ -3,6 +3,7 @@ import AdminModal from '../../components/admin/AdminModal'
 import { userManagementApi } from '../../api/userManagementApi'
 import { authApi } from '../../api/authApi'
 import { useAdminAuth } from '../../context/AdminAuthContext'
+import './AdminUsers.css'
 
 // Initial seed fallback data for pending requests if offline
 const INITIAL_PENDING_REQUESTS = [
@@ -628,7 +629,7 @@ function AdminUsers() {
                 <th>Work Email</th>
                 <th>Username</th>
                 <th>Date Requested</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="admin-users-th-actions">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -752,7 +753,7 @@ function AdminUsers() {
                 <th>User</th>
                 <th>Work Email</th>
                 <th>Role</th>
-                <th style={{ textAlign: 'right' }}>Actions</th>
+                <th className="admin-users-th-actions">Actions</th>
               </tr>
             </thead>
             <tbody>

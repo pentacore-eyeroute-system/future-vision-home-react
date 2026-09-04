@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import './AdminImageUploadField.css'
 
 function AdminImageUploadField({
   inputId = 'adminImageUpload',
@@ -67,7 +68,7 @@ function AdminImageUploadField({
           accept="image/*"
           multiple={multiple}
           onChange={onFilesSelected}
-          style={{ display: 'none' }}
+          className="admin-hidden-file-input"
         />
 
         <div className="admin-dropzone-content">

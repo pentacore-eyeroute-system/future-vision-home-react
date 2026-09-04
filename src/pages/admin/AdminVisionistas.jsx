@@ -4,6 +4,7 @@ import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
+import './AdminVisionistas.css'
 
 function AdminVisionistas() {
   const [visionistas, setVisionistas] = useState([])
@@ -224,7 +225,7 @@ function AdminVisionistas() {
 
   return (
     <div className="admin-section active">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+      <div className="admin-visionistas-header">
         <div>
           <h2>Visionistas</h2>
           <p>Manage and organize visionista profiles.</p>
@@ -300,7 +301,7 @@ function AdminVisionistas() {
                   id="vis_photo_input"
                   type="file"
                   accept="image/png,image/jpeg,image/jpg,image/webp"
-                  style={{ display: 'none' }}
+                  className="admin-visionistas-file-input"
                   onChange={handleImageUpload}
                 />
 

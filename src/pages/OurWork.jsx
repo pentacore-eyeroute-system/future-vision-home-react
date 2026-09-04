@@ -5,6 +5,7 @@ import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
 import { newsApi } from '../api/newsApi'
+import './OurWork.css'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
 
@@ -131,8 +132,8 @@ function OurWork() {
             </div>
 
             <div className="what-we-do-content-wrapper">
-              <div className="about-content" style={{ maxWidth: '100%', width: '100%', margin: 0 }}>
-                <div className="programs-cards-grid" style={{ marginBottom: '3rem' }}>
+              <div className="about-content our-work-about-content">
+                <div className="programs-cards-grid our-work-programs-grid">
                   <ProgramCard
                     icon="/images/braille.png"
                     title="Braille Training"
@@ -155,14 +156,14 @@ function OurWork() {
                   />
                 </div>
 
-                <div className="about-description" style={{ marginBottom: '2rem' }}>
+                <div className="about-description our-work-description-spacing">
                   <p>
                     These comprehensive training programs prepare blind and visually impaired
                     individuals for their life in society at large.
                   </p>
                 </div>
 
-                <div className="about-description" style={{ marginBottom: '2rem' }}>
+                <div className="about-description our-work-description-spacing">
                   <p>
                     At present, more than fifty blind/visually impaired individuals have directly
                     benefited. Some are now attending the Public Schools in Taguig City. One is
@@ -173,18 +174,18 @@ function OurWork() {
                   </p>
                 </div>
 
-                <div className="about-description" style={{ marginBottom: '2rem' }}>
-                  <p style={{ fontFamily: 'Poppins-SemiBold, sans-serif' }}>
+                <div className="about-description our-work-description-spacing">
+                  <p className="our-work-pandemic-intro">
                     Now that we are experiencing the effect of Corona Pandemic, we at the home are
                     holding two Projects:
                   </p>
                 </div>
 
-                <div className="about-description" style={{ marginBottom: '1rem', paddingLeft: '1.5rem' }}>
+                <div className="about-description our-work-project-item-1">
                   <p>1. The School at the Future Vision Home project where the blind students are housed at the home and,</p>
                 </div>
 
-                <div className="about-description" style={{ marginBottom: '2rem', paddingLeft: '1.5rem' }}>
+                <div className="about-description our-work-project-item-2">
                   <p>2. The Teaching at their home project, where a teacher goes to the house of the student.</p>
                 </div>
 

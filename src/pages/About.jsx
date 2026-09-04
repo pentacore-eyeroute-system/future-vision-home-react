@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import './About.css'
 
 const mapHashToAboutTab = (hash) => {
   if (!hash) return null
@@ -80,7 +81,7 @@ function About() {
                   </div>
                 </div>
 
-                <p className="story-text" style={{ marginTop: 0 }}>
+                <p className="story-text about-story-text-top">
                   <strong>FUTURE VISION SIGHTED-BLIND INC.</strong> is registered as a non-profit
                   organization which is composed of blind and visually impaired members as well as
                   parents/guardians. Its purpose is to give empowerment to the blind and/vision
@@ -90,7 +91,7 @@ function About() {
               </div>
 
               <div className="story-right-column">
-                <div className="svm-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                <div className="svm-grid about-svm-column-grid">
                   <div className="svm-card">
                     <div className="svm-header">
                       <img src="/images/vision.png" alt="Vision" className="svm-icon" />

@@ -3,6 +3,7 @@ import { getApiErrorMessage, normalizeReview, reviewApi } from "../api/reviewApi
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
 import { VITE_API_BASE_URL } from "../config/apiUrlConfig";
+import "./EyeRoute.css";
 
 const demoFeedbacks = [
   {
@@ -702,7 +703,7 @@ function EyeRoute() {
                       ></textarea>
 
                       {editingReviewId === feedback.id && reviewActionError && (
-                        <p className="feedback-status feedback-status-error" style={{ margin: "0.75rem 0" }}>
+                        <p className="feedback-status feedback-status-error eyeroute-review-action-error">
                           {reviewActionError}
                         </p>
                       )}
@@ -742,8 +743,7 @@ function EyeRoute() {
           aria-labelledby="delete-review-modal-title"
         >
           <div
-            className="modal-content animate-fadeInUp"
-            style={{ maxWidth: '460px' }}
+            className="modal-content animate-fadeInUp eyeroute-delete-modal-content"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
@@ -775,24 +775,11 @@ function EyeRoute() {
               </button>
             </div>
             <div className="delete-confirmation-body">
-              <p style={{ color: 'var(--text-secondary, #64748b)', fontSize: '0.95rem', lineHeight: '1.5', margin: 0 }}>
+              <p className="eyeroute-delete-modal-text">
                 Are you sure you want to permanently delete your review? This action cannot be undone.
               </p>
               {reviewToDelete.comment && (
-                <blockquote
-                  style={{
-                    marginTop: '0.875rem',
-                    padding: '0.75rem 1rem',
-                    background: 'var(--bg-secondary, rgba(0,0,0,0.04))',
-                    borderLeft: '3px solid #ef4444',
-                    borderRadius: '6px',
-                    fontSize: '0.875rem',
-                    fontStyle: 'italic',
-                    color: 'var(--text-primary, #1e293b)',
-                    maxHeight: '90px',
-                    overflowY: 'auto',
-                  }}
-                >
+                <blockquote className="eyeroute-delete-quote">
                   &ldquo;{reviewToDelete.comment}&rdquo;
                 </blockquote>
               )}

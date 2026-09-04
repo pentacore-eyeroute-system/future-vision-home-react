@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import AccountSettingsModal from '../components/admin/AccountSettingsModal'
 import { ThemeContext } from '../context/ThemeContext'
 import { useAdminAuth } from '../context/AdminAuthContext'
+import './AdminLayout.css'
 
 // Core Content Navigation (Visible to both Editor and Admin)
 const contentNavItems = [
@@ -39,7 +40,7 @@ function AdminLayout() {
   const profileMenuRef = useRef(null)
   const tabListRef = useRef(null)
   const tabRefs = useRef({})
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0, opacity: 0 })
+  const indicatorRef = useRef(null)
 
   // All currently active navigation items based on role
   const visibleNavItems = isAdmin
@@ -56,18 +57,19 @@ function AdminLayout() {
   // Update sliding tab indicator position
   const updateIndicator = () => {
     const activeItem = visibleNavItems.find((item) => isTabActive(item.path))
-    if (activeItem && tabRefs.current[activeItem.path] && tabListRef.current) {
+    if (activeItem && tabRefs.current[activeItem.path] && tabListRef.current && indicatorRef.current) {
       const activeEl = tabRefs.current[activeItem.path]
       const containerRect = tabListRef.current.getBoundingClientRect()
       const elRect = activeEl.getBoundingClientRect()
 
-      setIndicatorStyle({
-        left: elRect.left - containerRect.left + tabListRef.current.scrollLeft,
-        width: elRect.width,
-        opacity: 1,
-      })
-    } else {
-      setIndicatorStyle((prev) => ({ ...prev, opacity: 0 }))
+      const left = elRect.left - containerRect.left + tabListRef.current.scrollLeft
+      const width = elRect.width
+
+      indicatorRef.current.style.left = `${left}px`
+      indicatorRef.current.style.width = `${width}px`
+      indicatorRef.current.style.opacity = '1'
+    } else if (indicatorRef.current) {
+      indicatorRef.current.style.opacity = '0'
     }
   }
 
@@ -391,12 +393,8 @@ function AdminLayout() {
         >
           {/* Animated Sliding Underline Indicator */}
           <span
+            ref={indicatorRef}
             className="admin-tab-indicator"
-            style={{
-              left: `${indicatorStyle.left}px`,
-              width: `${indicatorStyle.width}px`,
-              opacity: indicatorStyle.opacity,
-            }}
             aria-hidden="true"
           />
 

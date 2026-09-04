@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import './Home.css'
 
 function Home() {
   return (
@@ -8,8 +9,7 @@ function Home() {
         className="hero"
       >
         <div
-          className="hero-background"
-          style={{ backgroundImage: "url('/images/hero_pic.webp')" }}
+          className="hero-background home-hero-bg"
         >
           <div className="gradient-overlay"></div>
         </div>

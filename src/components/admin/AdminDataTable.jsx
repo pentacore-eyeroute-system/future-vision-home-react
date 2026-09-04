@@ -1,3 +1,5 @@
+import './AdminDataTable.css'
+
 function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading = false, emptyMessage = 'No records found.' }) {
   return (
     <table className="admin-table">
@@ -12,7 +14,7 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
       <tbody>
         {isLoading ? (
           <tr>
-            <td colSpan={columns.length + 1} style={{ textAlign: 'center', padding: '2rem' }}>
+            <td colSpan={columns.length + 1} className="admin-table-status-cell">
               Loading records...
             </td>
           </tr>
@@ -53,7 +55,7 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
           ))
         ) : (
           <tr>
-            <td colSpan={columns.length + 1} style={{ textAlign: 'center', padding: '2rem' }}>
+            <td colSpan={columns.length + 1} className="admin-table-status-cell">
               {emptyMessage}
             </td>
           </tr>

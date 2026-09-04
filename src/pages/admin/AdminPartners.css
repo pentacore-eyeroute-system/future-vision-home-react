@@ -1,0 +1,10 @@
+.admin-partners-type-tag {
+  text-transform: capitalize;
+}
+
+.admin-partners-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}

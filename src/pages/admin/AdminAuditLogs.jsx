@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { auditLogApi } from '../../api/auditLogApi'
+import './AdminAuditLogs.css'
 
 function AdminAuditLogs() {
   const [logs, setLogs] = useState([])
@@ -378,10 +379,10 @@ function AdminAuditLogs() {
         <table className="admin-table audit-table">
           <thead>
             <tr>
-              <th style={{ width: '170px' }}>Timestamp</th>
-              <th style={{ width: '210px' }}>Actor</th>
-              <th style={{ width: '180px' }}>Action Type</th>
-              <th style={{ width: '200px' }}>Target User</th>
+              <th className="audit-th-timestamp">Timestamp</th>
+              <th className="audit-th-actor">Actor</th>
+              <th className="audit-th-action">Action Type</th>
+              <th className="audit-th-target">Target User</th>
               <th>Details</th>
             </tr>
           </thead>
@@ -514,7 +515,7 @@ function AdminAuditLogs() {
                         <line x1="12" y1="8" x2="12" y2="12" />
                         <line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
-                      <h4 style={{ color: '#ef4444' }}>Unable to Load Audit Logs</h4>
+                      <h4 className="audit-error-title">Unable to Load Audit Logs</h4>
                       <p>{errorMessage}</p>
                       <button
                         type="button"

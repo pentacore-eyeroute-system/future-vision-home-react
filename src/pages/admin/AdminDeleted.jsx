@@ -3,6 +3,7 @@ import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
+import './AdminDeleted.css'
 
 const FILTERS = [
   { key: 'visionista', label: 'Visionistas' },
@@ -85,7 +86,7 @@ function AdminDeleted() {
     {
       key: 'type',
       label: 'Type',
-      render: (val) => <span style={{ textTransform: 'capitalize' }}>{formatType(val)}</span>,
+      render: (val) => <span className="admin-deleted-type-tag">{formatType(val)}</span>,
     },
     { key: 'deletedAt', label: 'Deleted Date' },
   ]
@@ -132,7 +133,7 @@ function AdminDeleted() {
 
   return (
     <div className="admin-section active">
-      <div style={{ marginBottom: '1.5rem' }}>
+      <div className="admin-deleted-header">
         <h2>Recently Deleted</h2>
         <p>Restore accidentally deleted records or permanently delete them.</p>
       </div>

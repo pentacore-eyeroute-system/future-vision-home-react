@@ -1,0 +1,27 @@
+.our-work-about-content {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.our-work-programs-grid {
+  margin-bottom: 3rem;
+}
+
+.our-work-description-spacing {
+  margin-bottom: 2rem;
+}
+
+.our-work-pandemic-intro {
+  font-family: 'Poppins-SemiBold', sans-serif;
+}
+
+.our-work-project-item-1 {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.our-work-project-item-2 {
+  margin-bottom: 2rem;
+  padding-left: 1.5rem;
+}

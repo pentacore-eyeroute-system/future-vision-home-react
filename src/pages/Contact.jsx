@@ -1,3 +1,5 @@
+import './Contact.css'
+
 function Contact() {
   return (
     <section className="contact">
@@ -51,7 +53,7 @@ function Contact() {
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d965.5660841350115!2d121.06915008846894!3d14.52686678316803!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397c8a5c7f41e17%3A0x99b7c26db6ff998a!2sA-26%20M.%20L.%20Quezon%20Avenue%2C%20Taguig%2C%201637%20Metro%20Manila!5e0!3m2!1sen!2sph!4v1768734183526!5m2!1sen!2sph"
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                className="contact-map-iframe"
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

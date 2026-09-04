@@ -3,6 +3,7 @@ import { getAllPartners, addPartner, updatePartner, temporaryDeletePartner } fro
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import './AdminPartners.css'
 
 function AdminPartners() {
   const [partners, setPartners] = useState([])
@@ -39,7 +40,7 @@ function AdminPartners() {
     { 
       key: 'par_type', 
       label: 'Type',
-      render: (val) => <span style={{ textTransform: 'capitalize' }}>{val}</span>
+      render: (val) => <span className="admin-partners-type-tag">{val}</span>
     },
   ]
 
@@ -117,7 +118,7 @@ function AdminPartners() {
 
   return (
     <div className="admin-section active">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+      <div className="admin-partners-header">
         <div>
           <h2>Our Partners</h2>
           <p>Manage individual and organization partners.</p>

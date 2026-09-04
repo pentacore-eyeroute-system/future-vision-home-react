@@ -8,6 +8,7 @@ import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
 import RichTextEditor from '../../components/admin/RichTextEditor'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
+import './AdminNewsGallery.css'
 
 function AdminNewsGallery() {
   const [data, setData] = useState([])
@@ -73,7 +74,7 @@ function AdminNewsGallery() {
     {
       key: 'type',
       label: 'Type',
-      render: (val) => <span style={{ textTransform: 'capitalize' }}>{val}</span>,
+      render: (val) => <span className="admin-news-gallery-type-tag">{val}</span>,
     },
     { key: 'displayDate', label: 'Date' },
     {
@@ -297,7 +298,7 @@ function AdminNewsGallery() {
 
   return (
     <div className="admin-section active">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+      <div className="admin-news-gallery-header">
         <div>
           <h2>News & Gallery</h2>
           <p>Create and manage news posts and gallery items.</p>

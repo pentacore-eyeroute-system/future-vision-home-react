@@ -1,0 +1,27 @@
+.eyeroute-review-action-error {
+  margin: 0.75rem 0;
+}
+
+.eyeroute-delete-modal-content {
+  max-width: 460px;
+}
+
+.eyeroute-delete-modal-text {
+  color: var(--text-secondary, #64748b);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.eyeroute-delete-quote {
+  margin-top: 0.875rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary, rgba(0, 0, 0, 0.04));
+  border-left: 3px solid #ef4444;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--text-primary, #1e293b);
+  max-height: 90px;
+  overflow-y: auto;
+}
