@@ -17,7 +17,7 @@ const loadStoredSession = () => {
   }
 
   try {
-    const raw = window.localStorage.getItem(SESSION_STORAGE_KEY)
+    const raw = window.sessionStorage.getItem(SESSION_STORAGE_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
@@ -29,7 +29,7 @@ const storeSession = (session) => {
     return
   }
 
-  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
+  window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
 }
 
 const clearStoredSession = () => {
@@ -37,7 +37,7 @@ const clearStoredSession = () => {
     return
   }
 
-  window.localStorage.removeItem(SESSION_STORAGE_KEY)
+  window.sessionStorage.removeItem(SESSION_STORAGE_KEY)
 }
 
 export function ReviewAuthProvider({ children }) {

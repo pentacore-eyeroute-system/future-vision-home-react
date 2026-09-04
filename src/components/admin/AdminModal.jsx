@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 function AdminModal({ 
   isOpen, 
   onClose, 
@@ -8,6 +10,19 @@ function AdminModal({
   children,
   footer
 }) {
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.()
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   if (!isOpen) return null
 
   return (
@@ -16,6 +31,7 @@ function AdminModal({
       onClick={(e) => e.target.classList.contains('modal') && onClose()}
       role="dialog"
       aria-modal="true"
+      aria-labelledby="admin-modal-title"
     >
       <div 
         className={`modal-content animate-fadeInUp ${maxWidth} ${className}`}
@@ -23,7 +39,7 @@ function AdminModal({
       >
         <div className="modal-header">
           <div className="modal-header-text">
-            <h2 className="modal-title">{title}</h2>
+            <h2 className="modal-title" id="admin-modal-title">{title}</h2>
             {subtitle && <p className="modal-subtitle">{subtitle}</p>}
           </div>
           <button 
@@ -42,6 +58,7 @@ function AdminModal({
               strokeWidth="2.2" 
               strokeLinecap="round" 
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>

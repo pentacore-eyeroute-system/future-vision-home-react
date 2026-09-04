@@ -52,11 +52,12 @@ function OurWork() {
   }, [location.hash])
 
   useEffect(() => {
-    if (!selectedVisionista) return
+    if (!selectedVisionista && !lightboxImage) return
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setSelectedVisionista(null)
+        setLightboxImage(null)
       }
     }
 
@@ -65,7 +66,7 @@ function OurWork() {
     return () => {
       document.removeEventListener('keydown', handleKeyDown)
     }
-  }, [selectedVisionista])
+  }, [selectedVisionista, lightboxImage])
 
   const fetchData = async () => {
     const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }))
@@ -105,10 +106,15 @@ function OurWork() {
 
       <section className="work-tabs">
         <div className="container">
-          <div className="tabs-nav">
+          <div className="tabs-nav" role="tablist" aria-label="Our Work sections">
             {tabOrder.map((tab) => (
               <button
                 key={tab}
+                type="button"
+                role="tab"
+                id={`tab-${tab}`}
+                aria-selected={activeTab === tab}
+                aria-controls={tab}
                 className={`tab-btn${activeTab === tab ? ' active' : ''}`}
                 onClick={() => handleTabChange(tab)}
               >
@@ -122,7 +128,7 @@ function OurWork() {
       </section>
 
       {activeTab === 'what-we-do' && (
-        <section id="what-we-do" className="work-section active">
+        <section id="what-we-do" role="tabpanel" aria-labelledby="tab-what-we-do" className="work-section active">
           <div className="container">
             <div className="section-header">
               <h2 className="section-title">What We Do</h2>
@@ -199,7 +205,7 @@ function OurWork() {
       )}
 
       {activeTab === 'visionistas' && (
-        <section id="visionistas" className="work-section active">
+        <section id="visionistas" role="tabpanel" aria-labelledby="tab-visionistas" className="work-section active">
           <div className="container">
             <div className="section-header">
               <h2 className="section-title">Our Visionistas</h2>
@@ -221,6 +227,7 @@ function OurWork() {
                     type="button"
                     onClick={() => setSelectedVisionista(v)}
                     aria-haspopup="dialog"
+                    aria-label={`Read story of ${v.vis_fullname}`}
                   >
                     <div className="visionista-icon">
                       {v.vis_pic_url ? (
@@ -234,7 +241,7 @@ function OurWork() {
                           }}
                         />
                       ) : (
-                        <div className="visionista-avatar-fallback" aria-label={v.vis_fullname}>
+                        <div className="visionista-avatar-fallback" aria-hidden="true">
                           {v.vis_fullname?.charAt(0) || 'V'}
                         </div>
                       )}
@@ -289,7 +296,7 @@ function OurWork() {
                   ) : (
                     <div
                       className="visionista-avatar-fallback visionista-modal-avatar-fallback"
-                      aria-label={selectedVisionista.vis_fullname}
+                      aria-hidden="true"
                     >
                       {selectedVisionista.vis_fullname?.charAt(0) || 'V'}
                     </div>
@@ -309,7 +316,7 @@ function OurWork() {
       )}
 
       {activeTab === 'gallery' && (
-        <section id="gallery" className="work-section active">
+        <section id="gallery" role="tabpanel" aria-labelledby="tab-gallery" className="work-section active">
           <div className="container">
             <div className="section-header">
               <h2 className="section-title">News and Gallery</h2>
@@ -320,7 +327,7 @@ function OurWork() {
 
             <div className="gallery-content-wrapper">
               <div className="news-search">
-                <form className="search-form" onSubmit={(e) => e.preventDefault()}>
+                <form className="search-form" role="search" onSubmit={(e) => e.preventDefault()}>
                   <input
                     type="search"
                     placeholder="Search here..."
@@ -338,16 +345,6 @@ function OurWork() {
                     <NewsCard key={article.news_slug} article={article} />
                   ))}
                 </div>
-                {/* <div className="news-featured-row">
-                  {filteredNews.slice(2, 4).map((article) => (
-                    <NewsCard key={article.news_slug} article={article} />
-                  ))}
-                </div>
-                <div className="news-featured-row">
-                  {filteredNews.slice(4, 5).map((article) => (
-                    <NewsCard key={article.news_slug} article={article} />
-                  ))}
-                </div> */}
                 {filteredNews.length === 0 && (
                   <div className="no-results">
                     <h2>No Results Found</h2>
@@ -368,14 +365,15 @@ function OurWork() {
                       <p className="gallery-description">{gallery.gal_description}</p>
                     )}
                     <div className="gallery-grid">
-                      {gallery.galleryPictures.map((img) => (
+                      {gallery.galleryPictures?.map((img, idx) => (
                         <button
-                          key={img}
+                          key={img.gpi_pic_url || idx}
                           className="gallery-item"
                           type="button"
-                          onClick={() => setLightboxImage(img)}
+                          onClick={() => setLightboxImage(img.gpi_pic_url)}
+                          aria-label={`View photo from ${gallery.gal_title}`}
                         >
-                          <img src={decodeURI(img.gpi_pic_url)} alt={gallery.title} />
+                          <img src={decodeURI(img.gpi_pic_url)} alt={`${gallery.gal_title} photo ${idx + 1}`} />
                         </button>
                       ))}
                     </div>
@@ -388,18 +386,18 @@ function OurWork() {
       )}
 
       {lightboxImage && (
-        <div className="image-lightbox" aria-modal="true" role="dialog">
+        <div className="image-lightbox" aria-modal="true" role="dialog" aria-label="Photo Preview">
           <div className="image-lightbox-content">
             <button
               type="button"
               className="image-lightbox-nav image-lightbox-nav--prev"
-              aria-label="Close image"
+              aria-label="Close image preview"
               onClick={() => setLightboxImage(null)}
             >
               ×
             </button>
             <div className="image-lightbox-frame">
-              <img id="imageLightboxImg" className="image-lightbox-img" src={decodeURI(lightboxImage)} alt="" />
+              <img id="imageLightboxImg" className="image-lightbox-img" src={decodeURI(lightboxImage)} alt="Enlarged photo preview" />
             </div>
           </div>
         </div>
@@ -412,7 +410,7 @@ function ProgramCard({ icon, title, description }) {
   return (
     <div className="program-card-item">
       <div className="program-card-icon">
-        <img src={icon} alt={title} className="program-icon-img" />
+        <img src={icon} alt="" aria-hidden="true" className="program-icon-img" />
       </div>
       <h3 className="program-card-title">{title}</h3>
       <p className="program-card-description">{description}</p>
@@ -434,7 +432,11 @@ function NewsCard({ article }) {
           </p>
         )}
         <p className="news-article-excerpt">{getPlainText(article.news_description)}</p>
-        <Link to={`/news/${article.news_slug}`} className="news-read-more">
+        <Link
+          to={`/news/${article.news_slug}`}
+          className="news-read-more"
+          aria-label={`Read more about ${article.news_title}`}
+        >
           Read More
         </Link>
       </div>

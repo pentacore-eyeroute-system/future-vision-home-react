@@ -123,7 +123,7 @@ function AdminPartners() {
           <h2>Our Partners</h2>
           <p>Manage individual and organization partners.</p>
         </div>
-        <button className="btn-add" onClick={handleOpenAdd}>
+        <button type="button" className="btn-add" onClick={handleOpenAdd} aria-label="Add a Partner">
           Add a Partner
         </button>
       </div>
@@ -152,8 +152,9 @@ function AdminPartners() {
       >
         <form onSubmit={handleSubmit} className="admin-form">
           <div className="form-group">
-            <label>Name/Organization</label>
+            <label htmlFor="partnerFullName">Name/Organization</label>
             <input 
+              id="partnerFullName"
               type="text" 
               required
               value={formData.par_fullname}
@@ -161,8 +162,9 @@ function AdminPartners() {
             />
           </div>
           <div className="form-group">
-            <label>Partner Type</label>
+            <label htmlFor="partnerType">Partner Type</label>
             <select 
+              id="partnerType"
               value={formData.par_type}
               onChange={(e) => setFormData({...formData, par_type: e.target.value})}
             >

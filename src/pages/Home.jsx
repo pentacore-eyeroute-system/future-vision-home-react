@@ -32,7 +32,7 @@ function Home() {
             </div>
           </div>
         </div>
-        <div className="scroll-indicator">
+        <div className="scroll-indicator" aria-hidden="true">
           <div className="mouse"></div>
         </div>
       </section>
@@ -54,7 +54,7 @@ function Home() {
           <div className="svm-grid">
             <div className="svm-card">
               <div className="svm-header">
-                <img src="/images/story.png" alt="Story" className="svm-icon" />
+                <img src="/images/story.png" alt="" aria-hidden="true" className="svm-icon" />
                 <h2 className="svm-title">Our Story</h2>
               </div>
               <p className="svm-description">
@@ -66,7 +66,7 @@ function Home() {
             </div>
             <div className="svm-card">
               <div className="svm-header">
-                <img src="/images/vision.png" alt="Vision" className="svm-icon" />
+                <img src="/images/vision.png" alt="" aria-hidden="true" className="svm-icon" />
                 <h2 className="svm-title">Our Vision</h2>
               </div>
               <p className="svm-description">
@@ -78,7 +78,7 @@ function Home() {
             </div>
             <div className="svm-card">
               <div className="svm-header">
-                <img src="/images/mission.png" alt="Mission" className="svm-icon" />
+                <img src="/images/mission.png" alt="" aria-hidden="true" className="svm-icon" />
                 <h2 className="svm-title">Our Mission</h2>
               </div>
               <p className="svm-description">
@@ -102,35 +102,35 @@ function Home() {
           </div>
           <div className="work-preview-grid">
             <div className="work-preview-card">
-              <img src="/images/what-we-do.png" alt="What We Do" className="work-preview-icon" />
+              <img src="/images/what-we-do.png" alt="" aria-hidden="true" className="work-preview-icon" />
               <h3 className="work-preview-title">What We Do</h3>
               <p className="work-preview-description">
                 Braille training, livelihood programs, and comprehensive education support designed
                 to empower our Visionistas.
               </p>
-              <Link to="/our-work#programs" className="work-preview-link">
+              <Link to="/our-work#programs" className="work-preview-link" aria-label="Explore what we do and our programs">
                 Explore →
               </Link>
             </div>
             <div className="work-preview-card">
-              <img src="/images/visionistas.png" alt="Visionistas" className="work-preview-icon" />
+              <img src="/images/visionistas.png" alt="" aria-hidden="true" className="work-preview-icon" />
               <h3 className="work-preview-title">Visionistas</h3>
               <p className="work-preview-description">
                 Success stories of beneficiaries like Jessa Mae, Neslie, and others who have
                 overcome challenges and achieved their dreams.
               </p>
-              <Link to="/our-work#visionistas" className="work-preview-link">
+              <Link to="/our-work#visionistas" className="work-preview-link" aria-label="Read Visionistas success stories">
                 Read Stories →
               </Link>
             </div>
             <div className="work-preview-card">
-              <img src="/images/news-gallery.png" alt="News & Gallery" className="work-preview-icon" />
+              <img src="/images/news-gallery.png" alt="" aria-hidden="true" className="work-preview-icon" />
               <h3 className="work-preview-title">News & Gallery</h3>
               <p className="work-preview-description">
                 Latest newsletters, news updates, and photo gallery showcasing our activities and
                 events.
               </p>
-              <Link to="/our-work#gallery" className="work-preview-link">
+              <Link to="/our-work#gallery" className="work-preview-link" aria-label="View news and photo gallery">
                 View Gallery →
               </Link>
             </div>

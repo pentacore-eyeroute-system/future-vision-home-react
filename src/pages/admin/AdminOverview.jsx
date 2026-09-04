@@ -31,7 +31,7 @@ function AdminOverview() {
         {cards.map((card) => (
           <div key={card.label} className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-slate-700 flex items-center gap-4">
             <div className={`${card.color} w-12 h-12 rounded-xl flex items-center justify-center text-2xl text-white shadow-lg`}>
-              {card.icon}
+              <span aria-hidden="true">{card.icon}</span>
             </div>
             <div>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{card.label}</p>

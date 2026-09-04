@@ -30,22 +30,28 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
                 <div className="admin-actions">
                   {onRestore ? (
                     <button 
+                      type="button"
                       onClick={() => onRestore(item)}
                       className="btn-restore"
+                      aria-label={`Restore ${item.name || item.title || item.username || item.vis_fullname || item.news_title || item.par_fullname || item.gal_title || 'record'}`}
                     >
                       Restore
                     </button>
                   ) : (
                     <button 
+                      type="button"
                       onClick={() => onEdit(item)}
                       className="btn-edit"
+                      aria-label={`Edit ${item.name || item.title || item.username || item.vis_fullname || item.news_title || item.par_fullname || item.gal_title || 'record'}`}
                     >
                       Edit
                     </button>
                   )}
                   <button 
+                    type="button"
                     onClick={() => onDelete(item)}
                     className="btn-delete"
+                    aria-label={`${onRestore ? 'Permanently delete' : 'Delete'} ${item.name || item.title || item.username || item.vis_fullname || item.news_title || item.par_fullname || item.gal_title || 'record'}`}
                   >
                     {onRestore ? 'Delete Permanently' : 'Delete'}
                   </button>

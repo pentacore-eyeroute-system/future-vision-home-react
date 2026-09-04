@@ -117,9 +117,8 @@ function AccountSettingsModal({
         password: newPassword.trim(),
       })
 
-      // Update local storage credentials
+      // Update session storage credentials
       sessionStorage.setItem('userPassword', newPassword.trim())
-      localStorage.setItem('userPassword', newPassword.trim())
 
       setSuccessMessage('Password changed successfully!')
       setCurrentPassword('')
@@ -154,7 +153,9 @@ function AccountSettingsModal({
           <button
             type="button"
             role="tab"
+            id="tab-profile"
             aria-selected={activeTab === 'profile'}
+            aria-controls="panel-profile"
             className={`account-modal-tab ${activeTab === 'profile' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('profile')
@@ -171,6 +172,7 @@ function AccountSettingsModal({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
@@ -181,7 +183,9 @@ function AccountSettingsModal({
           <button
             type="button"
             role="tab"
+            id="tab-security"
             aria-selected={activeTab === 'security'}
+            aria-controls="panel-security"
             className={`account-modal-tab ${activeTab === 'security' ? 'active' : ''}`}
             onClick={() => {
               setActiveTab('security')
@@ -198,6 +202,7 @@ function AccountSettingsModal({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              aria-hidden="true"
             >
               <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
@@ -208,7 +213,7 @@ function AccountSettingsModal({
 
         {/* TAB A: GENERAL PROFILE */}
         {activeTab === 'profile' && (
-          <div className="account-tab-content animate-fadeIn">
+          <div id="panel-profile" role="tabpanel" aria-labelledby="tab-profile" className="account-tab-content animate-fadeIn">
             {/* Avatar & Role Header Card */}
             <div className="account-profile-header-card">
               <div className="account-avatar-wrapper-large">
@@ -398,7 +403,7 @@ function AccountSettingsModal({
 
         {/* TAB B: SECURITY & PASSWORD */}
         {activeTab === 'security' && (
-          <div className="account-tab-content animate-fadeIn">
+          <div id="panel-security" role="tabpanel" aria-labelledby="tab-security" className="account-tab-content animate-fadeIn">
             <form onSubmit={handlePasswordSubmit} className="account-password-form" noValidate>
               {/* Inline Error Alert */}
               {error && (
@@ -414,6 +419,7 @@ function AccountSettingsModal({
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="admin-login-alert-icon"
+                    aria-hidden="true"
                   >
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -436,6 +442,7 @@ function AccountSettingsModal({
                     strokeWidth="2.2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
+                    aria-hidden="true"
                   >
                     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                     <polyline points="22 4 12 14.01 9 11.01" />
@@ -469,7 +476,6 @@ function AccountSettingsModal({
                     className="admin-password-toggle"
                     onClick={() => setShowCurrentPassword((prev) => !prev)}
                     aria-label={showCurrentPassword ? 'Hide current password' : 'Show current password'}
-                    tabIndex={-1}
                     disabled={isSubmitting}
                   >
                     {showCurrentPassword ? (
@@ -483,6 +489,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
@@ -498,6 +505,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />
@@ -532,7 +540,6 @@ function AccountSettingsModal({
                     className="admin-password-toggle"
                     onClick={() => setShowNewPassword((prev) => !prev)}
                     aria-label={showNewPassword ? 'Hide new password' : 'Show new password'}
-                    tabIndex={-1}
                     disabled={isSubmitting}
                   >
                     {showNewPassword ? (
@@ -546,6 +553,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
@@ -561,6 +569,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />
@@ -591,6 +600,7 @@ function AccountSettingsModal({
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="hint-icon"
+                        aria-hidden="true"
                       >
                         <polyline points="20 6 9 17 4 12" />
                       </svg>
@@ -627,7 +637,6 @@ function AccountSettingsModal({
                     className="admin-password-toggle"
                     onClick={() => setShowConfirmPassword((prev) => !prev)}
                     aria-label={showConfirmPassword ? 'Hide confirmed password' : 'Show confirmed password'}
-                    tabIndex={-1}
                     disabled={isSubmitting}
                   >
                     {showConfirmPassword ? (
@@ -641,6 +650,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
@@ -656,6 +666,7 @@ function AccountSettingsModal({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />

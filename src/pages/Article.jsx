@@ -82,8 +82,9 @@ const Article = () => {
             type="button"
             className="article-back-button"
             onClick={() => navigate('/our-work#gallery')}
+            aria-label="Go back to News and Gallery"
           >
-            Back
+            ← Back
           </button>
           <h1 className="page-title">{article.news_title}</h1>
         </div>

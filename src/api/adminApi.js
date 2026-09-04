@@ -1,6 +1,6 @@
 /**
  * Frontend-only Admin API
- * Stores admin content in localStorage so the dashboard behaves more like an MVP
+ * Stores admin content in sessionStorage so the dashboard behaves more like an MVP
  * while the real backend is still being built. 
  */
 
@@ -90,11 +90,11 @@ const readState = () => {
     return createDefaultState()
   }
 
-  const raw = window.localStorage.getItem(STORAGE_KEY)
+  const raw = window.sessionStorage.getItem(STORAGE_KEY)
 
   if (!raw) {
     const next = createDefaultState()
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
     return next
   }
 
@@ -124,14 +124,14 @@ const readState = () => {
     }
   } catch {
     const next = createDefaultState()
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(next))
     return next
   }
 }
 
 const writeState = (state) => {
   if (isBrowser) {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }
 
   return state

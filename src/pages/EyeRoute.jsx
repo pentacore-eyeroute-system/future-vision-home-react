@@ -69,7 +69,7 @@ function FeedbackAvatar({ name, picture, className }) {
     return (
       <img
         src={safePicture}
-        alt={name || "Google User"}
+        alt={name ? `${name}'s avatar` : "User avatar"}
         className={className}
         onError={() => setImageFailed(true)}
       />
@@ -77,7 +77,7 @@ function FeedbackAvatar({ name, picture, className }) {
   }
 
   return (
-    <div className={`${className} feedback-avatar-fallback`}>{initial}</div>
+    <div className={`${className} feedback-avatar-fallback`} aria-hidden="true">{initial}</div>
   );
 }
 
@@ -333,11 +333,12 @@ function EyeRoute() {
                   href="#"
                   target="_blank"
                   rel="noreferrer"
-                  aria-label="Get it on Google Play"
+                  aria-label="Get EyeRoute on Google Play (Coming soon)"
                 >
                   <img
                     src="/images/google-play.png"
-                    alt="Get it on Google Play"
+                    alt=""
+                    aria-hidden="true"
                     className="download-btn-image"
                   />
                 </a>
@@ -345,11 +346,12 @@ function EyeRoute() {
                   href="#"
                   target="_blank"
                   rel="noreferrer"
-                  aria-label="Download on the App Store"
+                  aria-label="Download EyeRoute on the App Store (Coming soon)"
                 >
                   <img
                     src="/images/app-store.png"
-                    alt="Download on the App Store"
+                    alt=""
+                    aria-hidden="true"
                     className="download-btn-image"
                   />
                 </a>
@@ -377,7 +379,7 @@ function EyeRoute() {
             </div>
           </div>
         </div>
-        <div className="scroll-indicator">
+        <div className="scroll-indicator" aria-hidden="true">
           <div className="mouse"></div>
         </div>
       </section>
@@ -655,9 +657,11 @@ function EyeRoute() {
                       )}
                     </div>
                   </div>
-                  <div className="feedback-rating">
-                    {"★".repeat(feedback.rating)}
-                    {"☆".repeat(5 - feedback.rating)}
+                  <div className="feedback-rating" aria-label={`Rated ${feedback.rating} out of 5 stars`}>
+                    <span aria-hidden="true">
+                      {"★".repeat(feedback.rating)}
+                      {"☆".repeat(5 - feedback.rating)}
+                    </span>
                   </div>
                   <p className={`feedback-comment${editingReviewId === feedback.id ? " feedback-comment-editing" : ""}`}>
                     {feedback.comment}
@@ -813,7 +817,7 @@ function Feature({ icon, title, description }) {
   return (
     <div className="feature-card">
       <div className="feature-icon">
-        <img src={icon} alt={title} />
+        <img src={icon} alt="" aria-hidden="true" />
       </div>
       <h3 className="feature-title">{title}</h3>
       <p className="feature-description">{description}</p>

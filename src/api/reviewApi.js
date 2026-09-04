@@ -8,7 +8,7 @@ const API = axios.create({
 });
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -50,7 +50,7 @@ export const reviewApi = {
     // Save token if returned in response
     const token = payload.result?.token || payload.result?.user?.token;
     if (token) {
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
     }
 
     return normalizeSession(payload.result?.user || payload.result || {});
@@ -61,7 +61,7 @@ export const reviewApi = {
       return null;
     }
 
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     const response = await axios.get(reviewAuthConfig.buildApiUrl(reviewAuthConfig.endpoints.authSession), {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });

@@ -50,27 +50,22 @@ function AdminUsers() {
   const currentUserId =
     currentUser?.id ||
     sessionStorage.getItem('currentUserId') ||
-    localStorage.getItem('currentUserId') ||
     sessionStorage.getItem('userId') ||
-    localStorage.getItem('userId') ||
     ''
 
   const currentAdminEmail =
     currentUser?.email ||
     sessionStorage.getItem('userEmail') ||
-    localStorage.getItem('userEmail') ||
     ''
 
   const currentAdminUsername =
     currentUser?.username ||
     sessionStorage.getItem('userName') ||
-    localStorage.getItem('userName') ||
     ''
 
   const currentAdminFullName =
     currentUser?.fullName ||
     sessionStorage.getItem('userFullName') ||
-    localStorage.getItem('userFullName') ||
     'Administrator'
 
   // Helper to dynamically check if user matches logged-in session
@@ -168,17 +163,17 @@ function AdminUsers() {
 
   const actionMenuRef = useRef(null)
 
-  // Sync with pendingRequestsUpdated event and localStorage
+  // Sync with pendingRequestsUpdated event and sessionStorage
   const updatePendingStorage = (updated) => {
     setPendingRequests(updated)
-    localStorage.setItem('pendingAccessRequests', JSON.stringify(updated))
+    sessionStorage.setItem('pendingAccessRequests', JSON.stringify(updated))
     window.dispatchEvent(new Event('pendingRequestsUpdated'))
   }
 
   const updateStaffStorage = (updated) => {
     setStaffMembers(updated)
-    localStorage.setItem('staffMembersList', JSON.stringify(updated))
-    localStorage.setItem('activeUsersList', JSON.stringify(updated))
+    sessionStorage.setItem('staffMembersList', JSON.stringify(updated))
+    sessionStorage.setItem('activeUsersList', JSON.stringify(updated))
   }
 
   const showToast = (message, type = 'success') => {
@@ -214,7 +209,7 @@ function AdminUsers() {
   // Number of administrators currently in the system
   const adminCount = staffMembers.filter((u) => u.role === 'Admin').length
 
-  // Helper to record an audit log event to localStorage and dispatch event
+  // Helper to record an audit log event to sessionStorage and dispatch event
   const recordAuditEvent = ({
     actionType,
     actionLabel,
@@ -225,7 +220,7 @@ function AdminUsers() {
     details,
   }) => {
     try {
-      const stored = localStorage.getItem('auditLogsList')
+      const stored = sessionStorage.getItem('auditLogsList')
       const currentLogs = stored ? JSON.parse(stored) : []
       const newLog = {
         id: 'log_' + Date.now(),
@@ -255,7 +250,7 @@ function AdminUsers() {
       }
 
       const updated = [newLog, ...currentLogs]
-      localStorage.setItem('auditLogsList', JSON.stringify(updated))
+      sessionStorage.setItem('auditLogsList', JSON.stringify(updated))
       window.dispatchEvent(new Event('auditLogsUpdated'))
     } catch {
       // ignore
@@ -575,6 +570,11 @@ function AdminUsers() {
                 ? 'Search requests by name, email, username...'
                 : 'Search staff by name, email, username...'
             }
+            aria-label={
+              subTab === 'pending'
+                ? 'Search requests by name, email, username'
+                : 'Search staff by name, email, username'
+            }
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="user-search-input"
@@ -593,7 +593,7 @@ function AdminUsers() {
 
         {/* Role Filter for Staff Members */}
         {subTab === 'staff' && (
-          <div className="user-role-filter-group">
+          <div className="user-role-filter-group" role="group" aria-label="Role filters">
             <button
               type="button"
               className={`user-filter-pill ${roleFilter === 'ALL' ? 'active' : ''}`}
@@ -638,7 +638,7 @@ function AdminUsers() {
                   <tr key={req.id}>
                     <td>
                       <div className="user-name-cell">
-                        <div className="user-table-avatar">
+                        <div className="user-table-avatar" aria-hidden="true">
                           {req.fullName
                             .split(' ')
                             .map((n) => n[0])
@@ -667,6 +667,7 @@ function AdminUsers() {
                           onClick={() => handleApproveRequest(req)}
                           className="btn-user-approve"
                           title="Approve access request"
+                          aria-label={`Approve ${req.fullName}`}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -678,6 +679,7 @@ function AdminUsers() {
                             strokeWidth="2.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            aria-hidden="true"
                           >
                             <polyline points="20 6 9 17 4 12" />
                           </svg>
@@ -688,6 +690,7 @@ function AdminUsers() {
                           onClick={() => setRejectTarget(req)}
                           className="btn-user-reject"
                           title="Reject access request"
+                          aria-label={`Reject ${req.fullName}`}
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -699,6 +702,7 @@ function AdminUsers() {
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
+                            aria-hidden="true"
                           >
                             <line x1="18" y1="6" x2="6" y2="18" />
                             <line x1="6" y1="6" x2="18" y2="18" />
@@ -847,7 +851,7 @@ function AdminUsers() {
                                 className={`btn-user-more ${isMenuOpen ? 'active' : ''}`}
                                 aria-label={`Actions for ${user.fullName}`}
                                 aria-expanded={isMenuOpen}
-                                aria-haspopup="true"
+                                aria-haspopup="menu"
                               >
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
@@ -859,6 +863,7 @@ function AdminUsers() {
                                   strokeWidth="2.5"
                                   strokeLinecap="round"
                                   strokeLinejoin="round"
+                                  aria-hidden="true"
                                 >
                                   <circle cx="12" cy="12" r="1" />
                                   <circle cx="19" cy="12" r="1" />
@@ -899,6 +904,7 @@ function AdminUsers() {
                                           strokeWidth="2"
                                           strokeLinecap="round"
                                           strokeLinejoin="round"
+                                          aria-hidden="true"
                                         >
                                           <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
                                           <circle cx="12" cy="7" r="4" />
@@ -917,6 +923,7 @@ function AdminUsers() {
                                           strokeWidth="2"
                                           strokeLinecap="round"
                                           strokeLinejoin="round"
+                                          aria-hidden="true"
                                         >
                                           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
                                         </svg>
@@ -949,6 +956,7 @@ function AdminUsers() {
                                       strokeWidth="2"
                                       strokeLinecap="round"
                                       strokeLinejoin="round"
+                                      aria-hidden="true"
                                     >
                                       <path d="M3 6h18" />
                                       <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -980,6 +988,7 @@ function AdminUsers() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="user-empty-icon"
+                        aria-hidden="true"
                       >
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                         <circle cx="9" cy="7" r="4" />
@@ -1091,6 +1100,7 @@ function AdminUsers() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     className="admin-login-alert-icon"
+                    aria-hidden="true"
                   >
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />
@@ -1134,7 +1144,6 @@ function AdminUsers() {
                     className="admin-password-toggle"
                     onClick={() => setShowAdminPasswordInput((prev) => !prev)}
                     aria-label={showAdminPasswordInput ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
                     disabled={isVerifyingPassword}
                   >
                     {showAdminPasswordInput ? (
@@ -1148,6 +1157,7 @@ function AdminUsers() {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                         <line x1="1" y1="1" x2="23" y2="23" />
@@ -1163,6 +1173,7 @@ function AdminUsers() {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />

@@ -39,14 +39,24 @@ function About() {
 
       <section className="work-tabs">
         <div className="container">
-          <div className="tabs-nav">
+          <div className="tabs-nav" role="tablist" aria-label="About Us sections">
             <button
+              type="button"
+              role="tab"
+              id="tab-story"
+              aria-selected={tab === 'story'}
+              aria-controls="story"
               className={`tab-btn${tab === 'story' ? ' active' : ''}`}
               onClick={() => handleTabChange('story')}
             >
               Our Story
             </button>
             <button
+              type="button"
+              role="tab"
+              id="tab-founder"
+              aria-selected={tab === 'founder'}
+              aria-controls="founder"
               className={`tab-btn${tab === 'founder' ? ' active' : ''}`}
               onClick={() => handleTabChange('founder')}
             >
@@ -56,7 +66,13 @@ function About() {
         </div>
       </section>
 
-      <section id="story" className={`work-section${tab === 'story' ? ' active' : ''}`}>
+      <section
+        id="story"
+        role="tabpanel"
+        aria-labelledby="tab-story"
+        className={`work-section${tab === 'story' ? ' active' : ''}`}
+        hidden={tab !== 'story'}
+      >
         <div className="container">
           <div className="about-content">
             <div className="story-content">
@@ -94,7 +110,7 @@ function About() {
                 <div className="svm-grid about-svm-column-grid">
                   <div className="svm-card">
                     <div className="svm-header">
-                      <img src="/images/vision.png" alt="Vision" className="svm-icon" />
+                      <img src="/images/vision.png" alt="" aria-hidden="true" className="svm-icon" />
                       <h2 className="svm-title">Our Vision</h2>
                     </div>
                     <p className="svm-description">
@@ -111,7 +127,7 @@ function About() {
                   </div>
                   <div className="svm-card">
                     <div className="svm-header">
-                      <img src="/images/mission.png" alt="Mission" className="svm-icon" />
+                      <img src="/images/mission.png" alt="" aria-hidden="true" className="svm-icon" />
                       <h2 className="svm-title">Our Mission</h2>
                     </div>
                     <p className="svm-description">
@@ -135,7 +151,13 @@ function About() {
         </div>
       </section>
 
-      <section id="founder" className={`work-section${tab === 'founder' ? ' active' : ''}`}>
+      <section
+        id="founder"
+        role="tabpanel"
+        aria-labelledby="tab-founder"
+        className={`work-section${tab === 'founder' ? ' active' : ''}`}
+        hidden={tab !== 'founder'}
+      >
         <div className="container">
           <div className="section-header">
             <h2 className="section-title">Founder&apos;s Background</h2>

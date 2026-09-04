@@ -9,36 +9,37 @@ function Contact() {
             <h2 className="info-title">Contact Information</h2>
             <InfoItem
               icon="/images/loc2.png"
-              alt="Location"
               title="Address"
               text="A-26 M. L. Quezon Avenue, Bambang, Taguig City, 1637 Metro Manila"
             />
-            <InfoItem icon="/images/phone2.png" alt="Phone" title="Phone" text="+63 942 376 9646" />
+            <InfoItem icon="/images/phone2.png" title="Phone" text="+63 942 376 9646" />
             <InfoItem
               icon="/images/email2.png"
-              alt="Email"
               title="Email"
-              text="futurevisionhome27@gmail.com"
+              text={
+                <a href="mailto:futurevisionhome27@gmail.com" aria-label="Send email to futurevisionhome27@gmail.com">
+                  futurevisionhome27@gmail.com
+                </a>
+              }
             />
             <InfoItem
               icon="/images/website.png"
-              alt="Website"
               title="Website"
               text={
-                <a href="https://futurevisionhome.org" target="_blank" rel="noreferrer">
+                <a href="https://futurevisionhome.org" target="_blank" rel="noreferrer" aria-label="Visit Future Vision Home website (opens in new tab)">
                   https://futurevisionhome.org
                 </a>
               }
             />
             <InfoItem
               icon="/images/facebook.png"
-              alt="Facebook"
               title="Facebook"
               text={
                 <a
                   href="https://www.facebook.com/futurevisionsightedblindinc"
                   target="_blank"
                   rel="noreferrer"
+                  aria-label="Visit Future Vision Home Facebook page (opens in new tab)"
                 >
                   www.facebook.com/futurevisionsightedblindinc
                 </a>
@@ -66,11 +67,11 @@ function Contact() {
   )
 }
 
-function InfoItem({ icon, alt, title, text }) {
+function InfoItem({ icon, title, text }) {
   return (
     <div className="info-item">
       <div className="info-icon">
-        <img src={icon} alt={alt} className="info-icon-img" />
+        <img src={icon} alt="" aria-hidden="true" className="info-icon-img" />
       </div>
       <div>
         <h4>{title}</h4>

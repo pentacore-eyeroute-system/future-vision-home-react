@@ -230,7 +230,7 @@ function AdminVisionistas() {
           <h2>Visionistas</h2>
           <p>Manage and organize visionista profiles.</p>
         </div>
-        <button className="btn-add" onClick={handleOpenAdd}>
+        <button type="button" className="btn-add" onClick={handleOpenAdd} aria-label="Add Visionista Profile">
           Add Visionista Profile
         </button>
       </div>
@@ -266,7 +266,7 @@ function AdminVisionistas() {
         <form onSubmit={handleSubmit} className="visionista-form">
           {formError && (
             <div className="admin-form-error-banner" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -289,6 +289,7 @@ function AdminVisionistas() {
                 onClick={() => fileInputRef.current?.click()}
                 role="button"
                 tabIndex={0}
+                aria-label="Upload profile photo. Click or press Enter to choose file"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault()
@@ -302,6 +303,7 @@ function AdminVisionistas() {
                   type="file"
                   accept="image/png,image/jpeg,image/jpg,image/webp"
                   className="admin-visionistas-file-input"
+                  tabIndex={-1}
                   onChange={handleImageUpload}
                 />
 
@@ -316,6 +318,7 @@ function AdminVisionistas() {
                       <button
                         type="button"
                         className="btn-change-photo"
+                        aria-label="Change photo"
                         onClick={(e) => {
                           e.stopPropagation()
                           fileInputRef.current?.click()
@@ -331,6 +334,7 @@ function AdminVisionistas() {
                           strokeWidth="2.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
+                          aria-hidden="true"
                         >
                           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                           <polyline points="17 8 12 3 7 8"></polyline>
@@ -358,6 +362,7 @@ function AdminVisionistas() {
                           strokeWidth="2.2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
+                          aria-hidden="true"
                         >
                           <polyline points="3 6 5 6 21 6"></polyline>
                           <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -378,6 +383,7 @@ function AdminVisionistas() {
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
+                        aria-hidden="true"
                       >
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="17 8 12 3 7 8"></polyline>

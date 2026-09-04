@@ -303,7 +303,7 @@ function AdminNewsGallery() {
           <h2>News & Gallery</h2>
           <p>Create and manage news posts and gallery items.</p>
         </div>
-        <button className="btn-add" onClick={handleOpenAdd}>
+        <button type="button" className="btn-add" onClick={handleOpenAdd} aria-label="Create Post">
           Create Post
         </button>
       </div>
@@ -339,7 +339,7 @@ function AdminNewsGallery() {
         <form onSubmit={handleSubmit} className="admin-form">
           {(imageError || descriptionError) && (
             <div className="admin-form-error-banner" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -366,8 +366,9 @@ function AdminNewsGallery() {
               {/* Right Column: Metadata Fields */}
               <div className="news-gallery-fields-col flex flex-col gap-3.5">
                 <div className="form-group mb-0">
-                  <label>Title <span className="text-red-500">*</span></label>
+                  <label htmlFor="galleryTitle">Title <span className="text-red-500">*</span></label>
                   <input
+                    id="galleryTitle"
                     type="text"
                     required
                     placeholder="Enter gallery title"
@@ -378,8 +379,9 @@ function AdminNewsGallery() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="form-group mb-0">
-                    <label>Type</label>
+                    <label htmlFor="galleryType">Type</label>
                     <select
+                      id="galleryType"
                       value={formData.type}
                       disabled={!!editingItem}
                       onChange={(e) => {
@@ -394,8 +396,9 @@ function AdminNewsGallery() {
                   </div>
 
                   <div className="form-group mb-0">
-                    <label>Date <span className="text-red-500">*</span></label>
+                    <label htmlFor="galleryDate">Date <span className="text-red-500">*</span></label>
                     <input
+                      id="galleryDate"
                       type="date"
                       required
                       value={formData.date}
@@ -405,8 +408,9 @@ function AdminNewsGallery() {
                 </div>
 
                 <div className="form-group mb-0 flex-1 flex flex-col">
-                  <label>Description <span className="text-red-500">*</span></label>
+                  <label htmlFor="galleryDescription">Description <span className="text-red-500">*</span></label>
                   <textarea
+                    id="galleryDescription"
                     required
                     rows={4}
                     placeholder="Enter a brief description for this gallery..."
@@ -437,8 +441,9 @@ function AdminNewsGallery() {
                 {/* Right Column: Title, Type, Date */}
                 <div className="news-meta-fields">
                   <div className="form-group mb-0">
-                    <label>Article Title <span className="text-red-500">*</span></label>
+                    <label htmlFor="newsArticleTitle">Article Title <span className="text-red-500">*</span></label>
                     <input
+                      id="newsArticleTitle"
                       type="text"
                       required
                       placeholder="Enter news article title"
@@ -449,8 +454,9 @@ function AdminNewsGallery() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="form-group mb-0">
-                      <label>Type</label>
+                      <label htmlFor="newsType">Type</label>
                       <select
+                        id="newsType"
                         value={formData.type}
                         disabled={!!editingItem}
                         onChange={(e) => {
@@ -465,8 +471,9 @@ function AdminNewsGallery() {
                     </div>
 
                     <div className="form-group mb-0">
-                      <label>Publish Date <span className="text-red-500">*</span></label>
+                      <label htmlFor="newsPublishDate">Publish Date <span className="text-red-500">*</span></label>
                       <input
+                        id="newsPublishDate"
                         type="date"
                         required
                         value={formData.date}

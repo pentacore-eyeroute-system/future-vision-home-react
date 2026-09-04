@@ -18,11 +18,11 @@ function Navbar() {
   const closeMenu = () => setMenuOpen(false)
 
   return (
-    <nav className="navbar">
+    <nav className="navbar" aria-label="Main Navigation">
       <div className="container">
         <div className="nav-content">
           <NavLink to="/" className="logo" onClick={closeMenu}>
-            <img src="/images/fvh-logo.png" alt="Future Vision Home" className="logo-image" />
+            <img src="/images/fvh-logo.png" alt="Future Vision Home logo" className="logo-image" />
             <div className="logo-text-wrapper">
               <span className="logo-text">Future Vision Home</span>
               <span className="logo-subtext">Future Vision Sighted-Blind, Inc.</span>
@@ -48,14 +48,17 @@ function Navbar() {
           <div className="nav-actions">
             <ThemeToggle />
             <button
+              type="button"
               className={`nav-toggle${menuOpen ? ' active' : ''}`}
               id="navToggle"
-              aria-label="Toggle navigation"
+              aria-label="Toggle navigation menu"
+              aria-expanded={menuOpen}
+              aria-controls="navMenu"
               onClick={() => setMenuOpen((open) => !open)}
             >
-              <span></span>
-              <span></span>
-              <span></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
+              <span aria-hidden="true"></span>
             </button>
           </div>
         </div>

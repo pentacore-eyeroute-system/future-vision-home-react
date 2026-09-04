@@ -137,7 +137,7 @@ function AdminLayout() {
   useEffect(() => {
     const syncCount = () => {
       try {
-        const raw = localStorage.getItem('pendingAccessRequests')
+        const raw = sessionStorage.getItem('pendingAccessRequests')
         if (raw) {
           const parsed = JSON.parse(raw)
           const count = parsed.filter((r) => r.status === 'PENDING_APPROVAL').length
@@ -197,7 +197,7 @@ function AdminLayout() {
               onClick={handleBackToWebsite}
               title="Return to Public Website (Ends Admin Session)"
             >
-              <img src="/images/fvh-logo.png" alt="Future Vision Home" className="logo-image" />
+              <img src="/images/fvh-logo.png" alt="Future Vision Home logo" className="logo-image" />
               <div className="logo-text-wrapper">
                 <span className="logo-text">Future Vision Home</span>
                 <span className="logo-subtext">Future Vision Sighted-Blind, Inc.</span>
@@ -219,7 +219,7 @@ function AdminLayout() {
                     title={`Profile Menu (${userName} • ${userRole})`}
                     aria-label="User Profile Menu"
                     aria-expanded={isProfileMenuOpen}
-                    aria-haspopup="true"
+                    aria-haspopup="menu"
                   >
                     <span className="admin-avatar-initials">{initials}</span>
                     {/* Active Status Dot */}

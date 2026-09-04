@@ -82,35 +82,12 @@ export const AdminAuthProvider = ({ children }) => {
     sessionStorage.setItem('adminAuthenticated', 'true')
     sessionStorage.setItem('adminLoginTime', Date.now().toString())
 
-    // Clear any stale persistent storage credentials
-    localStorage.removeItem('token')
-    localStorage.removeItem('adminAuthenticated')
-    localStorage.removeItem('adminLoginTime')
-    localStorage.removeItem('userRole')
-    localStorage.removeItem('userName')
-    localStorage.removeItem('userEmail')
-    localStorage.removeItem('currentUserId')
-    localStorage.removeItem('userId')
-    localStorage.removeItem('userFullName')
-    localStorage.removeItem('userPassword')
-
     setCurrentUser(sessionUser)
     window.dispatchEvent(new Event('adminAuthUpdated'))
   }, [])
 
   const logout = useCallback(() => {
     sessionStorage.clear()
-    localStorage.removeItem('token')
-    localStorage.removeItem('adminAuthenticated')
-    localStorage.removeItem('adminLoginTime')
-    localStorage.removeItem('userRole')
-    localStorage.removeItem('userName')
-    localStorage.removeItem('userEmail')
-    localStorage.removeItem('currentUserId')
-    localStorage.removeItem('userId')
-    localStorage.removeItem('userFullName')
-    localStorage.removeItem('userPassword')
-
     setCurrentUser(null)
     window.dispatchEvent(new Event('adminAuthUpdated'))
   }, [])

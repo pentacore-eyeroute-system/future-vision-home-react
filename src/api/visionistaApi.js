@@ -8,7 +8,7 @@ const API = axios.create({
 
 // Automatically attach Admin Token from storage to requests
 API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+  const token = sessionStorage.getItem('token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -40,12 +40,14 @@ function RichTextEditor({ value, onChange }) {
 
   return (
     <div className="rich-text-editor">
-      <div className="rich-text-editor-toolbar" aria-label="Post formatting controls">
+      <div className="rich-text-editor-toolbar" role="toolbar" aria-label="Text formatting controls">
         {toolbarButtons.map((button) => (
           <button
             key={button.title}
             type="button"
             title={button.title}
+            aria-label={button.title}
+            aria-pressed={button.active(editor)}
             className={button.active(editor) ? 'active' : ''}
             onClick={() => button.action(editor)}
           >

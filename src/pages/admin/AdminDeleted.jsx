@@ -138,16 +138,18 @@ function AdminDeleted() {
         <p>Restore accidentally deleted records or permanently delete them.</p>
       </div>
 
-      <div className="admin-subtabs" role="tablist" aria-label="Recently deleted filters">
+      <div className="admin-subtabs" role="tablist" aria-label="Recently deleted categories">
         {FILTERS.map((filter) => (
           <button
             key={filter.key}
             type="button"
+            role="tab"
+            aria-selected={activeFilter === filter.key}
             className={`admin-subtab ${activeFilter === filter.key ? 'active' : ''}`}
             onClick={() => setActiveFilter(filter.key)}
           >
             {filter.label}
-            <span className="admin-subtab-count">{getFilterCount(filter.key)}</span>
+            <span className="admin-subtab-count" title={`${getFilterCount(filter.key)} deleted items`}>{getFilterCount(filter.key)}</span>
           </button>
         ))}
       </div>

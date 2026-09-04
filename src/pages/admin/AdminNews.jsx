@@ -190,7 +190,9 @@ function AdminNews() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">News Management</h1>
         <button 
+          type="button"
           onClick={handleOpenAdd}
+          aria-label="Post New Article"
           className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-xl shadow-md transition-all font-semibold"
         >
           + Post New Article
@@ -222,7 +224,7 @@ function AdminNews() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {formError && (
             <div className="admin-form-error-banner" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -231,8 +233,9 @@ function AdminNews() {
             </div>
           )}
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title <span className="text-red-500">*</span></label>
+            <label htmlFor="newsTitle" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title <span className="text-red-500">*</span></label>
             <input 
+              id="newsTitle"
               type="text" 
               required
               className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
@@ -241,8 +244,9 @@ function AdminNews() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Date <span className="text-red-500">*</span></label>
+            <label htmlFor="newsDate" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Date <span className="text-red-500">*</span></label>
             <input 
+              id="newsDate"
               type="date" 
               required
               className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"
@@ -251,8 +255,9 @@ function AdminNews() {
             />
           </div>
           <div className="space-y-1">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description / Content <span className="text-red-500">*</span></label>
+            <label htmlFor="newsDescription" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description / Content <span className="text-red-500">*</span></label>
             <textarea 
+              id="newsDescription"
               rows="6"
               required
               className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-700 dark:bg-slate-900 focus:ring-2 focus:ring-primary outline-none transition-all"

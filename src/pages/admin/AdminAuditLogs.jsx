@@ -18,19 +18,15 @@ function AdminAuditLogs() {
   // Current logged in admin identification from session
   const currentUserId =
     sessionStorage.getItem('currentUserId') ||
-    localStorage.getItem('currentUserId') ||
     sessionStorage.getItem('userId') ||
-    localStorage.getItem('userId') ||
     ''
 
   const currentAdminEmail =
     sessionStorage.getItem('userEmail') ||
-    localStorage.getItem('userEmail') ||
     ''
 
   const currentAdminUsername =
     sessionStorage.getItem('userName') ||
-    localStorage.getItem('userName') ||
     ''
 
   const fetchAuditLogs = async (pageToFetch = currentPage) => {
@@ -333,6 +329,7 @@ function AdminAuditLogs() {
           <input
             type="text"
             placeholder="Search logs by actor, email, or action..."
+            aria-label="Search audit logs by actor, email, or action"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="user-search-input !py-2"
@@ -354,6 +351,7 @@ function AdminAuditLogs() {
           onClick={handleExportCSV}
           className="audit-export-btn"
           title="Download audit records as CSV"
+          aria-label="Export audit logs to CSV"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -365,6 +363,7 @@ function AdminAuditLogs() {
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
+            aria-hidden="true"
           >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
