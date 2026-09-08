@@ -178,7 +178,7 @@ function About() {
           <div className="founder-media-section">
             <div className="founder-image-section">
               <div className="founder-image-placeholder">
-                <img src="/images/lorena.png" alt="Portrait of Lorena Acula" />
+                <img src="/images/lorena.jpg" alt="Portrait of Lorena Acula" />
               </div>
             </div>
 
