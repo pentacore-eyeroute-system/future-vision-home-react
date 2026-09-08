@@ -1,25 +1,53 @@
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext'
 import AppLayout from './layout/AppLayout'
 import AdminLayout from './layout/AdminLayout'
-import Placeholder from './components/Placeholder'
-import Home from './pages/Home'
-import About from './pages/About'
-import OurWork from './pages/OurWork'
-import OurPartners from './pages/OurPartners'
-import EyeRoute from './pages/EyeRoute'
-import Donate from './pages/Donate'
-import Contact from './pages/Contact'
-import Admin from './pages/Admin'
-import RequestAccess from './pages/RequestAccess'
-import Article from './pages/Article'
-import AdminVisionistas from './pages/admin/AdminVisionistas'
-import AdminPartners from './pages/admin/AdminPartners'
-import AdminNewsGallery from './pages/admin/AdminNewsGallery'
-import AdminDeleted from './pages/admin/AdminDeleted'
-import AdminUsers from './pages/admin/AdminUsers'
-import AdminAuditLogs from './pages/admin/AdminAuditLogs'
+
+// Lazy-loaded public page components
+const Home = lazy(() => import('./pages/Home'))
+const About = lazy(() => import('./pages/About'))
+const OurWork = lazy(() => import('./pages/OurWork'))
+const OurPartners = lazy(() => import('./pages/OurPartners'))
+const EyeRoute = lazy(() => import('./pages/EyeRoute'))
+const Donate = lazy(() => import('./pages/Donate'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Admin = lazy(() => import('./pages/Admin'))
+const RequestAccess = lazy(() => import('./pages/RequestAccess'))
+const Article = lazy(() => import('./pages/Article'))
+
+// Lazy-loaded admin section components
+const AdminVisionistas = lazy(() => import('./pages/admin/AdminVisionistas'))
+const AdminPartners = lazy(() => import('./pages/admin/AdminPartners'))
+const AdminNewsGallery = lazy(() => import('./pages/admin/AdminNewsGallery'))
+const AdminDeleted = lazy(() => import('./pages/admin/AdminDeleted'))
+const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
+const AdminAuditLogs = lazy(() => import('./pages/admin/AdminAuditLogs'))
+
+const PageLoader = () => (
+  <div style={{
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: '60vh',
+    width: '100%'
+  }}>
+    <div style={{
+      width: '40px',
+      height: '40px',
+      border: '4px solid #e2e8f0',
+      borderTop: '4px solid #95ab2f',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite'
+    }} />
+    <style>{`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+)
 
 const publicRoutes = [
   { path: '/', element: <Home /> },
@@ -104,41 +132,43 @@ function App() {
   return (
     <AdminAuthProvider>
       <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route element={<AppLayout />}>
-            {publicRoutes.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element} />
-            ))}
-          </Route>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            {/* Public Routes */}
+            <Route element={<AppLayout />}>
+              {publicRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+              ))}
+            </Route>
 
-          {/* Admin Login - No Layout */}
-          <Route path="/admin/login" element={<Admin />} />
-          <Route path="/login" element={<Admin />} />
+            {/* Admin Login - No Layout */}
+            <Route path="/admin/login" element={<Admin />} />
+            <Route path="/login" element={<Admin />} />
 
-          {/* Sign Up / Request Access Routes - No Layout */}
-          <Route path="/internal/request-access" element={<RequestAccess />} />
-          <Route path="/signup" element={<RequestAccess />} />
-          <Route path="/sign-up" element={<RequestAccess />} />
-          <Route path="/register" element={<RequestAccess />} />
+            {/* Sign Up / Request Access Routes - No Layout */}
+            <Route path="/internal/request-access" element={<RequestAccess />} />
+            <Route path="/signup" element={<RequestAccess />} />
+            <Route path="/sign-up" element={<RequestAccess />} />
+            <Route path="/register" element={<RequestAccess />} />
 
-          {/* Protected Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            {adminRoutes.map((route) => (
-              <Route key={route.path} path={route.path} element={route.element} />
-            ))}
-          </Route>
+            {/* Protected Admin Routes */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              }
+            >
+              {adminRoutes.map((route) => (
+                <Route key={route.path} path={route.path} element={route.element} />
+              ))}
+            </Route>
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </AdminAuthProvider>
   )
