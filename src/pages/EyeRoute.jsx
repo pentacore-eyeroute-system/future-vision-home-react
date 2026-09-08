@@ -1,4 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { getApiErrorMessage, normalizeReview, reviewApi } from "../api/reviewApi";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useReviewAuth } from "../context/reviewAuth";
@@ -388,14 +390,11 @@ function EyeRoute() {
         <div className="container">
           <div className="eyeroute-video-wrapper">
             <div className="eyeroute-video-container">
-              <iframe
-                src="https://www.youtube.com/embed/TARb1Ip1J-I?rel=0"
+              <LiteYouTubeEmbed
+                id="TARb1Ip1J-I"
                 title="EyeRoute Infomercial"
-                className="eyeroute-video-iframe"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+                params="rel=0"
+              />
             </div>
           </div>
         </div>

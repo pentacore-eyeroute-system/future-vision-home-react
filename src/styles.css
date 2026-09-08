@@ -1,30 +1,34 @@
 /* Font Face Declarations */
 @font-face {
     font-family: 'Poppins-SemiBold';
-    src: url('/fonts/Poppins-SemiBold.ttf') format('truetype');
+    src: url('/fonts/Poppins-SemiBold.woff2') format('woff2');
     font-weight: 600;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'Poppins-Regular';
-    src: url('/fonts/Poppins-Regular.ttf') format('truetype');
+    src: url('/fonts/Poppins-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'Poppins-Light';
-    src: url('/fonts/Poppins-Light.ttf') format('truetype');
+    src: url('/fonts/Poppins-Light.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'Poppins-Bold';
-    src: url('/fonts/Poppins-Bold.ttf') format('truetype');
+    src: url('/fonts/Poppins-Bold.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
+    font-display: swap;
 }
 
 /* Reset and Base Styles */
@@ -3484,7 +3488,8 @@ html[data-theme="dark"] .theme-switch-icon {
 }
 
 #story .video-container {
-    height: 480px;
+    height: auto;
+    aspect-ratio: 16 / 9;
 }
 
 #story .youtube-video {
@@ -3502,12 +3507,20 @@ html[data-theme="dark"] .theme-switch-icon {
 
 .founder-media-section .video-container {
     height: 100%;
-    min-height: 400px;
+    min-height: 360px;
+    aspect-ratio: 16 / 9;
 }
 
 .founder-media-section .youtube-video {
     height: 100%;
     min-height: 400px;
+}
+
+.video-container .yt-lite,
+.eyeroute-video-container .yt-lite {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
 }
 
 .video-note {

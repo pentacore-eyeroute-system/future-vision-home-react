@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import LiteYouTubeEmbed from 'react-lite-youtube-embed'
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css'
 import './About.css'
 
 const mapHashToAboutTab = (hash) => {
@@ -83,17 +85,11 @@ function About() {
 
                 <div className="video-section">
                   <div className="video-container">
-                    <iframe
-                      width="100%"
-                      height="480"
-                      src="https://www.youtube.com/embed/MGvJQoxRcvQ?rel=0&showinfo=0"
+                    <LiteYouTubeEmbed
+                      id="MGvJQoxRcvQ"
                       title="Future Vision Home Story"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      referrerPolicy="no-referrer-when-downgrade"
-                      className="youtube-video"
-                    ></iframe>
+                      params="rel=0&showinfo=0"
+                    />
                   </div>
                 </div>
 
@@ -184,17 +180,11 @@ function About() {
 
             <div className="video-section">
               <div className="video-container">
-                <iframe
-                  width="100%"
-                  height="515"
-                  src="https://www.youtube.com/embed/z4Yz3kFGJ3M?rel=0&showinfo=0"
+                <LiteYouTubeEmbed
+                  id="z4Yz3kFGJ3M"
                   title="Founder's Background Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="youtube-video"
-                ></iframe>
+                  params="rel=0&showinfo=0"
+                />
               </div>
             </div>
           </div>
