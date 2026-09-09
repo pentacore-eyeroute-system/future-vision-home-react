@@ -5,6 +5,7 @@ import { newsArticles } from '../data/newsArticles'
 import { galleryCategories } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
 import { newsApi } from '../api/newsApi'
+import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
 import './OurWork.css'
 
 const tabOrder = ['what-we-do', 'visionistas', 'gallery']
@@ -231,7 +232,7 @@ function OurWork() {
                   >
                     <div className="visionista-icon">
                       {v.vis_pic_url ? (
-                        <img
+                        <ImageWithSkeleton
                           src={v.vis_pic_url}
                           alt={v.vis_fullname}
                           className="visionista-card-photo"
@@ -285,7 +286,7 @@ function OurWork() {
               <div className="visionista-dialog-body">
                 <div className="visionista-modal-photo-column">
                   {selectedVisionista.vis_pic_url ? (
-                    <img
+                    <ImageWithSkeleton
                       className="visionista-modal-photo"
                       src={selectedVisionista.vis_pic_url}
                       alt={selectedVisionista.vis_fullname}
@@ -375,7 +376,7 @@ function OurWork() {
                           onClick={() => setLightboxImage(img.gpi_pic_url)}
                           aria-label={`View photo from ${gallery.gal_title}`}
                         >
-                          <img src={decodeURI(img.gpi_pic_url)} alt={`${gallery.gal_title} photo ${idx + 1}`} loading="lazy" />
+                          <ImageWithSkeleton src={decodeURI(img.gpi_pic_url)} alt={`${gallery.gal_title} photo ${idx + 1}`} loading="lazy" />
                         </button>
                       ))}
                     </div>
@@ -424,7 +425,7 @@ function NewsCard({ article }) {
   return (
     <article className="news-article">
       <div className="news-image">
-        <img src={article.newsPictures?.[0]?.npi_pic_url} alt={`${article.news_title} cover`} className="news-cover-image" loading="lazy" />
+        <ImageWithSkeleton src={article.newsPictures?.[0]?.npi_pic_url} alt={`${article.news_title} cover`} className="news-cover-image" loading="lazy" />
       </div>
       <div className="news-content">
         <h2 className="news-article-title">{article.news_title}</h2>

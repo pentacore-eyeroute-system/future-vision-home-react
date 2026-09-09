@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { newsApi } from '../api/newsApi'
+import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
 
 const getImageUrl = (image) => {
   if (!image) return ''
@@ -99,7 +100,7 @@ const Article = () => {
 
         {featuredImage && (
           <section className="article-image-section" aria-label="Article images">
-            <img
+            <ImageWithSkeleton
               className="article-featured-image"
               src={featuredImage.url}
               alt={featuredImage.alt}
@@ -109,7 +110,7 @@ const Article = () => {
             {galleryImages.length > 0 && (
               <div className="article-image-gallery">
                 {galleryImages.map((image) => (
-                  <img
+                  <ImageWithSkeleton
                     key={image.id}
                     className="article-gallery-image"
                     src={image.url}

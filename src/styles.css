@@ -8280,3 +8280,80 @@ html[data-theme="dark"] .theme-switch-icon {
     user-select: none;
 }
 
+/* ==========================================================================
+   Image Skeleton Screen & Smooth Loading Animations
+   ========================================================================== */
+.img-skeleton-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.img-skeleton-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(210, 220, 226, 0.6) 25%, rgba(240, 244, 248, 0.95) 50%, rgba(210, 220, 226, 0.6) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    border-radius: inherit;
+    z-index: 2;
+    pointer-events: none;
+}
+
+[data-theme='dark'] .img-skeleton-pulse,
+.dark .img-skeleton-pulse {
+    background: linear-gradient(90deg, rgba(30, 41, 59, 0.7) 25%, rgba(51, 65, 85, 0.95) 50%, rgba(30, 41, 59, 0.7) 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.img-skeleton-loading {
+    opacity: 0 !important;
+}
+
+.img-skeleton-loaded {
+    opacity: 1 !important;
+    transition: opacity 0.35s ease-in-out;
+}
+
+/* Specific Wrapper Fixes for Visionistas & Gallery */
+.visionista-icon .img-skeleton-wrapper {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.visionista-modal-photo-column .img-skeleton-wrapper {
+    width: 100%;
+    max-width: 220px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.gallery-item .img-skeleton-wrapper {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+}
+
+.news-image .img-skeleton-wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+
