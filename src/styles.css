@@ -3142,6 +3142,9 @@ html[data-theme="dark"] .theme-switch-icon {
 .article-back-button:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: translateX(-2px);
+}.article-page {
+    min-height: 800px;
+    contain: layout style;
 }
 
 .article-page-header {
@@ -3184,17 +3187,22 @@ html[data-theme="dark"] .theme-switch-icon {
 .article-content {
     padding: 3rem 0;
     background: var(--bg-primary);
+    min-height: 400px;
+    contain: layout style;
 }
 
 .article-image-section {
     max-width: 900px;
     width: 100%;
     margin: 0 auto 2.5rem;
+    min-height: 300px;
+    aspect-ratio: 16 / 9;
 }
 
 .article-featured-image {
     width: 100%;
     max-height: 420px;
+    aspect-ratio: 16 / 9;
     object-fit: cover;
     border-radius: 12px;
     display: block;

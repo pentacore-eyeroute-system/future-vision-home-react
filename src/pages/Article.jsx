@@ -1,7 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { newsApi } from '../api/newsApi'
+import { newsArticles as newsArticlesData } from '../data/newsArticles'
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
+
+const initialNews = (newsArticlesData || []).map((item) => ({
+  news_slug: item.slug,
+  news_title: item.title,
+  news_description: item.excerpt || item.content || '',
+  newsPictures: [{ npi_pic_url: item.image }],
+  news_date: '2024-12-31',
+}))
 
 const getImageUrl = (image) => {
   if (!image) return ''
@@ -47,29 +56,39 @@ const getArticleImages = (article) => {
 const Article = () => {
   const navigate = useNavigate()
   const { slug } = useParams()
-  const [loading, setLoading] = useState(true);
-  const [news, setNews] = useState([]);
+  const [news, setNews] = useState(initialNews)
+  const [isFetched, setIsFetched] = useState(false)
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData()
+  }, [])
 
   const fetchData = async () => {
-    const newsResponse = await newsApi.getNews();
+    try {
+      const newsResponse = await newsApi.getNews()
+      if (newsResponse?.result?.length) {
+        setNews(newsResponse.result)
+      }
+    } catch (error) {
+      console.error('Failed fetching news article:', error)
+    } finally {
+      setIsFetched(true)
+    }
+  }
 
-    console.log(newsResponse.result)
-    setNews(newsResponse.result);
-    setLoading(false)
-  };
+  const article = news.find((newsItem) => newsItem.news_slug === slug)
 
-  if (loading) {
-    return <div>Loading...</div>
-  };
-
-  const article = news.find((news) => news.news_slug === slug)
+  // Redirect to news list if API fetching completes and article does not exist
+  if (!article && isFetched) {
+    return <Navigate to="/our-work#gallery" replace />
+  }
 
   if (!article) {
-    return <Navigate to="/our-work" replace />
+    return (
+      <div className="article-page min-h-[800px] p-8 text-center text-gray-500">
+        Loading article...
+      </div>
+    )
   }
 
   const articleImages = getArticleImages(article)
@@ -85,7 +104,7 @@ const Article = () => {
             onClick={() => navigate('/our-work#gallery')}
             aria-label="Go back to News and Gallery"
           >
-            ← Back
+            Back
           </button>
           <h1 className="page-title">{article.news_title}</h1>
         </div>
@@ -101,7 +120,8 @@ const Article = () => {
         {featuredImage && (
           <section className="article-image-section" aria-label="Article images">
             <ImageWithSkeleton
-              className="article-featured-image"
+              className="article-featured-image aspect-video w-full bg-gray-100"
+              wrapperClassName="aspect-video w-full bg-gray-100 rounded-xl"
               src={featuredImage.url}
               alt={featuredImage.alt}
               loading="lazy"
@@ -112,7 +132,8 @@ const Article = () => {
                 {galleryImages.map((image) => (
                   <ImageWithSkeleton
                     key={image.id}
-                    className="article-gallery-image"
+                    className="article-gallery-image aspect-square w-full bg-gray-100"
+                    wrapperClassName="aspect-square w-full bg-gray-100 rounded-lg"
                     src={image.url}
                     alt={image.alt}
                     loading="lazy"
