@@ -117,9 +117,6 @@ function AccountSettingsModal({
         password: newPassword.trim(),
       })
 
-      // Update session storage credentials
-      sessionStorage.setItem('userPassword', newPassword.trim())
-
       setSuccessMessage('Password changed successfully!')
       setCurrentPassword('')
       setNewPassword('')

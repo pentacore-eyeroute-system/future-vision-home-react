@@ -25,3 +25,52 @@
   max-height: 90px;
   overflow-y: auto;
 }
+
+/* EyeRoute Download Area */
+.eyeroute-download-wrapper {
+  display: inline-flex;
+  margin-top: 1.5rem;
+}
+
+/* Badge button shaped like Google/Store download buttons */
+.apk-download-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  padding: 0 1.75rem;
+  background: #000000;
+  color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  text-decoration: none;
+  font-family: 'Poppins-SemiBold', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.apk-download-badge-btn:hover {
+  background: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  color: #ffffff;
+}
+
+.apk-download-badge-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 968px) {
+  .eyeroute-download-wrapper {
+    margin: 1.5rem auto 0;
+    justify-content: center;
+  }
+}
+
+
+
+
+

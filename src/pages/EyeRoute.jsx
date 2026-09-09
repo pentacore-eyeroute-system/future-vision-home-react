@@ -330,32 +330,15 @@ function EyeRoute() {
                 Stay connected. Guide your loved ones with visual impairment.
                 Feel reassured wherever they go.
               </p>
-              <div className="app-download-buttons">
+              <div className="eyeroute-download-wrapper">
                 <a
-                  href="#"
+                  href="https://github.com/pentacore-eyeroute-system/EyeRoute-Mobile-APK/releases/download/v1.0.0/EyeRoute-v1.0.0.apk"
                   target="_blank"
-                  rel="noreferrer"
-                  aria-label="Get EyeRoute on Google Play (Coming soon)"
+                  rel="noopener noreferrer"
+                  className="apk-download-badge-btn"
+                  aria-label="Download EyeRoute APK"
                 >
-                  <img
-                    src="/images/google-play.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="download-btn-image"
-                  />
-                </a>
-                <a
-                  href="#"
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label="Download EyeRoute on the App Store (Coming soon)"
-                >
-                  <img
-                    src="/images/app-store.png"
-                    alt=""
-                    aria-hidden="true"
-                    className="download-btn-image"
-                  />
+                  Download EyeRoute APK
                 </a>
               </div>
             </div>
