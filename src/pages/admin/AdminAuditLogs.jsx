@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { auditLogApi } from '../../api/auditLogApi'
 import './AdminAuditLogs.css'
 
@@ -154,10 +154,11 @@ function AdminAuditLogs() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  // Filter application by search query
-  const filteredLogs = logs.filter((log) => {
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase().trim()
+  // Filter application by search query (Memoized for zero-lag searching)
+  const filteredLogs = useMemo(() => {
+    if (!searchQuery.trim()) return logs
+    const q = searchQuery.toLowerCase().trim()
+    return logs.filter((log) => {
       const matchesActor =
         log.actor?.fullName?.toLowerCase().includes(q) ||
         log.actor?.username?.toLowerCase().includes(q) ||
@@ -172,10 +173,8 @@ function AdminAuditLogs() {
       const matchesDetails = log.details?.toLowerCase().includes(q)
 
       return matchesActor || matchesTarget || matchesAction || matchesDetails
-    }
-
-    return true
-  })
+    })
+  }, [logs, searchQuery])
 
   // Format timestamp
   const formatTimestamp = (isoString) => {
@@ -213,7 +212,7 @@ function AdminAuditLogs() {
     }
   }
 
-  // Export logs to CSV
+  // Export logs to CSV using Blob URL
   const handleExportCSV = () => {
     try {
       const headers = ['Timestamp', 'Actor Name', 'Actor Email', 'Action Type', 'Target Name', 'Target Email', 'Severity', 'Details']
@@ -228,14 +227,17 @@ function AdminAuditLogs() {
         `"${(l.details || '').replace(/"/g, '""')}"`,
       ])
 
-      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-      const encodedUri = encodeURI(csvContent)
+      const csvString = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
-      link.setAttribute('href', encodedUri)
-      link.setAttribute('download', `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`)
+      link.href = url
+      link.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
       showToast('Audit logs exported successfully.')
     } catch {
       showToast('Failed to export logs.', 'error')

@@ -201,13 +201,13 @@ function AdminUsers() {
     }
   }, [])
 
-  // Guardrail calculations
-  const activePendingList = pendingRequests.filter((r) => r.status === 'PENDING_APPROVAL')
+  // Guardrail calculations (Memoized)
+  const activePendingList = useMemo(() => pendingRequests.filter((r) => r.status === 'PENDING_APPROVAL'), [pendingRequests])
   const pendingCount = activePendingList.length
   const totalStaffCount = staffMembers.length
 
-  // Number of administrators currently in the system
-  const adminCount = staffMembers.filter((u) => u.role === 'Admin').length
+  // Number of administrators currently in the system (Memoized)
+  const adminCount = useMemo(() => staffMembers.filter((u) => u.role === 'Admin').length, [staffMembers])
 
   // Helper to record an audit log event to sessionStorage and dispatch event
   const recordAuditEvent = ({
@@ -257,8 +257,11 @@ function AdminUsers() {
     }
   }
 
-  // Handlers for Pending Requests
+  // Handlers for Pending Requests (Optimistic UI updates)
   const handleApproveRequest = async (request) => {
+    // Optimistic removal from pending list
+    setPendingRequests((prev) => prev.filter((r) => r.id !== request.id))
+
     try {
       await userManagementApi.updatePendingRequest(request.id, 'approved')
       showToast(`Approved ${request.fullName} as an Editor.`)
@@ -272,15 +275,19 @@ function AdminUsers() {
 
   const handleConfirmReject = async () => {
     if (!rejectTarget) return
+    const target = rejectTarget
+    setRejectTarget(null)
+
+    // Optimistic removal from pending list
+    setPendingRequests((prev) => prev.filter((r) => r.id !== target.id))
+
     try {
-      await userManagementApi.updatePendingRequest(rejectTarget.id, 'rejected')
-      showToast(`Access request from ${rejectTarget.fullName} was rejected.`, 'info')
-      setRejectTarget(null)
+      await userManagementApi.updatePendingRequest(target.id, 'rejected')
+      showToast(`Access request from ${target.fullName} was rejected.`, 'info')
       await fetchUsersData()
     } catch (err) {
       const errorMsg = err?.response?.data?.error || err?.message || 'Failed to reject request'
       showToast(errorMsg, 'error')
-      setRejectTarget(null)
       await fetchUsersData()
     }
   }
@@ -346,6 +353,7 @@ function AdminUsers() {
     e?.preventDefault()
     if (!authActionModal.targetUser) return
     const targetUser = authActionModal.targetUser
+    const actionType = authActionModal.type
 
     const trimmedPassword = adminPasswordInput.trim()
     if (!trimmedPassword) {
@@ -360,16 +368,26 @@ function AdminUsers() {
       // Step 1: Verify current admin password via /confirm-password
       await authApi.confirmPassword(trimmedPassword)
 
+      // Optimistic update
+      if (actionType === 'DEMOTE') {
+        setStaffMembers((prev) =>
+          prev.map((u) => (u.id === targetUser.id ? { ...u, role: 'Editor' } : u))
+        )
+      } else if (actionType === 'REMOVE') {
+        setStaffMembers((prev) => prev.filter((u) => u.id !== targetUser.id))
+      }
+
+      handleCloseAuthModal()
+
       // Step 2: Automatically proceed to execute the administrative action upon successful verification
       try {
-        if (authActionModal.type === 'DEMOTE') {
+        if (actionType === 'DEMOTE') {
           await userManagementApi.updateStaffRole(targetUser.id, 'editor')
           showToast(`${targetUser.fullName} was demoted to Editor.`)
-        } else if (authActionModal.type === 'REMOVE') {
+        } else if (actionType === 'REMOVE') {
           await userManagementApi.updateStaffStatus(targetUser.id, 'disabled')
           showToast(`${targetUser.fullName} was removed from the staff directory.`, 'info')
         }
-        handleCloseAuthModal()
         await fetchUsersData()
       } catch (actionErr) {
         const errorMsg =
@@ -378,7 +396,6 @@ function AdminUsers() {
           actionErr?.message ||
           'Failed to complete the administrative action.'
         showToast(errorMsg, 'error')
-        handleCloseAuthModal()
         await fetchUsersData()
       }
     } catch (authErr) {
@@ -414,13 +431,17 @@ function AdminUsers() {
       // Demoting Admin requires password re-authentication modal
       handleOpenDemoteModal(user)
     } else {
-      // Promoting Editor to Admin
+      // Promoting Editor to Admin (Optimistic update)
+      setStaffMembers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, role: 'Admin' } : u))
+      )
       try {
         await userManagementApi.updateStaffRole(user.id, 'admin')
         showToast(`${user.fullName} was promoted to Administrator.`)
         await fetchUsersData()
       } catch (err) {
         showToast(err?.response?.data?.error || err?.message || 'Failed to promote user', 'error')
+        await fetchUsersData()
       }
     }
   }
@@ -439,28 +460,30 @@ function AdminUsers() {
     }
   }
 
-  // Filtering for Pending Requests
-  const filteredPending = activePendingList.filter((r) => {
+  // Filtering for Pending Requests (Memoized)
+  const filteredPending = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    if (!q) return true
-    return (
+    if (!q) return activePendingList
+    return activePendingList.filter((r) =>
       r.fullName.toLowerCase().includes(q) ||
       r.email.toLowerCase().includes(q) ||
       r.username.toLowerCase().includes(q)
     )
-  })
+  }, [activePendingList, searchQuery])
 
-  // Filtering for Staff Members
-  const filteredStaff = staffMembers.filter((u) => {
+  // Filtering for Staff Members (Memoized)
+  const filteredStaff = useMemo(() => {
     const q = searchQuery.toLowerCase().trim()
-    const matchesRole = roleFilter === 'ALL' || u.role === roleFilter
-    if (!q) return matchesRole
-    const matchesQuery =
-      u.fullName.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.username.toLowerCase().includes(q)
-    return matchesRole && matchesQuery
-  })
+    return staffMembers.filter((u) => {
+      const matchesRole = roleFilter === 'ALL' || u.role === roleFilter
+      if (!q) return matchesRole
+      const matchesQuery =
+        u.fullName.toLowerCase().includes(q) ||
+        u.email.toLowerCase().includes(q) ||
+        u.username.toLowerCase().includes(q)
+      return matchesRole && matchesQuery
+    })
+  }, [staffMembers, searchQuery, roleFilter])
 
   return (
     <div className="admin-section active">
