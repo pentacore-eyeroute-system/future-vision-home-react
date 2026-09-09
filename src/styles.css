@@ -1356,24 +1356,26 @@ html[data-theme="dark"] .theme-switch-icon {
 .partners-content-wrapper {
     padding: 0 1rem;
     margin-top: 0;
+    min-height: 750px;
+    contain: layout style;
 }
 
 .partners-category {
     margin-bottom: 1.5rem;
     margin-top: 0;
+    min-height: 180px;
+    contain: layout style;
 }
 
 .partners-category:first-child {
     margin-top: 0;
     margin-bottom: 1rem;
+    min-height: 150px;
 }
 
 .partners-category:last-child {
     margin-bottom: 0;
-}
-
-.partners-category:last-child {
-    margin-bottom: 0;
+    min-height: 150px;
 }
 
 .partners-category-title {
@@ -1393,6 +1395,7 @@ html[data-theme="dark"] .theme-switch-icon {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem 2rem;
+    min-height: 80px;
 }
 
 .partners-names-grid p {
