@@ -120,8 +120,8 @@ const Article = () => {
         {featuredImage && (
           <section className="article-image-section" aria-label="Article images">
             <ImageWithSkeleton
-              className="article-featured-image aspect-video w-full bg-gray-100"
-              wrapperClassName="aspect-video w-full bg-gray-100 rounded-xl"
+              className="article-featured-image w-full"
+              wrapperClassName="w-full rounded-xl overflow-hidden"
               src={featuredImage.url}
               alt={featuredImage.alt}
               loading="lazy"
@@ -132,8 +132,8 @@ const Article = () => {
                 {galleryImages.map((image) => (
                   <ImageWithSkeleton
                     key={image.id}
-                    className="article-gallery-image aspect-square w-full bg-gray-100"
-                    wrapperClassName="aspect-square w-full bg-gray-100 rounded-lg"
+                    className="article-gallery-image w-full"
+                    wrapperClassName="w-full rounded-lg overflow-hidden"
                     src={image.url}
                     alt={image.alt}
                     loading="lazy"
