@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
@@ -38,29 +38,41 @@ function AdminDeleted() {
   const fetchData = async () => {
     setLoading(true)
 
-    const visionistas = await recentlyDeletedApi.getDeletedVisionistas();
-    const news = await recentlyDeletedApi.getDeletedNews();
-    const galleries = await recentlyDeletedApi.getDeletedGalleries();
-    const partners = await recentlyDeletedApi.getDeletedPartners();
+    try {
+      const [visionistasRes, newsRes, galleriesRes, partnersRes] = await Promise.allSettled([
+        recentlyDeletedApi.getDeletedVisionistas(),
+        recentlyDeletedApi.getDeletedNews(),
+        recentlyDeletedApi.getDeletedGalleries(),
+        recentlyDeletedApi.getDeletedPartners(),
+      ])
 
-    const combinedDeletedItems = [
-      ...visionistas.result,
-      ...news.result,
-      ...galleries.result,
-      ...partners.result
-    ];
+      const visionistas = visionistasRes.status === 'fulfilled' ? (visionistasRes.value?.result || []) : []
+      const news = newsRes.status === 'fulfilled' ? (newsRes.value?.result || []) : []
+      const galleries = galleriesRes.status === 'fulfilled' ? (galleriesRes.value?.result || []) : []
+      const partners = partnersRes.status === 'fulfilled' ? (partnersRes.value?.result || []) : []
 
-    const data = combinedDeletedItems.map((item) => ({
-      id: item.id,
-      sourceKey: item.type,
-      type: item.type,
-      displayTitle: item.vis_fullname || item.news_title || item.gal_title || item.par_fullname,
-      deletedAt: normalizeDate(item.updatedAt),
-      item,
-    }));
+      const combinedDeletedItems = [
+        ...visionistas,
+        ...news,
+        ...galleries,
+        ...partners
+      ]
 
-    setDeletedItems(data)
-    setLoading(false)
+      const data = combinedDeletedItems.map((item) => ({
+        id: item.id,
+        sourceKey: item.type,
+        type: item.type,
+        displayTitle: item.vis_fullname || item.news_title || item.gal_title || item.par_fullname,
+        deletedAt: normalizeDate(item.updatedAt),
+        item,
+      }))
+
+      setDeletedItems(data)
+    } catch (error) {
+      console.error('Error fetching deleted items:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const restoreMap = {
@@ -68,7 +80,7 @@ function AdminDeleted() {
     news: recentlyDeletedApi.restoreDeletedNews,
     gallery: recentlyDeletedApi.restoreDeletedGallery,
     partner: recentlyDeletedApi.restoreDeletedPartner,
-  };
+  }
 
   const deleteMap = {
     visionista: recentlyDeletedApi.permanentDeleteVisionista,
@@ -78,8 +90,10 @@ function AdminDeleted() {
   }
 
   const normalizeDate = (date) => {
-    return new Date(date).toLocaleDateString('en-CA');
-  };
+    if (!date) return ''
+    const d = new Date(date)
+    return isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-CA')
+  }
 
   const columns = [
     { key: 'displayTitle', label: 'Name/Title' },
@@ -91,44 +105,73 @@ function AdminDeleted() {
     { key: 'deletedAt', label: 'Deleted Date' },
   ]
 
-  const filteredItems = deletedItems.filter((item) => matchesFilter(item, activeFilter))
+  // Memoized filtered items for active filter tab
+  const filteredItems = useMemo(() => {
+    return deletedItems.filter((item) => matchesFilter(item, activeFilter))
+  }, [deletedItems, activeFilter])
 
-  const getFilterCount = (filterKey) => deletedItems.filter((item) => matchesFilter(item, filterKey)).length
+  // Memoized filter counts across all subtab categories
+  const filterCounts = useMemo(() => {
+    return deletedItems.reduce((acc, item) => {
+      acc[item.type] = (acc[item.type] || 0) + 1
+      return acc
+    }, {})
+  }, [deletedItems])
 
-  const handleRestore = async (item) => {
+  const getFilterCount = useCallback((filterKey) => filterCounts[filterKey] || 0, [filterCounts])
+
+  const handleRestore = (item) => {
     setRestoreTarget(item)
   }
 
   const confirmRestore = async () => {
     if (!restoreTarget) return
 
-    const fn = restoreMap[restoreTarget.type]
-
-    if (!fn) return
-
-    await fn(restoreTarget.id, {
-      isTemporarilyDeleted: false
-    })
-
+    const targetToRestore = restoreTarget
     setRestoreTarget(null)
-    fetchData()
+
+    // Optimistic UI update: remove restored item immediately
+    setDeletedItems((prev) =>
+      prev.filter((item) => !(item.id === targetToRestore.id && item.type === targetToRestore.type))
+    )
+
+    try {
+      const fn = restoreMap[targetToRestore.type]
+      if (fn) {
+        await fn(targetToRestore.id, { isTemporarilyDeleted: false })
+      }
+    } catch (error) {
+      console.error('Error restoring item:', error)
+      // Revert optimistic update on failure
+      fetchData()
+    }
   }
 
-  const handleDeletePermanent = async (item) => {
+  const handleDeletePermanent = (item) => {
     setDeleteTarget(item)
   }
 
   const confirmPermanentDelete = async () => {
     if (!deleteTarget) return
 
-    const fn = deleteMap[deleteTarget.type]
-
-    if (!fn) return
-
-    await fn(deleteTarget.id)
-
+    const targetToDelete = deleteTarget
     setDeleteTarget(null)
-    fetchData()
+
+    // Optimistic UI update: remove deleted item immediately
+    setDeletedItems((prev) =>
+      prev.filter((item) => !(item.id === targetToDelete.id && item.type === targetToDelete.type))
+    )
+
+    try {
+      const fn = deleteMap[targetToDelete.type]
+      if (fn) {
+        await fn(targetToDelete.id)
+      }
+    } catch (error) {
+      console.error('Error permanently deleting item:', error)
+      // Revert optimistic update on failure
+      fetchData()
+    }
   }
 
   return (
