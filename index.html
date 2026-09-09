@@ -4,7 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>react-app</title>
+    <meta name="description" content="Future Vision - Empowering and transforming lives of blind and visually impaired individuals." />
+    <title>Future Vision - Home of the Future</title>
+
+    <!-- Font Preloads to eliminate text render delays (FCP/LCP) -->
+    <link rel="preload" href="/fonts/Poppins-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Poppins-SemiBold.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Hero Image Preload for fast LCP render -->
+    <link rel="preload" href="/images/hero_pic.webp" as="image" fetchpriority="high" />
   </head>
   <body>
     <div id="root"></div>

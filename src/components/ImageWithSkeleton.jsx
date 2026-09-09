@@ -49,6 +49,7 @@ export function ImageWithSkeleton({
         src={src}
         alt={alt}
         loading={loading}
+        decoding="async"
         width={width}
         height={height}
         onLoad={handleLoad}
