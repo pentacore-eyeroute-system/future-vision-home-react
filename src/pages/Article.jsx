@@ -103,6 +103,7 @@ const Article = () => {
               className="article-featured-image"
               src={featuredImage.url}
               alt={featuredImage.alt}
+              loading="lazy"
             />
 
             {galleryImages.length > 0 && (
@@ -113,6 +114,7 @@ const Article = () => {
                     className="article-gallery-image"
                     src={image.url}
                     alt={image.alt}
+                    loading="lazy"
                   />
                 ))}
               </div>
