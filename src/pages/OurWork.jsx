@@ -235,8 +235,11 @@ function OurWork() {
                         <ImageWithSkeleton
                           src={v.vis_pic_url}
                           alt={v.vis_fullname}
-                          className="visionista-card-photo"
+                          className="visionista-card-photo aspect-square w-full bg-gray-100"
+                          wrapperClassName="aspect-square w-full bg-gray-100 rounded-full"
                           loading="lazy"
+                          width={84}
+                          height={84}
                           onError={(e) => {
                             e.currentTarget.onerror = null
                             e.currentTarget.src = '/images/daily.png'
@@ -287,10 +290,13 @@ function OurWork() {
                 <div className="visionista-modal-photo-column">
                   {selectedVisionista.vis_pic_url ? (
                     <ImageWithSkeleton
-                      className="visionista-modal-photo"
+                      className="visionista-modal-photo aspect-square w-full bg-gray-100"
+                      wrapperClassName="aspect-square w-full bg-gray-100 rounded-xl"
                       src={selectedVisionista.vis_pic_url}
                       alt={selectedVisionista.vis_fullname}
                       loading="lazy"
+                      width={220}
+                      height={220}
                       onError={(e) => {
                         e.currentTarget.onerror = null
                         e.currentTarget.src = '/images/daily.png'
@@ -376,7 +382,13 @@ function OurWork() {
                           onClick={() => setLightboxImage(img.gpi_pic_url)}
                           aria-label={`View photo from ${gallery.gal_title}`}
                         >
-                          <ImageWithSkeleton src={decodeURI(img.gpi_pic_url)} alt={`${gallery.gal_title} photo ${idx + 1}`} loading="lazy" />
+                          <ImageWithSkeleton
+                            src={decodeURI(img.gpi_pic_url)}
+                            alt={`${gallery.gal_title} photo ${idx + 1}`}
+                            className="aspect-square w-full bg-gray-100"
+                            wrapperClassName="aspect-square w-full bg-gray-100"
+                            loading="lazy"
+                          />
                         </button>
                       ))}
                     </div>
@@ -425,7 +437,13 @@ function NewsCard({ article }) {
   return (
     <article className="news-article">
       <div className="news-image">
-        <ImageWithSkeleton src={article.newsPictures?.[0]?.npi_pic_url} alt={`${article.news_title} cover`} className="news-cover-image" loading="lazy" />
+        <ImageWithSkeleton
+          src={article.newsPictures?.[0]?.npi_pic_url}
+          alt={`${article.news_title} cover`}
+          className="news-cover-image aspect-video w-full bg-gray-100"
+          wrapperClassName="aspect-video w-full bg-gray-100"
+          loading="lazy"
+        />
       </div>
       <div className="news-content">
         <h2 className="news-article-title">{article.news_title}</h2>

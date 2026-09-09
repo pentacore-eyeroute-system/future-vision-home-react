@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 /**
  * ImageWithSkeleton component displays a pulsing skeleton shimmer screen
  * until the image successfully finishes loading, then smoothly fades it in.
+ * Preserves exact aspect ratio and dimensions to prevent layout shifts (CLS).
  */
 export function ImageWithSkeleton({
   src,
@@ -11,6 +12,8 @@ export function ImageWithSkeleton({
   wrapperClassName = '',
   skeletonClassName = '',
   loading = 'lazy',
+  width,
+  height,
   onError,
   onLoad,
   ...props
@@ -35,7 +38,10 @@ export function ImageWithSkeleton({
   }
 
   return (
-    <div className={`img-skeleton-wrapper ${wrapperClassName}`}>
+    <div
+      className={`img-skeleton-wrapper aspect-square w-full bg-gray-100 ${wrapperClassName}`}
+      style={width && height ? { width, height } : undefined}
+    >
       {!isLoaded && !hasError && (
         <div className={`img-skeleton-pulse ${skeletonClassName}`} aria-hidden="true" />
       )}
@@ -43,9 +49,13 @@ export function ImageWithSkeleton({
         src={src}
         alt={alt}
         loading={loading}
+        width={width}
+        height={height}
         onLoad={handleLoad}
         onError={handleError}
-        className={`${className} ${isLoaded ? 'img-skeleton-loaded' : 'img-skeleton-loading'}`}
+        className={`aspect-square w-full bg-gray-100 object-cover ${className} ${
+          isLoaded ? 'img-skeleton-loaded' : 'img-skeleton-loading'
+        }`}
         {...props}
       />
     </div>

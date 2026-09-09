@@ -8329,10 +8329,12 @@ html[data-theme="dark"] .theme-switch-icon {
     transition: opacity 0.35s ease-in-out;
 }
 
-/* Specific Wrapper Fixes for Visionistas & Gallery */
+/* Specific Wrapper Fixes for Visionistas & Gallery - CLS Optimization */
 .visionista-icon .img-skeleton-wrapper {
     width: 84px;
     height: 84px;
+    min-height: 84px;
+    aspect-ratio: 1 / 1;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -8340,6 +8342,8 @@ html[data-theme="dark"] .theme-switch-icon {
 .visionista-modal-photo-column .img-skeleton-wrapper {
     width: 100%;
     max-width: 220px;
+    min-height: 220px;
+    aspect-ratio: 1 / 1;
     border-radius: 16px;
     display: flex;
     justify-content: center;
@@ -8348,12 +8352,15 @@ html[data-theme="dark"] .theme-switch-icon {
 .gallery-item .img-skeleton-wrapper {
     width: 100%;
     height: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: inherit;
 }
 
 .news-image .img-skeleton-wrapper {
     width: 100%;
     height: 100%;
+    min-height: 180px;
+    aspect-ratio: 16 / 9;
 }
 
 
