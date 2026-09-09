@@ -633,7 +633,27 @@ function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {filteredPending.length > 0 ? (
+              {isLoading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={`skel-pending-${i}`}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="skeleton-box w-9 h-9 rounded-full flex-shrink-0" />
+                        <div className="skeleton-box h-4 w-32 rounded" />
+                      </div>
+                    </td>
+                    <td><div className="skeleton-box h-4 w-40 rounded" /></td>
+                    <td><div className="skeleton-box h-4 w-24 rounded" /></td>
+                    <td><div className="skeleton-box h-4 w-20 rounded" /></td>
+                    <td>
+                      <div className="flex justify-end gap-2">
+                        <div className="skeleton-box h-8 w-20 rounded-md" />
+                        <div className="skeleton-box h-8 w-20 rounded-md" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : filteredPending.length > 0 ? (
                 filteredPending.map((req) => (
                   <tr key={req.id}>
                     <td>
@@ -761,7 +781,28 @@ function AdminUsers() {
               </tr>
             </thead>
             <tbody>
-              {filteredStaff.length > 0 ? (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={`skel-staff-${i}`}>
+                    <td>
+                      <div className="flex items-center gap-3">
+                        <div className="skeleton-box w-9 h-9 rounded-full flex-shrink-0" />
+                        <div className="space-y-1.5">
+                          <div className="skeleton-box h-4 w-32 rounded" />
+                          <div className="skeleton-box h-3 w-20 rounded" />
+                        </div>
+                      </div>
+                    </td>
+                    <td><div className="skeleton-box h-4 w-44 rounded" /></td>
+                    <td><div className="skeleton-box h-6 w-20 rounded-full" /></td>
+                    <td>
+                      <div className="flex justify-end">
+                        <div className="skeleton-box h-8 w-24 rounded-md" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : filteredStaff.length > 0 ? (
                 filteredStaff.map((user) => {
                   const isSelf = isSelfUser(user)
                   const isLastAdmin = user.role === 'Admin' && adminCount <= 1

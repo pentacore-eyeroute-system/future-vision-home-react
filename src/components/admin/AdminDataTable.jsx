@@ -13,11 +13,24 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
       </thead>
       <tbody>
         {isLoading ? (
-          <tr>
-            <td colSpan={columns.length + 1} className="admin-table-status-cell">
-              Loading records...
-            </td>
-          </tr>
+          Array.from({ length: 5 }).map((_, rowIdx) => (
+            <tr key={`skeleton-row-${rowIdx}`} className="admin-table-skeleton-row">
+              {columns.map((col, colIdx) => (
+                <td key={`skeleton-cell-${colIdx}`}>
+                  <div
+                    className="skeleton-box h-4 rounded"
+                    style={{ width: `${Math.max(45, 90 - ((colIdx * 20 + rowIdx * 12) % 45))}%` }}
+                  />
+                </td>
+              ))}
+              <td>
+                <div className="admin-actions justify-end gap-2">
+                  <div className="skeleton-box h-7 w-14 rounded-md" />
+                  <div className="skeleton-box h-7 w-16 rounded-md" />
+                </div>
+              </td>
+            </tr>
+          ))
         ) : data.length > 0 ? (
           data.map((item, index) => (
             <tr key={item.id || index}>

@@ -8510,4 +8510,36 @@ html[data-theme="dark"] .theme-switch-icon {
     aspect-ratio: 16 / 9;
 }
 
+/* ==========================================================================
+   Admin Table & Card Skeleton Screen Utilities
+   ========================================================================== */
+.skeleton-box {
+    position: relative;
+    overflow: hidden;
+    background: rgba(210, 220, 226, 0.45);
+    border-radius: 6px;
+    display: block;
+}
 
+.skeleton-box::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 20%, rgba(255, 255, 255, 0.7) 50%, transparent 80%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+[data-theme='dark'] .skeleton-box,
+.dark .skeleton-box {
+    background: rgba(51, 65, 85, 0.45);
+}
+
+[data-theme='dark'] .skeleton-box::after,
+.dark .skeleton-box::after {
+    background: linear-gradient(90deg, transparent 20%, rgba(71, 85, 105, 0.7) 50%, transparent 80%);
+    background-size: 200% 100%;
+}

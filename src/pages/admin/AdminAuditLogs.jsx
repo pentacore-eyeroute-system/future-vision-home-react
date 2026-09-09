@@ -387,18 +387,25 @@ function AdminAuditLogs() {
           </thead>
           <tbody>
             {isLoading ? (
-              <tr>
-                <td colSpan={5} className="user-empty-table-cell !py-16">
-                  <div className="user-empty-state">
-                    <div
-                      className="admin-login-spinner !w-8 !h-8 !border-3 !border-primary !border-t-transparent"
-                      aria-hidden="true"
-                    />
-                    <h4 className="mt-3">Loading Audit Logs...</h4>
-                    <p className="text-slate-500 font-medium">Fetching page {currentPage} of logs</p>
-                  </div>
-                </td>
-              </tr>
+              Array.from({ length: 6 }).map((_, i) => (
+                <tr key={`skel-audit-${i}`}>
+                  <td>
+                    <div className="space-y-1">
+                      <div className="skeleton-box h-4 w-28 rounded" />
+                      <div className="skeleton-box h-3 w-16 rounded" />
+                    </div>
+                  </td>
+                  <td>
+                    <div className="flex items-center gap-2.5">
+                      <div className="skeleton-box w-8 h-8 rounded-full flex-shrink-0" />
+                      <div className="skeleton-box h-4 w-24 rounded" />
+                    </div>
+                  </td>
+                  <td><div className="skeleton-box h-6 w-28 rounded-full" /></td>
+                  <td><div className="skeleton-box h-4 w-24 rounded" /></td>
+                  <td><div className="skeleton-box h-4 w-48 rounded" /></td>
+                </tr>
+              ))
             ) : filteredLogs.length > 0 ? (
               filteredLogs.map((log) => {
                 const { datePart, timePart } = formatTimestamp(log.timestamp)
