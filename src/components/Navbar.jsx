@@ -22,7 +22,7 @@ function Navbar() {
       <div className="container">
         <div className="nav-content">
           <NavLink to="/" className="logo" onClick={closeMenu}>
-            <img src="/images/fvh-logo.webp" alt="Future Vision Home logo" className="logo-image" />
+            <img src="/images/fvh-logo.png" alt="Future Vision Home logo" className="logo-image" />
             <div className="logo-text-wrapper">
               <span className="logo-text">Future Vision Home</span>
               <span className="logo-subtext">Future Vision Sighted-Blind, Inc.</span>
