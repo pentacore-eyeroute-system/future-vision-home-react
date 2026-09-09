@@ -2262,6 +2262,8 @@ html[data-theme="dark"] .theme-switch-icon {
 .visionistas-content-wrapper {
     padding: 0 1rem;
     margin-bottom: 3rem;
+    min-height: 650px;
+    contain: layout style;
 }
 
 .visionistas-stories-heading {
@@ -2342,6 +2344,7 @@ html[data-theme="dark"] .theme-switch-icon {
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 2rem;
     align-items: stretch;
+    min-height: 550px;
 }
 
 .visionistas-grid-note {
@@ -2371,6 +2374,7 @@ html[data-theme="dark"] .theme-switch-icon {
     align-items: center;
     justify-content: flex-start;
     height: 100%;
+    min-height: 280px;
     box-sizing: border-box;
     overflow: hidden;
 }

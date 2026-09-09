@@ -1,8 +1,9 @@
 import { useMemo, useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { visionistaApi } from '../api/visionistaApi'
-import { newsArticles } from '../data/newsArticles'
-import { galleryCategories } from '../data/gallery'
+import { visionistas as visionistasData } from '../data/visionistas'
+import { newsArticles as newsArticlesData } from '../data/newsArticles'
+import { galleryCategories as galleryCategoriesData } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
 import { newsApi } from '../api/newsApi'
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
@@ -31,11 +32,32 @@ const mapHashToTab = (hash) => {
   return null
 }
 
+const initialVisionistas = (visionistasData || []).map((v) => ({
+  vis_fullname: v.name,
+  vis_pic_url: v.image,
+  vis_story: Array.isArray(v.story) ? v.story.join('\n\n') : v.preview || '',
+}))
+
+const initialNews = (newsArticlesData || []).map((item) => ({
+  news_slug: item.slug,
+  news_title: item.title,
+  news_description: item.excerpt || item.content || '',
+  newsPictures: [{ npi_pic_url: item.image }],
+  news_date: '2024-12-31',
+}))
+
+const initialGalleries = (galleryCategoriesData || []).map((cat) => ({
+  gal_title: cat.title,
+  gal_date: cat.date || '2022-06-01',
+  gal_description: '',
+  galleryPictures: (cat.images || []).map((img) => ({ gpi_pic_url: img })),
+}))
+
 function OurWork() {
   const location = useLocation()
-  const [visionistas, setVisionistas] = useState([])
-  const [news, setNews] = useState([])
-  const [galleries, setGalleries] = useState([])
+  const [visionistas, setVisionistas] = useState(initialVisionistas)
+  const [news, setNews] = useState(initialNews)
+  const [galleries, setGalleries] = useState(initialGalleries)
   const [activeTab, setActiveTab] = useState(() => mapHashToTab(location.hash) || 'what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -70,13 +92,32 @@ function OurWork() {
   }, [selectedVisionista, lightboxImage])
 
   const fetchData = async () => {
-    const visionistaResponse = await visionistaApi.getVisionistas().catch(() => ({ result: [] }))
-    const newsResponse = await newsApi.getNews().catch(() => ({ result: [] }))
-    const galleryResponse = await galleryApi.getGalleries().catch(() => ({ result: [] }))
+    try {
+      const visionistaResponse = await visionistaApi.getVisionistas()
+      if (visionistaResponse?.result?.length) {
+        setVisionistas(visionistaResponse.result)
+      }
+    } catch {
+      // Keep initial static state
+    }
 
-    setVisionistas(visionistaResponse?.result || [])
-    setNews(newsResponse?.result || [])
-    setGalleries(galleryResponse?.result || [])
+    try {
+      const newsResponse = await newsApi.getNews()
+      if (newsResponse?.result?.length) {
+        setNews(newsResponse.result)
+      }
+    } catch {
+      // Keep initial static state
+    }
+
+    try {
+      const galleryResponse = await galleryApi.getGalleries()
+      if (galleryResponse?.result?.length) {
+        setGalleries(galleryResponse.result)
+      }
+    } catch {
+      // Keep initial static state
+    }
   }
 
   const filteredNews = useMemo(() => {
