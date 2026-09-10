@@ -110,9 +110,9 @@ const Article = () => {
         </div>
       </section>
 
-      <div className="container py-5">
+      <div className="container max-w-4xl mx-auto px-4 py-5 flex flex-col items-center">
         {article.news_date && (
-          <p className="article-date-meta">
+          <p className="article-date-meta text-center mb-4 text-gray-500 font-medium">
             {new Date(article.news_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         )}
