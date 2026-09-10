@@ -15,15 +15,15 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const getAllPartners = () => API.get('/get-all-partners');
+export const getAllPartners = (config) => API.get('/get-all-partners', config);
 export const addPartner = (data) => API.post('/add-partner', data);
 export const updatePartner = (id, data) => API.patch(`/update-partner-info/${id}`, data);
 export const temporaryDeletePartner = (id) => API.patch(`/temporary-delete-partner/${id}`, { isTemporarilyDeleted: true });
 
 // Backward compatibility for public routes (e.g. OurPartners.jsx)
 export const partnerApi = {
-  getPartners: async () => {
-    const response = await getAllPartners();
+  getPartners: async (config) => {
+    const response = await getAllPartners(config);
     return response.data;
   }
 };

@@ -15,15 +15,15 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const getAllNews = () => API.get('/get-all-news');
+export const getAllNews = (config) => API.get('/get-all-news', config);
 export const createNews = (formData) => API.post('/create-news', formData);
 export const updateNews = (id, formData) => API.patch(`/update-news-info/${id}`, formData);
 export const temporaryDeleteNews = (id) => API.patch(`/temporary-delete-news/${id}`, { isTemporarilyDeleted: true });
 
 // Backward compatibility for public routes (e.g. OurWork.jsx, Article.jsx)
 export const newsApi = {
-  getNews: async () => {
-    const response = await getAllNews();
+  getNews: async (config) => {
+    const response = await getAllNews(config);
     return { result: response.data.result || [] };
   }
 };

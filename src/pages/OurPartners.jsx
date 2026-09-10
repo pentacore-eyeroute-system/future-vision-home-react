@@ -8,19 +8,26 @@ function OurPartners() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchData()
+    const controller = new AbortController()
+    fetchData(controller.signal)
+    return () => {
+      controller.abort()
+    }
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (signal) => {
     try {
       setLoading(true)
-      const partners = await partnerApi.getPartners()
+      const partners = await partnerApi.getPartners({ signal })
       if (partners?.result && Array.isArray(partners.result)) {
         setData(partners.result)
       } else {
         setData([])
       }
     } catch (error) {
+      if (error.name === 'CanceledError' || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        return
+      }
       console.error('Failed fetching partners:', error)
       setData([])
     } finally {

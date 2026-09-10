@@ -60,16 +60,23 @@ const Article = () => {
   const [isFetched, setIsFetched] = useState(false)
 
   useEffect(() => {
-    fetchData()
+    const controller = new AbortController()
+    fetchData(controller.signal)
+    return () => {
+      controller.abort()
+    }
   }, [])
 
-  const fetchData = async () => {
+  const fetchData = async (signal) => {
     try {
-      const newsResponse = await newsApi.getNews()
+      const newsResponse = await newsApi.getNews({ signal })
       if (newsResponse?.result?.length) {
         setNews(newsResponse.result)
       }
     } catch (error) {
+      if (error.name === 'CanceledError' || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
+        return
+      }
       console.error('Failed fetching news article:', error)
     } finally {
       setIsFetched(true)
