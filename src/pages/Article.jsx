@@ -110,9 +110,9 @@ const Article = () => {
         </div>
       </section>
 
-      <div className="container max-w-4xl mx-auto px-4 py-5 flex flex-col items-center">
+      <div className="container article-container py-8">
         {article.news_date && (
-          <p className="article-date-meta text-center mb-4 text-gray-500 font-medium">
+          <p className="article-date-meta">
             {new Date(article.news_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
           </p>
         )}
@@ -120,8 +120,8 @@ const Article = () => {
         {featuredImage && (
           <section className="article-image-section" aria-label="Article images">
             <ImageWithSkeleton
-              className="article-featured-image w-full"
-              wrapperClassName="w-full rounded-xl overflow-hidden"
+              className="article-featured-image"
+              wrapperClassName="article-featured-wrapper"
               src={featuredImage.url}
               alt={featuredImage.alt}
               width={1200}
@@ -135,8 +135,8 @@ const Article = () => {
                 {galleryImages.map((image) => (
                   <ImageWithSkeleton
                     key={image.id}
-                    className="article-gallery-image w-full"
-                    wrapperClassName="w-full rounded-lg overflow-hidden"
+                    className="article-gallery-image"
+                    wrapperClassName="article-gallery-item-wrapper"
                     src={image.url}
                     alt={image.alt}
                     width={400}

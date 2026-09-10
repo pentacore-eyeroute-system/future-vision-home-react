@@ -40,7 +40,6 @@ export function ImageWithSkeleton({
   return (
     <div
       className={`img-skeleton-wrapper ${wrapperClassName}`}
-      style={width && height ? { width, height } : undefined}
     >
       {!isLoaded && !hasError && (
         <div className={`img-skeleton-pulse ${skeletonClassName}`} aria-hidden="true" />
@@ -54,9 +53,8 @@ export function ImageWithSkeleton({
         height={height}
         onLoad={handleLoad}
         onError={handleError}
-        className={`${className} ${
-          isLoaded ? 'img-skeleton-loaded' : 'img-skeleton-loading'
-        }`}
+        className={`${className} ${isLoaded ? 'img-skeleton-loaded' : 'img-skeleton-loading'
+          }`}
         {...props}
       />
     </div>
