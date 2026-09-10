@@ -124,7 +124,10 @@ const Article = () => {
               wrapperClassName="w-full rounded-xl overflow-hidden"
               src={featuredImage.url}
               alt={featuredImage.alt}
-              loading="lazy"
+              width={1200}
+              height={675}
+              loading="eager"
+              fetchpriority="high"
             />
 
             {galleryImages.length > 0 && (
@@ -136,6 +139,8 @@ const Article = () => {
                     wrapperClassName="w-full rounded-lg overflow-hidden"
                     src={image.url}
                     alt={image.alt}
+                    width={400}
+                    height={300}
                     loading="lazy"
                   />
                 ))}

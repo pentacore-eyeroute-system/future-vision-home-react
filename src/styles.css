@@ -8469,6 +8469,201 @@ html[data-theme="dark"] .theme-switch-icon {
 
 .img-skeleton-loading {
     opacity: 0 !important;
+    color: var(--text-primary);
+}
+
+.audit-target-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+}
+
+.audit-target-email {
+    font-size: 0.75rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: var(--text-secondary);
+}
+
+.audit-details-condensed {
+    display: block;
+    max-width: 320px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    cursor: default;
+}
+
+/* ==========================================================================
+   Audit Log Instant Hover Tooltip Popover
+   ========================================================================== */
+
+.audit-tooltip-container {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.audit-hover-popover {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 8px);
+    z-index: 100;
+    width: max-content;
+    max-width: 360px;
+    min-width: 200px;
+    padding: 0.55rem 0.85rem;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border-color);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+    pointer-events: none;
+}
+
+.audit-tooltip-container:hover .audit-hover-popover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.audit-hover-popover::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--border-color) transparent transparent transparent;
+}
+
+.audit-popover-text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    margin: 0;
+    word-break: break-word;
+}
+
+/* ==========================================================================
+   Audit Logs Pagination Controls
+   ========================================================================== */
+
+.audit-pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0.5rem 0.5rem 0.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.audit-pagination-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.audit-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.audit-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.audit-page-btn:hover:not(:disabled):not(.active) {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color, #85A922);
+    color: var(--primary-color, #85A922);
+}
+
+.audit-page-btn.active {
+    background: var(--primary-color, #85A922);
+    border-color: var(--primary-color, #85A922);
+    color: #ffffff;
+}
+
+.audit-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    border-color: var(--border-color);
+}
+
+.audit-page-ellipsis {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 36px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 0.85rem;
+    user-select: none;
+}
+
+/* ==========================================================================
+   Image Skeleton Screen & Smooth Loading Animations
+   ========================================================================== */
+.img-skeleton-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.img-skeleton-pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(210, 220, 226, 0.6) 25%, rgba(240, 244, 248, 0.95) 50%, rgba(210, 220, 226, 0.6) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s ease-in-out infinite;
+    border-radius: inherit;
+    z-index: 2;
+    pointer-events: none;
+}
+
+[data-theme='dark'] .img-skeleton-pulse,
+.dark .img-skeleton-pulse {
+    background: linear-gradient(90deg, rgba(30, 41, 59, 0.7) 25%, rgba(51, 65, 85, 0.95) 50%, rgba(30, 41, 59, 0.7) 75%);
+    background-size: 200% 100%;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.img-skeleton-loading {
+    opacity: 0 !important;
 }
 
 .img-skeleton-loaded {
@@ -8508,6 +8703,36 @@ html[data-theme="dark"] .theme-switch-icon {
     height: 100%;
     min-height: 180px;
     aspect-ratio: 16 / 9;
+}
+
+/* Article Page Image Optimization for CLS */
+.article-featured-image {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    width: 100%;
+}
+
+.article-image-section .img-skeleton-wrapper {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+}
+
+.article-image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.article-image-gallery .img-skeleton-wrapper {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+}
+
+.article-gallery-image {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
 }
 
 /* ==========================================================================
