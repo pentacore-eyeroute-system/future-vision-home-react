@@ -1,59 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { partnerApi } from '../api/partnerApi'
-
-const defaultOrganizations = [
-  'Stichting kanthari',
-  'Kanthari Foundation Switzerland',
-  'Philippine Blind Union (PBU)',
-  'Eusebio C. Santos Elementary School (ECSES)',
-  'Department of Education (DepEd) Bureau of Education Assessment (BEA)',
-  'Buling Pag-asa',
-  'Persons with Different Abilities (PWDA) Bambang',
-  'JORGE HORHE',
-]
-
-const defaultIndividuals = [
-  'Cristy Villanueva',
-  'Imee Licos Chulipa',
-  'Sofia Villanueva',
-  'Junver Arcayna',
-  'Richi Arcayna (Ms. Jessa, Ms. Julia, Ms. Alyssa-Birthday Fund Raiser)',
-  'Gigi Tibi',
-  'Kristine Teves',
-  'Runnesa Soriano',
-  'Paola Jane Razon',
-  'John Mark Limel Papag',
-  'Senorita Edna D. Lhuillier',
-  'Catherine B. Jones',
-  'Limuel H. Vilela',
-  'Wil Sabado',
-  'Jing/Grace Montoya',
-  'Andrea',
-  'Judith C. Abando',
-  'Nancy D. Medina',
-]
-
-const defaultParentNames = [
-  'Rowena Pindug',
-  'Mirasol Trinidad',
-  '& Mrs Michael Olaso',
-  'Malou Bueno',
-  'Tita Ivy Sinones',
-  'Arsenia C. Sinones',
-  'Danica B. Par',
-  'Tita Josephine L. Malan',
-]
-
-const initialPartnersData = [
-  ...defaultOrganizations.map(name => ({ par_fullname: name, par_type: 'organization' })),
-  ...defaultIndividuals.map(name => ({ par_fullname: name, par_type: 'individual' })),
-  ...defaultParentNames.map(name => ({ par_fullname: name, par_type: 'parent' })),
-]
 
 const isPartnerType = (partner, type) => partner.par_type?.toLowerCase() === type
 
 function OurPartners() {
-  const [data, setData] = useState(initialPartnersData)
+  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchData()
@@ -61,39 +13,53 @@ function OurPartners() {
 
   const fetchData = async () => {
     try {
+      setLoading(true)
       const partners = await partnerApi.getPartners()
-      if (partners?.result && partners.result.length > 0) {
-        const apiPartners = partners.result
-        const mergedMap = new Map()
-
-        // Initialize with default items
-        initialPartnersData.forEach((item) => {
-          mergedMap.set(`${item.par_type}-${item.par_fullname.toLowerCase()}`, item)
-        })
-
-        // Merge API items
-        apiPartners.forEach((item) => {
-          if (item.par_fullname && item.par_type) {
-            mergedMap.set(`${item.par_type.toLowerCase()}-${item.par_fullname.toLowerCase()}`, item)
-          }
-        })
-
-        setData(Array.from(mergedMap.values()))
+      if (partners?.result && Array.isArray(partners.result)) {
+        setData(partners.result)
+      } else {
+        setData([])
       }
     } catch (error) {
       console.error('Failed fetching partners:', error)
+      setData([])
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getCategoryNames = (type) => {
+  const organizations = useMemo(() => {
     return Array.from(
       new Set(
         data
-          .filter((partner) => isPartnerType(partner, type))
+          .filter((partner) => isPartnerType(partner, 'organization'))
           .map((partner) => partner.par_fullname)
+          .filter(Boolean)
       )
     )
-  }
+  }, [data])
+
+  const individuals = useMemo(() => {
+    return Array.from(
+      new Set(
+        data
+          .filter((partner) => isPartnerType(partner, 'individual'))
+          .map((partner) => partner.par_fullname)
+          .filter(Boolean)
+      )
+    )
+  }, [data])
+
+  const parents = useMemo(() => {
+    return Array.from(
+      new Set(
+        data
+          .filter((partner) => isPartnerType(partner, 'parent'))
+          .map((partner) => partner.par_fullname)
+          .filter(Boolean)
+      )
+    )
+  }, [data])
 
   return (
     <>
@@ -102,29 +68,56 @@ function OurPartners() {
           <h1 className="page-title">Our Partners</h1>
           <p className="page-subtitle">
             The following are individuals and organizations who lovingly shared their support to Future
-            Vision Home in 2021.
+            Vision Home.
           </p>
         </div>
       </section>
 
-      <section className="partners-section">
+      <section className="partners-section py-8">
         <div className="container">
-          <div className="partners-content-wrapper">
-            <PartnersCategory
-              title="ORGANIZATIONS"
-              names={getCategoryNames('organization')}
-            />
+          {loading ? (
+            <div className="partners-content-wrapper space-y-8">
+              {[1, 2, 3].map((idx) => (
+                <div key={idx} className="partners-category">
+                  <div className="skeleton-box h-8 w-64 rounded-md mb-6" />
+                  <div className="partners-names-grid">
+                    {[1, 2, 3, 4, 5, 6].map((cell) => (
+                      <div key={cell} className="skeleton-box h-6 w-48 rounded" />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="partners-content-wrapper">
+              {organizations.length > 0 && (
+                <PartnersCategory
+                  title="ORGANIZATIONS"
+                  names={organizations}
+                />
+              )}
 
-            <PartnersCategory
-              title="INDIVIDUALS"
-              names={getCategoryNames('individual')}
-            />
+              {individuals.length > 0 && (
+                <PartnersCategory
+                  title="INDIVIDUALS"
+                  names={individuals}
+                />
+              )}
 
-            <PartnersCategory
-              title="PARENTS/GUARDIANS OF VISIONISTAS"
-              names={getCategoryNames('parent')}
-            />
-          </div>
+              {parents.length > 0 && (
+                <PartnersCategory
+                  title="PARENTS/GUARDIANS OF VISIONISTAS"
+                  names={parents}
+                />
+              )}
+
+              {organizations.length === 0 && individuals.length === 0 && parents.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  No partners available at this time.
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </>
