@@ -251,16 +251,6 @@ function AdminNews() {
         title={editingItem ? 'Edit News Article' : 'Post New News Article'}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          {formError && (
-            <div className="admin-form-error-banner" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span>{formError}</span>
-            </div>
-          )}
           <div className="space-y-1">
             <label htmlFor="newsTitle" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Title <span className="text-red-500">*</span></label>
             <input 
@@ -306,6 +296,16 @@ function AdminNews() {
               helperText="Upload one or more photos for this news article."
             />
           </div>
+          {formError && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{formError}</span>
+            </div>
+          )}
           <div className="pt-4 flex justify-end gap-3">
             <button 
               type="button"
