@@ -45,11 +45,11 @@ function AdminNewsGallery() {
       const newsResponse = await getAllNews()
       const newsData = newsResponse.data.result || []
       const activeNews = newsData.filter(item => !item.news_is_temporarily_deleted)
-      
+
       const galleryResponse = await getAllGalleries().catch(async () => ({
         data: { result: await adminApi.getGallery() }
       }))
-      
+
       const galleryData = galleryResponse.data.result || []
       const activeGalleryItems = galleryData.filter(item => !item.gal_is_temporarily_deleted)
 
@@ -214,13 +214,13 @@ function AdminNewsGallery() {
           showToast('News article updated successfully.', 'success')
         } else {
           const fd = new FormData()
-          
+
           fd.append('title', formData.title || '')
           fd.append('gal_title', formData.title || '')
-          
+
           fd.append('description', formData.description || '')
           fd.append('gal_description', formData.description || '')
-          
+
           fd.append('date', formData.date || '')
           fd.append('gal_date', formData.date || '')
 
@@ -266,10 +266,10 @@ function AdminNewsGallery() {
 
         fd.append('title', formData.title || '')
         fd.append('gal_title', formData.title || '')
-        
+
         fd.append('description', formData.description || '')
         fd.append('gal_description', formData.description || '')
-        
+
         fd.append('date', formData.date || '')
         fd.append('gal_date', formData.date || '')
 
@@ -335,68 +335,77 @@ function AdminNewsGallery() {
       <AdminModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingItem ? `Edit ${editingItem.type === 'news' ? 'News Article' : 'Gallery Event'}` : 'Create Post'}
+        title={editingItem ? 'Edit Post' : 'Create Post'}
+        subtitle={
+          editingItem
+            ? `Update details for this ${formData.type} entry.`
+            : `Fill in the information below to publish a new ${formData.type === 'news' ? 'news' : 'gallery'} entry.`
+        }
+        maxWidth="max-w-4xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="form-group mb-4">
-            <label>Content Type</label>
-            <div className="news-gallery-type-selector">
-              <label className={`type-option ${formData.type === 'news' ? 'active' : ''}`}>
-                <input
-                  type="radio"
-                  name="contentType"
-                  value="news"
-                  checked={formData.type === 'news'}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  disabled={!!editingItem}
-                />
-                News Article
-              </label>
-              <label className={`type-option ${formData.type === 'gallery' ? 'active' : ''}`}>
-                <input
-                  type="radio"
-                  name="contentType"
-                  value="gallery"
-                  checked={formData.type === 'gallery'}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                  disabled={!!editingItem}
-                />
-                Gallery Event
-              </label>
+        <form onSubmit={handleSubmit} className="admin-form">
+          {(imageError || descriptionError) && (
+            <div className="admin-form-error-banner" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>{imageError || descriptionError}</span>
             </div>
-          </div>
-
+          )}
           {formData.type === 'gallery' ? (
-            <div className="space-y-4">
-              <div className="form-grid-2col">
+            <div className="news-gallery-modal-grid">
+              {/* Left Column: Image Uploader */}
+              <div className="news-gallery-photo-col">
                 <AdminImageUploadField
-                  label="Event Photos"
+                  inputId="newsGalleryImages"
+                  label="Gallery Photos"
                   images={formData.images}
-                  onUpload={handleImageUpload}
-                  onRemove={handleRemoveImage}
-                  error={imageError}
-                  required
                   multiple
-                  helperText="Upload event photos (up to 10 photos recommended)."
+                  required={true}
+                  onFilesSelected={handleImageUpload}
+                  onRemoveImage={handleRemoveImage}
+                  helperText="Upload at least one photo for this gallery."
                 />
+              </div>
 
-                <div className="space-y-3.5">
-                  <div>
-                    <label htmlFor="galTitle">Event Title <span className="text-red-500">*</span></label>
-                    <input
-                      id="galTitle"
-                      type="text"
-                      required
-                      placeholder="Enter event title"
-                      value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    />
+              {/* Right Column: Metadata Fields */}
+              <div className="news-gallery-fields-col flex flex-col gap-3.5">
+                <div className="form-group mb-0">
+                  <label htmlFor="galleryTitle">Title <span className="text-red-500">*</span></label>
+                  <input
+                    id="galleryTitle"
+                    type="text"
+                    required
+                    placeholder="Enter gallery title"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="form-group mb-0">
+                    <label htmlFor="galleryType">Type</label>
+                    <select
+                      id="galleryType"
+                      value={formData.type}
+                      disabled={!!editingItem}
+                      onChange={(e) => {
+                        setFormData({ ...formData, type: e.target.value })
+                        setImageError('')
+                        setDescriptionError('')
+                      }}
+                    >
+                      <option value="news">News</option>
+                      <option value="gallery">Gallery</option>
+                    </select>
                   </div>
 
-                  <div>
-                    <label htmlFor="galDate">Event Date <span className="text-red-500">*</span></label>
+                  <div className="form-group mb-0">
+                    <label htmlFor="galleryDate">Date <span className="text-red-500">*</span></label>
                     <input
-                      id="galDate"
+                      id="galleryDate"
                       type="date"
                       required
                       value={formData.date}
@@ -404,43 +413,44 @@ function AdminNewsGallery() {
                     />
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <label htmlFor="galDescription">Event Description <span className="text-red-500">*</span></label>
-                <textarea
-                  id="galDescription"
-                  rows="4"
-                  required
-                  placeholder="Enter event description..."
-                  value={formData.description}
-                  onChange={(e) => {
-                    setFormData({ ...formData, description: e.target.value })
-                    setDescriptionError('')
-                  }}
-                ></textarea>
-                {descriptionError && <div className="admin-form-error-banner" role="alert"><span>{descriptionError}</span></div>}
+                <div className="form-group mb-0 flex-1 flex flex-col">
+                  <label htmlFor="galleryDescription">Description <span className="text-red-500">*</span></label>
+                  <textarea
+                    id="galleryDescription"
+                    required
+                    rows={4}
+                    placeholder="Enter a brief description for this gallery..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="flex-1 min-h-[110px]"
+                  ></textarea>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="form-grid-2col">
-                <AdminImageUploadField
-                  label="Cover Photo / Images"
-                  images={formData.images}
-                  onUpload={handleImageUpload}
-                  onRemove={handleRemoveImage}
-                  error={imageError}
-                  required
-                  multiple
-                  helperText="Upload a featured cover image."
-                />
+            <div className="news-modal-wrapper">
+              <div className="news-meta-grid">
+                {/* Left Column: Featured Cover Image */}
+                <div className="news-featured-col">
+                  <AdminImageUploadField
+                    inputId="newsFeaturedImage"
+                    label="Cover Photo / Images"
+                    images={formData.images}
+                    multiple
+                    required={true}
+                    onFilesSelected={handleImageUpload}
+                    onRemoveImage={handleRemoveImage}
+                    helperText="Upload a featured cover image."
+                  />
+                </div>
 
-                <div className="space-y-3.5">
-                  <div>
-                    <label htmlFor="newsTitle">Article Title <span className="text-red-500">*</span></label>
+                {/* Right Column: Title, Type, Date */}
+                <div className="news-meta-fields">
+                  <div className="form-group mb-0">
+                    <label htmlFor="newsArticleTitle">Article Title <span className="text-red-500">*</span></label>
                     <input
-                      id="newsTitle"
+                      id="newsArticleTitle"
                       type="text"
                       required
                       placeholder="Enter news article title"
@@ -450,17 +460,27 @@ function AdminNewsGallery() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
+                    <div className="form-group mb-0">
                       <label htmlFor="newsType">Type</label>
-                      <select id="newsType" disabled value="news">
+                      <select
+                        id="newsType"
+                        value={formData.type}
+                        disabled={!!editingItem}
+                        onChange={(e) => {
+                          setFormData({ ...formData, type: e.target.value })
+                          setImageError('')
+                          setDescriptionError('')
+                        }}
+                      >
                         <option value="news">News</option>
+                        <option value="gallery">Gallery</option>
                       </select>
                     </div>
 
-                    <div>
-                      <label htmlFor="newsDate">Publish Date <span className="text-red-500">*</span></label>
+                    <div className="form-group mb-0">
+                      <label htmlFor="newsPublishDate">Publish Date <span className="text-red-500">*</span></label>
                       <input
-                        id="newsDate"
+                        id="newsPublishDate"
                         type="date"
                         required
                         value={formData.date}
@@ -471,6 +491,7 @@ function AdminNewsGallery() {
                 </div>
               </div>
 
+              {/* Bottom Row: Full Width Rich Text Content */}
               <div className="form-group mt-3.5 mb-0">
                 <label>Article Content <span className="text-red-500">*</span></label>
                 <RichTextEditor
