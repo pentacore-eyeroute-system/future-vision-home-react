@@ -18,8 +18,7 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
               {columns.map((col, colIdx) => (
                 <td key={`skeleton-cell-${colIdx}`}>
                   <div
-                    className="skeleton-box h-4 rounded"
-                    style={{ width: `${Math.max(45, 90 - ((colIdx * 20 + rowIdx * 12) % 45))}%` }}
+                    className={`skeleton-box h-4 rounded ${['w-3/4', 'w-1/2', 'w-2/3', 'w-5/6', 'w-4/5', 'w-3/5'][(colIdx + rowIdx) % 6]}`}
                   />
                 </td>
               ))}

@@ -7768,13 +7768,56 @@ html[data-theme="dark"] .theme-switch-icon {
 .user-toast-banner {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 0.75rem;
     padding: 0.85rem 1.25rem;
     border-radius: 10px;
     font-size: 0.92rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
+    width: 100%;
+    box-sizing: border-box;
     animation: fadeIn 0.25s ease-out;
+}
+
+.user-toast-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.user-toast-icon {
+    flex-shrink: 0;
+}
+
+.user-toast-text {
+    word-break: break-word;
+}
+
+.user-toast-dismiss {
+    background: transparent;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 1.2rem;
+    line-height: 1;
+    opacity: 0.7;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+}
+
+.user-toast-dismiss:hover {
+    opacity: 1;
+}
+
+.btn-spinner {
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+    margin-right: 6px;
 }
 
 .user-toast-banner.success {

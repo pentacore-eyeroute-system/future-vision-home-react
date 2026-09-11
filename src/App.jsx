@@ -25,27 +25,8 @@ const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'))
 const AdminAuditLogs = lazy(() => import('./pages/admin/AdminAuditLogs'))
 
 const PageLoader = () => (
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: '60vh',
-    width: '100%'
-  }}>
-    <div style={{
-      width: '40px',
-      height: '40px',
-      border: '4px solid #e2e8f0',
-      borderTop: '4px solid #95ab2f',
-      borderRadius: '50%',
-      animation: 'spin 0.8s linear infinite'
-    }} />
-    <style>{`
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `}</style>
+  <div className="flex justify-center items-center min-h-[60vh] w-full">
+    <div className="w-10 h-10 border-4 border-slate-200 border-t-[#95ab2f] rounded-full animate-spin" />
   </div>
 )
 
