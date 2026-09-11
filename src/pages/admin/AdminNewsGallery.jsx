@@ -56,6 +56,7 @@ function AdminNewsGallery() {
       const combined = [
         ...activeNews.map((item) => ({
           ...item,
+          id: item.news_id || item.id,
           type: 'news',
           displayTitle: item.news_title,
           displayDate: normalizeDate(item.news_date),
@@ -63,6 +64,7 @@ function AdminNewsGallery() {
         })),
         ...activeGalleryItems.map((item) => ({
           ...item,
+          id: item.gal_id || item.id,
           type: 'gallery',
           displayTitle: item.gal_title,
           displayDate: normalizeDate(item.gal_date),
@@ -122,9 +124,11 @@ function AdminNewsGallery() {
   const confirmDelete = async () => {
     if (!deleteTarget) return
 
+    const targetId = deleteTarget.id || deleteTarget.news_id || deleteTarget.gal_id
+
     if (deleteTarget.type === 'news') {
       try {
-        await temporaryDeleteNews(deleteTarget.id)
+        await temporaryDeleteNews(targetId)
         showToast('News article deleted successfully.', 'success')
       } catch (error) {
         console.error("Error setting temporary delete status for news:", error)
@@ -132,7 +136,7 @@ function AdminNewsGallery() {
       }
     } else {
       try {
-        await temporaryDeleteGallery(deleteTarget.id)
+        await temporaryDeleteGallery(targetId)
         showToast('Gallery item deleted successfully.', 'success')
       } catch (error) {
         console.error("Error setting temporary delete status for gallery:", error)
@@ -186,6 +190,8 @@ function AdminNewsGallery() {
 
     try {
       if (editingItem) {
+        const targetId = editingItem.id || editingItem.news_id || editingItem.gal_id
+
         if (formData.type === 'news') {
           const data = new FormData()
           data.append('title', formData.title || '')
@@ -210,7 +216,7 @@ function AdminNewsGallery() {
             data.append('existingImage', existingImgUrl)
           }
 
-          await updateNews(editingItem.id, data)
+          await updateNews(targetId, data)
           showToast('News article updated successfully.', 'success')
         } else {
           const fd = new FormData()
@@ -237,10 +243,10 @@ function AdminNewsGallery() {
             })
           } else if (formData.images.length > 0) {
             const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
-            data.append('existingImage', existingImgUrl)
+            fd.append('existingImage', existingImgUrl)
           }
 
-          await updateGallery(editingItem.id, fd)
+          await updateGallery(targetId, fd)
           showToast('Gallery event updated successfully.', 'success')
         }
       } else if (formData.type === 'news') {

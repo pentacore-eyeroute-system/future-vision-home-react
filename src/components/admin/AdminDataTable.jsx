@@ -32,7 +32,7 @@ function AdminDataTable({ columns, data, onEdit, onDelete, onRestore, isLoading 
           ))
         ) : data.length > 0 ? (
           data.map((item, index) => (
-            <tr key={item.id || index}>
+            <tr key={`${item.type || 'item'}-${item.id || item.news_id || item.gal_id || index}`}>
               {columns.map((col) => (
                 <td key={col.key}>
                   {col.render ? col.render(item[col.key], item) : (item[col.key] ?? 'N/A')}
