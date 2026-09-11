@@ -6,8 +6,10 @@ import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
 import RichTextEditor from '../../components/admin/RichTextEditor'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
+import { extractErrorMessage } from '../../lib/errorUtils'
 import './AdminNewsGallery.css'
 
 function AdminNewsGallery() {
@@ -18,6 +20,8 @@ function AdminNewsGallery() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [imageError, setImageError] = useState('')
   const [descriptionError, setDescriptionError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [toast, setToast] = useState(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,6 +29,11 @@ function AdminNewsGallery() {
     type: 'news',
     images: [],
   })
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
 
   useEffect(() => {
     fetchData()
@@ -116,14 +125,18 @@ function AdminNewsGallery() {
     if (deleteTarget.type === 'news') {
       try {
         await temporaryDeleteNews(deleteTarget.id)
+        showToast('News article deleted successfully.', 'success')
       } catch (error) {
         console.error("Error setting temporary delete status for news:", error)
+        showToast(extractErrorMessage(error, 'Failed to delete news article.'), 'error')
       }
     } else {
       try {
         await temporaryDeleteGallery(deleteTarget.id)
+        showToast('Gallery item deleted successfully.', 'success')
       } catch (error) {
         console.error("Error setting temporary delete status for gallery:", error)
+        showToast(extractErrorMessage(error, 'Failed to delete gallery item.'), 'error')
       }
     }
     setDeleteTarget(null)
@@ -169,8 +182,68 @@ function AdminNewsGallery() {
       return
     }
 
-    if (editingItem) {
-      if (formData.type === 'news') {
+    setSubmitting(true)
+
+    try {
+      if (editingItem) {
+        if (formData.type === 'news') {
+          const data = new FormData()
+          data.append('title', formData.title || '')
+          data.append('news_title', formData.title || '')
+          data.append('description', formData.description || '')
+          data.append('news_description', formData.description || '')
+          data.append('date', formData.date || '')
+          data.append('news_date', formData.date || '')
+
+          const existingNewsPicturesIds = formData.images
+            .filter(image => !image.file && image.id !== undefined && image.id !== null)
+            .map(image => image.id)
+          data.append('existingNewsPicturesIds', JSON.stringify(existingNewsPicturesIds))
+
+          const newFiles = formData.images.filter(img => img.file).map(img => img.file)
+          if (newFiles.length > 0) {
+            newFiles.forEach(file => {
+              data.append('images', file)
+            })
+          } else if (formData.images.length > 0) {
+            const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
+            data.append('existingImage', existingImgUrl)
+          }
+
+          await updateNews(editingItem.id, data)
+          showToast('News article updated successfully.', 'success')
+        } else {
+          const fd = new FormData()
+          
+          fd.append('title', formData.title || '')
+          fd.append('gal_title', formData.title || '')
+          
+          fd.append('description', formData.description || '')
+          fd.append('gal_description', formData.description || '')
+          
+          fd.append('date', formData.date || '')
+          fd.append('gal_date', formData.date || '')
+
+          const existingGalleryPicturesIds = formData.images
+            .filter(image => !image.file && typeof image.id === 'number')
+            .map(image => image.id)
+          fd.append('existingGalleryPicturesIds', JSON.stringify(existingGalleryPicturesIds))
+
+          const newFiles = formData.images.filter(image => image.file).map(image => image.file)
+
+          if (newFiles.length > 0) {
+            newFiles.forEach(file => {
+              fd.append('images', file)
+            })
+          } else if (formData.images.length > 0) {
+            const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
+            data.append('existingImage', existingImgUrl)
+          }
+
+          await updateGallery(editingItem.id, fd)
+          showToast('Gallery event updated successfully.', 'success')
+        }
+      } else if (formData.type === 'news') {
         const data = new FormData()
         data.append('title', formData.title || '')
         data.append('news_title', formData.title || '')
@@ -179,32 +252,18 @@ function AdminNewsGallery() {
         data.append('date', formData.date || '')
         data.append('news_date', formData.date || '')
 
-        const existingNewsPicturesIds = formData.images
-          .filter(image => !image.file && image.id !== undefined && image.id !== null)
-          .map(image => image.id)
-        data.append('existingNewsPicturesIds', JSON.stringify(existingNewsPicturesIds))
-
         const newFiles = formData.images.filter(img => img.file).map(img => img.file)
         if (newFiles.length > 0) {
           newFiles.forEach(file => {
             data.append('images', file)
           })
-        } else if (formData.images.length > 0) {
-          const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
-          data.append('existingImage', existingImgUrl)
         }
 
-        try {
-          await updateNews(editingItem.id, data)
-        } catch (error) {
-          console.error("Error updating news article:", error)
-          if (error.response) {
-            console.error("Backend error details:", error.response.data)
-          }
-        }
+        await createNews(data)
+        showToast('News article created successfully.', 'success')
       } else {
         const fd = new FormData()
-        
+
         fd.append('title', formData.title || '')
         fd.append('gal_title', formData.title || '')
         
@@ -214,80 +273,27 @@ function AdminNewsGallery() {
         fd.append('date', formData.date || '')
         fd.append('gal_date', formData.date || '')
 
-        const existingGalleryPicturesIds = formData.images
-          .filter(image => !image.file && typeof image.id === 'number')
-          .map(image => image.id)
-        fd.append('existingGalleryPicturesIds', JSON.stringify(existingGalleryPicturesIds))
-
         const newFiles = formData.images.filter(image => image.file).map(image => image.file)
-
         if (newFiles.length > 0) {
           newFiles.forEach(file => {
             fd.append('images', file)
           })
-        } else if (formData.images.length > 0) {
-          const existingImgUrl = formData.images[0].url || formData.images[0].path || ''
-          fd.append('existingImage', existingImgUrl)
         }
 
-        try {
-          await updateGallery(editingItem.id, fd)
-        } catch (error) {
-          console.error("Error updating gallery entry:", error)
-        }
-      }
-    } else if (formData.type === 'news') {
-      const data = new FormData()
-      data.append('title', formData.title || '')
-      data.append('news_title', formData.title || '')
-      data.append('description', formData.description || '')
-      data.append('news_description', formData.description || '')
-      data.append('date', formData.date || '')
-      data.append('news_date', formData.date || '')
-
-      const newFiles = formData.images.filter(img => img.file).map(img => img.file)
-      if (newFiles.length > 0) {
-        newFiles.forEach(file => {
-          data.append('images', file)
-        })
-      }
-
-      try {
-        await createNews(data)
-      } catch (error) {
-        console.error("Error creating news article:", error)
-        if (error.response) {
-          console.error("Backend error details:", error.response.data)
-        }
-      }
-    } else {
-      const fd = new FormData()
-
-      fd.append('title', formData.title || '')
-      fd.append('gal_title', formData.title || '')
-      
-      fd.append('description', formData.description || '')
-      fd.append('gal_description', formData.description || '')
-      
-      fd.append('date', formData.date || '')
-      fd.append('gal_date', formData.date || '')
-
-      const newFiles = formData.images.filter(image => image.file).map(image => image.file)
-      if (newFiles.length > 0) {
-        newFiles.forEach(file => {
-          fd.append('images', file)
-        })
-      }
-
-      try {
         await createGallery(fd)
-      } catch (error) {
-        console.error("Error creating gallery entry:", error)
+        showToast('Gallery entry created successfully.', 'success')
       }
-    }
 
-    setModalOpen(false)
-    fetchData()
+      setModalOpen(false)
+      fetchData()
+    } catch (error) {
+      console.error("Error submitting news/gallery form:", error)
+      const errorMsg = extractErrorMessage(error, 'Failed to save entry.')
+      showToast(errorMsg, 'error')
+      setImageError(errorMsg)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const normalizeDate = (date) => {
@@ -298,6 +304,7 @@ function AdminNewsGallery() {
 
   return (
     <div className="admin-section active">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="admin-news-gallery-header">
         <div>
           <h2>News & Gallery</h2>
@@ -328,77 +335,68 @@ function AdminNewsGallery() {
       <AdminModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={editingItem ? 'Edit Post' : 'Create Post'}
-        subtitle={
-          editingItem
-            ? `Update details for this ${formData.type} entry.`
-            : `Fill in the information below to publish a new ${formData.type} entry.`
-        }
-        maxWidth="max-w-4xl"
+        title={editingItem ? `Edit ${editingItem.type === 'news' ? 'News Article' : 'Gallery Event'}` : 'Create Post'}
       >
-        <form onSubmit={handleSubmit} className="admin-form">
-          {(imageError || descriptionError) && (
-            <div className="admin-form-error-banner" role="alert">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
-              <span>{imageError || descriptionError}</span>
-            </div>
-          )}
-          {formData.type === 'gallery' ? (
-            <div className="news-gallery-modal-grid">
-              {/* Left Column: Image Uploader */}
-              <div className="news-gallery-photo-col">
-                <AdminImageUploadField
-                  inputId="newsGalleryImages"
-                  label="Gallery Photos"
-                  images={formData.images}
-                  multiple
-                  required={true}
-                  onFilesSelected={handleImageUpload}
-                  onRemoveImage={handleRemoveImage}
-                  helperText="Upload at least one photo for this gallery."
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="form-group mb-4">
+            <label>Content Type</label>
+            <div className="news-gallery-type-selector">
+              <label className={`type-option ${formData.type === 'news' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="contentType"
+                  value="news"
+                  checked={formData.type === 'news'}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  disabled={!!editingItem}
                 />
-              </div>
+                News Article
+              </label>
+              <label className={`type-option ${formData.type === 'gallery' ? 'active' : ''}`}>
+                <input
+                  type="radio"
+                  name="contentType"
+                  value="gallery"
+                  checked={formData.type === 'gallery'}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  disabled={!!editingItem}
+                />
+                Gallery Event
+              </label>
+            </div>
+          </div>
 
-              {/* Right Column: Metadata Fields */}
-              <div className="news-gallery-fields-col flex flex-col gap-3.5">
-                <div className="form-group mb-0">
-                  <label htmlFor="galleryTitle">Title <span className="text-red-500">*</span></label>
-                  <input
-                    id="galleryTitle"
-                    type="text"
-                    required
-                    placeholder="Enter gallery title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  />
-                </div>
+          {formData.type === 'gallery' ? (
+            <div className="space-y-4">
+              <div className="form-grid-2col">
+                <AdminImageUploadField
+                  label="Event Photos"
+                  images={formData.images}
+                  onUpload={handleImageUpload}
+                  onRemove={handleRemoveImage}
+                  error={imageError}
+                  required
+                  multiple
+                  helperText="Upload event photos (up to 10 photos recommended)."
+                />
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="form-group mb-0">
-                    <label htmlFor="galleryType">Type</label>
-                    <select
-                      id="galleryType"
-                      value={formData.type}
-                      disabled={!!editingItem}
-                      onChange={(e) => {
-                        setFormData({ ...formData, type: e.target.value })
-                        setImageError('')
-                        setDescriptionError('')
-                      }}
-                    >
-                      <option value="news">News</option>
-                      <option value="gallery">Gallery</option>
-                    </select>
+                <div className="space-y-3.5">
+                  <div>
+                    <label htmlFor="galTitle">Event Title <span className="text-red-500">*</span></label>
+                    <input
+                      id="galTitle"
+                      type="text"
+                      required
+                      placeholder="Enter event title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    />
                   </div>
 
-                  <div className="form-group mb-0">
-                    <label htmlFor="galleryDate">Date <span className="text-red-500">*</span></label>
+                  <div>
+                    <label htmlFor="galDate">Event Date <span className="text-red-500">*</span></label>
                     <input
-                      id="galleryDate"
+                      id="galDate"
                       type="date"
                       required
                       value={formData.date}
@@ -406,44 +404,43 @@ function AdminNewsGallery() {
                     />
                   </div>
                 </div>
+              </div>
 
-                <div className="form-group mb-0 flex-1 flex flex-col">
-                  <label htmlFor="galleryDescription">Description <span className="text-red-500">*</span></label>
-                  <textarea
-                    id="galleryDescription"
-                    required
-                    rows={4}
-                    placeholder="Enter a brief description for this gallery..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="flex-1 min-h-[110px]"
-                  ></textarea>
-                </div>
+              <div>
+                <label htmlFor="galDescription">Event Description <span className="text-red-500">*</span></label>
+                <textarea
+                  id="galDescription"
+                  rows="4"
+                  required
+                  placeholder="Enter event description..."
+                  value={formData.description}
+                  onChange={(e) => {
+                    setFormData({ ...formData, description: e.target.value })
+                    setDescriptionError('')
+                  }}
+                ></textarea>
+                {descriptionError && <div className="admin-form-error-banner" role="alert"><span>{descriptionError}</span></div>}
               </div>
             </div>
           ) : (
-            <div className="news-modal-wrapper">
-              <div className="news-meta-grid">
-                {/* Left Column: Featured Cover Image */}
-                <div className="news-featured-col">
-                  <AdminImageUploadField
-                    inputId="newsFeaturedImage"
-                    label="Cover Photo / Images"
-                    images={formData.images}
-                    multiple
-                    required={true}
-                    onFilesSelected={handleImageUpload}
-                    onRemoveImage={handleRemoveImage}
-                    helperText="Upload a featured cover image."
-                  />
-                </div>
+            <div className="space-y-3">
+              <div className="form-grid-2col">
+                <AdminImageUploadField
+                  label="Cover Photo / Images"
+                  images={formData.images}
+                  onUpload={handleImageUpload}
+                  onRemove={handleRemoveImage}
+                  error={imageError}
+                  required
+                  multiple
+                  helperText="Upload a featured cover image."
+                />
 
-                {/* Right Column: Title, Type, Date */}
-                <div className="news-meta-fields">
-                  <div className="form-group mb-0">
-                    <label htmlFor="newsArticleTitle">Article Title <span className="text-red-500">*</span></label>
+                <div className="space-y-3.5">
+                  <div>
+                    <label htmlFor="newsTitle">Article Title <span className="text-red-500">*</span></label>
                     <input
-                      id="newsArticleTitle"
+                      id="newsTitle"
                       type="text"
                       required
                       placeholder="Enter news article title"
@@ -453,27 +450,17 @@ function AdminNewsGallery() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="form-group mb-0">
+                    <div>
                       <label htmlFor="newsType">Type</label>
-                      <select
-                        id="newsType"
-                        value={formData.type}
-                        disabled={!!editingItem}
-                        onChange={(e) => {
-                          setFormData({ ...formData, type: e.target.value })
-                          setImageError('')
-                          setDescriptionError('')
-                        }}
-                      >
+                      <select id="newsType" disabled value="news">
                         <option value="news">News</option>
-                        <option value="gallery">Gallery</option>
                       </select>
                     </div>
 
-                    <div className="form-group mb-0">
-                      <label htmlFor="newsPublishDate">Publish Date <span className="text-red-500">*</span></label>
+                    <div>
+                      <label htmlFor="newsDate">Publish Date <span className="text-red-500">*</span></label>
                       <input
-                        id="newsPublishDate"
+                        id="newsDate"
                         type="date"
                         required
                         value={formData.date}
@@ -484,7 +471,6 @@ function AdminNewsGallery() {
                 </div>
               </div>
 
-              {/* Bottom Row: Full Width Rich Text Content */}
               <div className="form-group mt-3.5 mb-0">
                 <label>Article Content <span className="text-red-500">*</span></label>
                 <RichTextEditor
@@ -499,8 +485,31 @@ function AdminNewsGallery() {
           )}
 
           <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
-            <button type="submit" className="btn btn-primary">{editingItem ? 'Update Post' : 'Publish Post'}</button>
+            <button type="button" className="btn btn-secondary" disabled={submitting} onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span>{editingItem ? 'Updating...' : 'Publishing...'}</span>
+                </>
+              ) : (
+                <span>{editingItem ? 'Update Post' : 'Publish Post'}</span>
+              )}
+            </button>
           </div>
         </form>
       </AdminModal>

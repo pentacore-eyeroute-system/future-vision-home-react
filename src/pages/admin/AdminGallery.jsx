@@ -3,6 +3,8 @@ import { adminApi } from '../../api/adminApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
+import { extractErrorMessage } from '../../lib/errorUtils'
 
 function AdminGallery() {
   const [gallery, setGallery] = useState([])
@@ -11,12 +13,19 @@ function AdminGallery() {
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [formError, setFormError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [toast, setToast] = useState(null)
   const [formData, setFormData] = useState({
     gal_title: '',
-    gal_description: '',
     gal_date: '',
-    gal_pic_path: '' // Simplified for design
+    gal_pic_path: '',
+    gal_description: '',
   })
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
 
   useEffect(() => {
     fetchData()
@@ -24,9 +33,14 @@ function AdminGallery() {
 
   const fetchData = async () => {
     setLoading(true)
-    const data = await adminApi.getGallery()
-    setGallery(data)
-    setLoading(false)
+    try {
+      const data = await adminApi.getGallery()
+      setGallery(data)
+    } catch (error) {
+      console.error("Failed fetching gallery:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const columns = [
@@ -37,7 +51,7 @@ function AdminGallery() {
   const handleOpenAdd = () => {
     setEditingItem(null)
     setFormError('')
-    setFormData({ gal_title: '', gal_description: '', gal_date: '', gal_pic_path: '' })
+    setFormData({ gal_title: '', gal_date: '', gal_pic_path: '', gal_description: '' })
     setModalOpen(true)
   }
 
@@ -55,9 +69,15 @@ function AdminGallery() {
   const confirmDelete = async () => {
     if (!deleteTarget) return
 
-    await adminApi.deleteGallery(deleteTarget.id)
-    setDeleteTarget(null)
-    fetchData()
+    try {
+      await adminApi.deleteGallery(deleteTarget.id)
+      showToast('Gallery event deleted successfully.', 'success')
+      setDeleteTarget(null)
+      fetchData()
+    } catch (error) {
+      console.error("Error deleting gallery event:", error)
+      showToast(extractErrorMessage(error, 'Failed to delete gallery event.'), 'error')
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -69,17 +89,31 @@ function AdminGallery() {
       return
     }
 
-    if (editingItem) {
-      await adminApi.updateGallery(editingItem.id, formData)
-    } else {
-      await adminApi.createGallery(formData)
+    setSubmitting(true)
+
+    try {
+      if (editingItem) {
+        await adminApi.updateGallery(editingItem.id, formData)
+        showToast('Gallery event updated successfully.', 'success')
+      } else {
+        await adminApi.createGallery(formData)
+        showToast('Gallery event created successfully.', 'success')
+      }
+      setModalOpen(false)
+      fetchData()
+    } catch (error) {
+      console.error("Error submitting gallery event:", error)
+      const errorMsg = extractErrorMessage(error, 'Failed to save gallery event.')
+      showToast(errorMsg, 'error')
+      setFormError(errorMsg)
+    } finally {
+      setSubmitting(false)
     }
-    setModalOpen(false)
-    fetchData()
   }
 
   return (
     <div className="space-y-6">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Gallery Management</h1>
         <button 
@@ -174,16 +208,39 @@ function AdminGallery() {
           <div className="pt-4 flex justify-end gap-3">
             <button 
               type="button"
+              disabled={submitting}
               onClick={() => setModalOpen(false)}
-              className="px-6 py-2 text-gray-500 hover:text-gray-700 font-semibold"
+              className="px-6 py-2 text-gray-500 hover:text-gray-700 font-semibold disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit"
-              className="bg-primary hover:bg-primary-dark text-white px-8 py-2 rounded-xl shadow-lg transition-all font-semibold"
+              disabled={submitting}
+              className="bg-primary hover:bg-primary-dark text-white px-8 py-2 rounded-xl shadow-lg transition-all font-semibold disabled:opacity-50 flex items-center justify-center"
             >
-              {editingItem ? 'Save Changes' : 'Create Gallery'}
+              {submitting ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span>{editingItem ? 'Saving Changes...' : 'Creating Gallery...'}</span>
+                </>
+              ) : (
+                <span>{editingItem ? 'Save Changes' : 'Create Gallery'}</span>
+              )}
             </button>
           </div>
         </form>

@@ -3,7 +3,9 @@ import { getAllVisionistas, addVisionista, updateVisionista, temporaryDeleteVisi
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
+import { extractErrorMessage } from '../../lib/errorUtils'
 import './AdminVisionistas.css'
 
 function AdminVisionistas() {
@@ -15,7 +17,13 @@ function AdminVisionistas() {
   const [isDragging, setIsDragging] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState('')
+  const [toast, setToast] = useState(null)
   const fileInputRef = useRef(null)
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
 
   const [formData, setFormData] = useState({
     vis_fullname: '',
@@ -90,10 +98,12 @@ function AdminVisionistas() {
 
     try {
       await temporaryDeleteVisionista(deleteTarget.id)
+      showToast('Visionista deleted successfully.', 'success')
       setDeleteTarget(null)
       fetchData()
     } catch (error) {
       console.error('Error setting temporary delete status:', error)
+      showToast(extractErrorMessage(error, 'Failed to delete Visionista.'), 'error')
     }
   }
 
@@ -152,13 +162,14 @@ function AdminVisionistas() {
 
     try {
       await addVisionista(data)
+      showToast('Visionista profile created successfully.', 'success')
       fetchData()
       setModalOpen(false)
     } catch (error) {
       console.error('Error creating visionista:', error)
-      if (error.response) {
-        console.error('Backend error details:', error.response.data)
-      }
+      const errorMsg = extractErrorMessage(error, 'Failed to create Visionista profile.')
+      showToast(errorMsg, 'error')
+      setFormError(errorMsg)
     }
   }
 
@@ -182,13 +193,14 @@ function AdminVisionistas() {
 
     try {
       await updateVisionista(id, data)
+      showToast('Visionista profile updated successfully.', 'success')
       await fetchData()
       setModalOpen(false)
     } catch (error) {
       console.error('Error updating visionista:', error)
-      if (error.response) {
-        console.error('Backend error details:', error.response.data)
-      }
+      const errorMsg = extractErrorMessage(error, 'Failed to update Visionista profile.')
+      showToast(errorMsg, 'error')
+      setFormError(errorMsg)
     }
   }
 
@@ -225,6 +237,7 @@ function AdminVisionistas() {
 
   return (
     <div className="admin-section active">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="admin-visionistas-header">
         <div>
           <h2>Visionistas</h2>
@@ -464,6 +477,7 @@ function AdminVisionistas() {
             <button
               type="button"
               className="visionista-btn-cancel"
+              disabled={submitting}
               onClick={() => setModalOpen(false)}
             >
               Cancel
@@ -474,7 +488,24 @@ function AdminVisionistas() {
               className="visionista-btn-submit"
             >
               {submitting ? (
-                <span>Saving...</span>
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span>{editingItem ? 'Saving Changes...' : 'Saving Visionista...'}</span>
+                </>
               ) : (
                 <>
                   <svg

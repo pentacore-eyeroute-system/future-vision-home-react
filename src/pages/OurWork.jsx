@@ -2,8 +2,6 @@ import { useMemo, useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { visionistaApi } from '../api/visionistaApi'
 import { visionistas as visionistasData } from '../data/visionistas'
-import { newsArticles as newsArticlesData } from '../data/newsArticles'
-import { galleryCategories as galleryCategoriesData } from '../data/gallery'
 import { galleryApi } from '../api/galleryApi'
 import { newsApi } from '../api/newsApi'
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
@@ -38,26 +36,11 @@ const initialVisionistas = (visionistasData || []).map((v) => ({
   vis_story: Array.isArray(v.story) ? v.story.join('\n\n') : v.preview || '',
 }))
 
-const initialNews = (newsArticlesData || []).map((item) => ({
-  news_slug: item.slug,
-  news_title: item.title,
-  news_description: item.excerpt || item.content || '',
-  newsPictures: [{ npi_pic_url: item.image }],
-  news_date: '2024-12-31',
-}))
-
-const initialGalleries = (galleryCategoriesData || []).map((cat) => ({
-  gal_title: cat.title,
-  gal_date: cat.date || '2022-06-01',
-  gal_description: '',
-  galleryPictures: (cat.images || []).map((img) => ({ gpi_pic_url: img })),
-}))
-
 function OurWork() {
   const location = useLocation()
   const [visionistas, setVisionistas] = useState(initialVisionistas)
-  const [news, setNews] = useState(initialNews)
-  const [galleries, setGalleries] = useState(initialGalleries)
+  const [news, setNews] = useState([])
+  const [galleries, setGalleries] = useState([])
   const [activeTab, setActiveTab] = useState(() => mapHashToTab(location.hash) || 'what-we-do')
   const [selectedVisionista, setSelectedVisionista] = useState(null)
   const [lightboxImage, setLightboxImage] = useState(null)
@@ -98,25 +81,21 @@ function OurWork() {
         setVisionistas(visionistaResponse.result)
       }
     } catch {
-      // Keep initial static state
+      // Keep initial visionistas state
     }
 
     try {
       const newsResponse = await newsApi.getNews()
-      if (newsResponse?.result?.length) {
-        setNews(newsResponse.result)
-      }
+      setNews(newsResponse?.result || [])
     } catch {
-      // Keep initial static state
+      setNews([])
     }
 
     try {
       const galleryResponse = await galleryApi.getGalleries()
-      if (galleryResponse?.result?.length) {
-        setGalleries(galleryResponse.result)
-      }
+      setGalleries(galleryResponse?.result || [])
     } catch {
-      // Keep initial static state
+      setGalleries([])
     }
   }
 

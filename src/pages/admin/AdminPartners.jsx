@@ -3,6 +3,8 @@ import { getAllPartners, addPartner, updatePartner, temporaryDeletePartner } fro
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
+import { extractErrorMessage } from '../../lib/errorUtils'
 import './AdminPartners.css'
 
 function AdminPartners() {
@@ -11,10 +13,17 @@ function AdminPartners() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [toast, setToast] = useState(null)
   const [formData, setFormData] = useState({
     par_fullname: '',
     par_type: 'organization',
   })
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
 
   useEffect(() => {
     fetchData()
@@ -65,10 +74,12 @@ function AdminPartners() {
 
     try {
       await temporaryDeletePartner(deleteTarget.id)
+      showToast('Partner deleted successfully.', 'success')
       setDeleteTarget(null)
       fetchData() // Refresh view rows to omit the deleted item
     } catch (error) {
       console.error("Error setting temporary delete status:", error)
+      showToast(extractErrorMessage(error, 'Failed to delete Partner.'), 'error')
     }
   }
 
@@ -82,10 +93,12 @@ function AdminPartners() {
 
     try {
       await addPartner(payload)
+      showToast('Partner added successfully.', 'success')
       fetchData()
       setModalOpen(false)
     } catch (error) {
       console.error("Error creating partner:", error)
+      showToast(extractErrorMessage(error, 'Failed to create partner.'), 'error')
     }
   }
 
@@ -99,25 +112,33 @@ function AdminPartners() {
 
     try {
       await updatePartner(id, payload)
+      showToast('Partner updated successfully.', 'success')
       fetchData()
       setModalOpen(false)
     } catch (error) {
       console.error("Error updating partner:", error)
+      showToast(extractErrorMessage(error, 'Failed to update partner.'), 'error')
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitting(true)
     
-    if (editingItem) {
-      await handleUpdatePartner(editingItem.id, formData)
-    } else {
-      await handleAddPartner(formData)
+    try {
+      if (editingItem) {
+        await handleUpdatePartner(editingItem.id, formData)
+      } else {
+        await handleAddPartner(formData)
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
     <div className="admin-section active">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="admin-partners-header">
         <div>
           <h2>Our Partners</h2>
@@ -174,8 +195,31 @@ function AdminPartners() {
             </select>
           </div>
           <div className="form-actions">
-            <button type="submit" className="btn btn-primary">Save</button>
-            <button type="button" className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="button" className="btn btn-secondary" disabled={submitting} onClick={() => setModalOpen(false)}>Cancel</button>
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span>{editingItem ? 'Updating...' : 'Saving...'}</span>
+                </>
+              ) : (
+                <span>Save</span>
+              )}
+            </button>
           </div>
         </form>
       </AdminModal>

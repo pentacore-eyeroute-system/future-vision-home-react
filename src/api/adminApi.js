@@ -28,27 +28,8 @@ const createDefaultState = () => ({
       par_type: 'organization',
     },
   ],
-  news: [
-    {
-      id: 3,
-      news_title: '11th Anniversary',
-      news_description: 'A celebration of milestones, stories, and community support.',
-      news_date: '2025-03-27',
-      news_images: [createImage('news-3', 'newsletter-1.png', '/images/newsletter-1.png')],
-    },
-  ],
-  gallery: [
-    {
-      id: 4,
-      gal_title: 'Braille Day',
-      gal_description: 'Snapshots from a day focused on learning, reading, and inclusion.',
-      gal_date: '2025-01-11',
-      gal_images: [
-        createImage('gal-4-1', 'braille-1.png', '/images/Braille%201.png'),
-        createImage('gal-4-2', 'braille-2.png', '/images/Braille%202.png'),
-      ],
-    },
-  ],
+  news: [],
+  gallery: [],
   deleted: [],
 })
 

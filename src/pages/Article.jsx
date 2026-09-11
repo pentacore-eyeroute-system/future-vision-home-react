@@ -1,16 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { newsApi } from '../api/newsApi'
-import { newsArticles as newsArticlesData } from '../data/newsArticles'
 import { ImageWithSkeleton } from '../components/ImageWithSkeleton'
-
-const initialNews = (newsArticlesData || []).map((item) => ({
-  news_slug: item.slug,
-  news_title: item.title,
-  news_description: item.excerpt || item.content || '',
-  newsPictures: [{ npi_pic_url: item.image }],
-  news_date: '2024-12-31',
-}))
 
 const getImageUrl = (image) => {
   if (!image) return ''
@@ -56,7 +47,7 @@ const getArticleImages = (article) => {
 const Article = () => {
   const navigate = useNavigate()
   const { slug } = useParams()
-  const [news, setNews] = useState(initialNews)
+  const [news, setNews] = useState([])
   const [isFetched, setIsFetched] = useState(false)
 
   useEffect(() => {
@@ -70,9 +61,7 @@ const Article = () => {
   const fetchData = async (signal) => {
     try {
       const newsResponse = await newsApi.getNews({ signal })
-      if (newsResponse?.result?.length) {
-        setNews(newsResponse.result)
-      }
+      setNews(newsResponse?.result || [])
     } catch (error) {
       if (error.name === 'CanceledError' || error.name === 'AbortError' || error.code === 'ERR_CANCELED') {
         return

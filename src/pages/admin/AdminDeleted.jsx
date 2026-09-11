@@ -2,7 +2,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react'
 import { galleryApi } from '../../api/galleryApi'
 import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
 import { recentlyDeletedApi } from '../../api/recentlyDeletedApi'
+import { extractErrorMessage } from '../../lib/errorUtils'
 import './AdminDeleted.css'
 
 const FILTERS = [
@@ -120,6 +122,13 @@ function AdminDeleted() {
 
   const getFilterCount = useCallback((filterKey) => filterCounts[filterKey] || 0, [filterCounts])
 
+  const [toast, setToast] = useState(null)
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
+
   const handleRestore = (item) => {
     setRestoreTarget(item)
   }
@@ -139,9 +148,11 @@ function AdminDeleted() {
       const fn = restoreMap[targetToRestore.type]
       if (fn) {
         await fn(targetToRestore.id, { isTemporarilyDeleted: false })
+        showToast(`Restored "${targetToRestore.displayTitle}" successfully.`, 'success')
       }
     } catch (error) {
       console.error('Error restoring item:', error)
+      showToast(extractErrorMessage(error, 'Failed to restore item.'), 'error')
       // Revert optimistic update on failure
       fetchData()
     }
@@ -166,9 +177,11 @@ function AdminDeleted() {
       const fn = deleteMap[targetToDelete.type]
       if (fn) {
         await fn(targetToDelete.id)
+        showToast(`Permanently deleted "${targetToDelete.displayTitle}".`, 'info')
       }
     } catch (error) {
       console.error('Error permanently deleting item:', error)
+      showToast(extractErrorMessage(error, 'Failed to permanently delete item.'), 'error')
       // Revert optimistic update on failure
       fetchData()
     }
@@ -176,6 +189,7 @@ function AdminDeleted() {
 
   return (
     <div className="admin-section active">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="admin-deleted-header">
         <h2>Recently Deleted</h2>
         <p>Restore accidentally deleted records or permanently delete them.</p>

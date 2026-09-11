@@ -4,7 +4,9 @@ import AdminDataTable from '../../components/admin/AdminDataTable'
 import AdminImageUploadField from '../../components/admin/AdminImageUploadField'
 import AdminModal from '../../components/admin/AdminModal'
 import AdminConfirmModal from '../../components/admin/AdminConfirmModal'
+import AdminToast from '../../components/admin/AdminToast'
 import { filesToImageEntries, normalizeImageList } from '../../lib/adminImages'
+import { extractErrorMessage } from '../../lib/errorUtils'
 
 function AdminNews() {
   const [news, setNews] = useState([])
@@ -13,12 +15,19 @@ function AdminNews() {
   const [editingItem, setEditingItem] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [formError, setFormError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [toast, setToast] = useState(null)
   const [formData, setFormData] = useState({
     news_title: '',
     news_description: '',
     news_date: '',
     news_images: []
   })
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4500)
+  }
 
   useEffect(() => {
     fetchNewsData()
@@ -112,10 +121,14 @@ function AdminNews() {
 
     try {
       await createNews(data)
+      showToast('News article created successfully.', 'success')
       fetchNewsData()
       setModalOpen(false)
     } catch (error) {
       console.error("Error creating news article:", error)
+      const errorMsg = extractErrorMessage(error, 'Failed to create news article.')
+      showToast(errorMsg, 'error')
+      setFormError(errorMsg)
     }
   }
 
@@ -149,44 +162,60 @@ function AdminNews() {
 
     try {
       await updateNews(id, data)
+      showToast('News article updated successfully.', 'success')
       fetchNewsData()
       setModalOpen(false)
     } catch (error) {
       console.error("Error updating news article:", error)
+      const errorMsg = extractErrorMessage(error, 'Failed to update news article.')
+      showToast(errorMsg, 'error')
+      setFormError(errorMsg)
     }
   }
 
   const confirmDeleteNews = async (id) => {
     try {
       await temporaryDeleteNews(id)
+      showToast('News article deleted successfully.', 'success')
       fetchNewsData() // Refresh view grid
     } catch (error) {
       console.error("Error setting temporary delete status for news:", error)
+      showToast(extractErrorMessage(error, 'Failed to delete news article.'), 'error')
     }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setFormError('')
-    const hasImages = formData.news_images && formData.news_images.length > 0
+    const imageFile = formData.news_images.find((img) => img.file)?.file || null
+    const hasExistingImage = formData.news_images && formData.news_images.length > 0
 
-    if (!hasImages) {
-      setFormError('Photo is required. Please upload at least one image for the news article.')
+    if (!editingItem && !imageFile) {
+      setFormError('Photo is required. Please upload at least one news image.')
       return
     }
 
-    const newFiles = formData.news_images.filter(img => img.file).map(img => img.file)
-    const imageFile = newFiles[0] || null
+    if (editingItem && !hasExistingImage && !imageFile) {
+      setFormError('Photo is required. Please upload at least one news image.')
+      return
+    }
 
-    if (editingItem) {
-      await handleUpdateNews(editingItem.id, formData, imageFile)
-    } else {
-      await handleCreateNews(formData, imageFile)
+    setSubmitting(true)
+
+    try {
+      if (editingItem) {
+        await handleUpdateNews(editingItem.id, formData, imageFile)
+      } else {
+        await handleCreateNews(formData, imageFile)
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
     <div className="space-y-6">
+      <AdminToast toast={toast} onClose={() => setToast(null)} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">News Management</h1>
         <button 
@@ -280,16 +309,39 @@ function AdminNews() {
           <div className="pt-4 flex justify-end gap-3">
             <button 
               type="button"
+              disabled={submitting}
               onClick={() => setModalOpen(false)}
-              className="px-6 py-2 text-gray-500 hover:text-gray-700 font-semibold"
+              className="px-6 py-2 text-gray-500 hover:text-gray-700 font-semibold disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit"
-              className="bg-primary hover:bg-primary-dark text-white px-8 py-2 rounded-xl shadow-lg transition-all font-semibold"
+              disabled={submitting}
+              className="bg-primary hover:bg-primary-dark text-white px-8 py-2 rounded-xl shadow-lg transition-all font-semibold disabled:opacity-50 flex items-center justify-center"
             >
-              {editingItem ? 'Save Changes' : 'Post Article'}
+              {submitting ? (
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{ animation: 'spin 0.8s linear infinite', display: 'inline-block', marginRight: '6px' }}
+                    aria-hidden="true"
+                  >
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  </svg>
+                  <span>{editingItem ? 'Saving Changes...' : 'Posting Article...'}</span>
+                </>
+              ) : (
+                <span>{editingItem ? 'Save Changes' : 'Post Article'}</span>
+              )}
             </button>
           </div>
         </form>
