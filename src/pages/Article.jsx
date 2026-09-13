@@ -44,6 +44,33 @@ const getArticleImages = (article) => {
     })
 }
 
+const ArticleSkeleton = () => (
+  <div className="article-page animate-pulse" aria-busy="true" aria-label="Loading article">
+    <section className="page-header article-page-header">
+      <div className="container">
+        <div className="h-9 w-20 bg-gray-200/40 rounded mb-4" />
+        <div className="h-10 w-3/4 max-w-2xl bg-gray-200/40 rounded" />
+      </div>
+    </section>
+
+    <div className="container article-container py-8">
+      <div className="h-5 w-40 bg-gray-200 rounded mb-6" />
+
+      <section className="article-image-section mb-8">
+        <div className="article-featured-wrapper w-full aspect-[16/9] max-w-[1200px] mx-auto bg-gray-200 rounded-xl" />
+      </section>
+
+      <div className="article-content space-y-4 max-w-4xl">
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-11/12" />
+        <div className="h-4 bg-gray-200 rounded w-4/5" />
+        <div className="h-4 bg-gray-200 rounded w-full" />
+        <div className="h-4 bg-gray-200 rounded w-3/4" />
+      </div>
+    </div>
+  </div>
+)
+
 const Article = () => {
   const navigate = useNavigate()
   const { slug } = useParams()
@@ -80,11 +107,7 @@ const Article = () => {
   }
 
   if (!article) {
-    return (
-      <div className="article-page min-h-[800px] p-8 text-center text-gray-500">
-        Loading article...
-      </div>
-    )
+    return <ArticleSkeleton />
   }
 
   const articleImages = getArticleImages(article)

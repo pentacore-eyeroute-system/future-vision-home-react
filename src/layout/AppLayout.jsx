@@ -5,14 +5,14 @@ import Footer from '../components/Footer'
 
 function AppLayout() {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <ScrollToTop />
       <Navbar />
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
       <Footer />
-    </>
+    </div>
   )
 }
 
