@@ -332,7 +332,7 @@ function EyeRoute() {
               </p>
               <div className="eyeroute-download-wrapper">
                 <a
-                  href="https://github.com/pentacore-eyeroute-system/EyeRoute-Mobile-APK/releases/download/v1.0.0/EyeRoute-v1.0.0.apk"
+                  href="https://github.com/pentacore-eyeroute-system/eyeroute-frontend/releases/download/v1.0.0/EyeRoute-v1.0.0.apk"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="apk-download-badge-btn"
