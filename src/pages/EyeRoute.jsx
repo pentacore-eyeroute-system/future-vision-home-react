@@ -430,6 +430,51 @@ function EyeRoute() {
         </div>
       </section>
 
+      <section className="eyeroute-guide-section" id="wearer-info">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Wearer Information &amp; Public Guide</h2>
+            <p className="section-subtitle">
+              Important information and safety guidelines for the public, bystanders, and emergency responders
+            </p>
+          </div>
+
+          <div className="eyeroute-guide-grid">
+            <div className="eyeroute-guide-card">
+              <h3 className="eyeroute-guide-card-title">About the Wearable Vest</h3>
+              <p className="eyeroute-guide-card-text">
+                The individual wearing this vest is navigating independently using EyeRoute, an intelligent assistive mobility system developed in partnership with Future Vision Home. The wearable vest uses an on-device microcomputer and forward-facing camera to evaluate real-world pedestrian hazards, delivering immediate spoken safety cues through an open-ear audio clip to complement the primary tactile feedback of their white cane. It is designed to foster autonomous mobility and personal safety for visually impaired individuals without replacing their traditional orientation and navigation skills.
+              </p>
+            </div>
+
+            <div className="eyeroute-guide-card">
+              <h3 className="eyeroute-guide-card-title">Privacy &amp; Public Protection</h3>
+              <p className="eyeroute-guide-card-text">
+                Your privacy and the privacy of the surrounding public are strictly protected. The camera does not record, save, or store video footage on the device, on cloud servers, or anywhere online. Visual frames are processed instantaneously in volatile memory purely for local obstacle detection and are discarded immediately afterward. Live camera streaming is never publicly accessible; it is strictly restricted to pre-authorized family members or registered guardians via an encrypted, private mobile application to verify the wearer&apos;s physical safety during active travel.
+              </p>
+            </div>
+
+            <div className="eyeroute-guide-card">
+              <h3 className="eyeroute-guide-card-title">Offering Assistance</h3>
+              <p className="eyeroute-guide-card-text">
+                If you encounter the wearer and wish to offer help, please speak verbally before initiating any physical contact. Introduce yourself clearly and ask if they need assistance rather than grabbing, pulling, or touching the wearer, their vest, or their white cane. Please avoid touching or obstructing the chest-mounted camera module, battery pack, or audio earpiece. Many visually impaired individuals travel familiar routes with complete confidence, so if they politely decline your offer of assistance, please respect their decision and allow them to proceed.
+              </p>
+            </div>
+
+            <div className="eyeroute-guide-card">
+              <h3 className="eyeroute-guide-card-title">Emergency &amp; Contact Info</h3>
+              <p className="eyeroute-guide-card-text">
+                If the wearer appears disoriented, injured, or explicitly requests assistance contacting their family or care facility, please guide them to a safe sidewalk area away from active vehicular traffic. You may reach Future Vision Home for organizational coordination and emergency assistance at{" "}
+                <a href="tel:+639423769646" className="eyeroute-guide-link">+63 942 376 9646</a>{" "}
+                or via email at{" "}
+                <a href="mailto:futurevisionhome27@gmail.com" className="eyeroute-guide-link">futurevisionhome27@gmail.com</a>. In the event of an urgent medical or roadside emergency, please contact local emergency responders (911 or the local barangay post) immediately. For more information regarding this initiative, visit{" "}
+                <a href="https://futurevisionhome.app" target="_blank" rel="noopener noreferrer" className="eyeroute-guide-link">futurevisionhome.app</a>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="feedback-section">
         <div className="container">
           <div className="section-header">
