@@ -70,6 +70,102 @@
   }
 }
 
+/* Wearer Guide & Public Safety Information */
+.eyeroute-guide-section {
+  background: var(--bg-primary, #ffffff);
+  padding: 5rem 0;
+  position: relative;
+}
+
+[data-theme="dark"] .eyeroute-guide-section {
+  background: var(--bg-primary, #0f172a);
+}
+
+.eyeroute-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.eyeroute-guide-card {
+  background: var(--bg-secondary, #f8fafc);
+  padding: 2.25rem;
+  border-radius: 20px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.eyeroute-guide-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.06), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  border-color: rgba(33, 158, 187, 0.4);
+}
+
+[data-theme="dark"] .eyeroute-guide-card {
+  background: var(--bg-secondary, #1e293b);
+  border-color: var(--border-color, #334155);
+}
+
+.eyeroute-guide-card-title {
+  font-family: 'Poppins-SemiBold', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #219ebb;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+[data-theme="dark"] .eyeroute-guide-card-title {
+  color: #38bdf8;
+}
+
+.eyeroute-guide-card-text {
+  font-family: 'Poppins-Regular', sans-serif;
+  font-size: 0.975rem;
+  color: var(--text-secondary, #475569);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.eyeroute-guide-link {
+  color: #219ebb;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.eyeroute-guide-link:hover {
+  color: #167a92;
+}
+
+[data-theme="dark"] .eyeroute-guide-link {
+  color: #38bdf8;
+}
+
+[data-theme="dark"] .eyeroute-guide-link:hover {
+  color: #7dd3fc;
+}
+
+@media (max-width: 968px) {
+  .eyeroute-guide-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .eyeroute-guide-section {
+    padding: 3.5rem 0;
+  }
+
+  .eyeroute-guide-card {
+    padding: 1.75rem;
+  }
+}
+
 
 
 
