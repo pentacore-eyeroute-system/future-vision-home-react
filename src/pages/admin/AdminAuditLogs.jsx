@@ -217,8 +217,9 @@ function AdminAuditLogs() {
     if (val === null || val === undefined) return '""';
     let str = String(val);
 
-    // Prepend single quote if it begins with formula trigger characters (=, +, -, @, tab)
-    if (/^[=+\-@\t\r]/.test(str.trimStart())) {
+    // Strip leading quotes, single quotes, or whitespace to accurately detect formula triggers (=, +, -, @, \t, \r)
+    const triggerCheck = str.replace(/^["'\s]+/, '');
+    if (/^[=+\-@\t\r]/.test(triggerCheck)) {
       str = `'${str}`;
     }
 
