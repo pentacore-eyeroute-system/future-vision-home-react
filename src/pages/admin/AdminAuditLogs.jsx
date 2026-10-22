@@ -212,37 +212,50 @@ function AdminAuditLogs() {
     }
   }
 
+  // Helper to sanitize cell values against CSV/Formula injection (CWE-1236)
+  const safeCell = (val) => {
+    if (val === null || val === undefined) return '""';
+    let str = String(val);
+
+    // Prepend single quote if it begins with formula trigger characters (=, +, -, @, tab)
+    if (/^[=+\-@\t\r]/.test(str.trimStart())) {
+      str = `'${str}`;
+    }
+
+    return `"${str.replace(/"/g, '""')}"`;
+  };
+
   // Export logs to CSV using Blob URL
   const handleExportCSV = () => {
     try {
-      const headers = ['Timestamp', 'Actor Name', 'Actor Email', 'Action Type', 'Target Name', 'Target Email', 'Severity', 'Details']
+      const headers = ['Timestamp', 'Actor Name', 'Actor Email', 'Action Type', 'Target Name', 'Target Email', 'Severity', 'Details'];
       const rows = filteredLogs.map((l) => [
-        `"${l.timestamp}"`,
-        `"${l.actor?.fullName || ''}"`,
-        `"${l.actor?.email || ''}"`,
-        `"${l.actionLabel || l.actionType || ''}"`,
-        `"${l.targetUser?.fullName || '—'}"`,
-        `"${l.targetUser?.email || ''}"`,
-        `"${l.severity || 'info'}"`,
-        `"${(l.details || '').replace(/"/g, '""')}"`,
-      ])
+        safeCell(l.timestamp),
+        safeCell(l.actor?.fullName || ''),
+        safeCell(l.actor?.email || ''),
+        safeCell(l.actionLabel || l.actionType || ''),
+        safeCell(l.targetUser?.fullName || l.targetApplication?.fullName || '—'),
+        safeCell(l.targetUser?.email || l.targetApplication?.email || ''),
+        safeCell(l.severity || 'info'),
+        safeCell(l.details || ''),
+      ]);
 
-      const csvString = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n')
-      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      const csvString = [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      showToast('Audit logs exported successfully.')
+      showToast('Audit logs exported successfully.');
     } catch {
-      showToast('Failed to export logs.', 'error')
+      showToast('Failed to export logs.', 'error');
     }
-  }
+  };
 
   // Minimal Action Type indicator with clean status dot (no capsule pills)
   const renderActionStatus = (log) => {
